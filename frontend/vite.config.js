@@ -6,7 +6,10 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
   server: {
-    host: true, // Listen on all network interfaces (for Docker compatibility)
-    port: 5173
+    host: true,
+    port: 5173,
+    watch: {
+      usePolling: true,
+    },
   }
 })
