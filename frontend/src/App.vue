@@ -1,7 +1,9 @@
 <script setup>
-import D3HelloWorld from './components/D3HelloWorld.vue'
+import Navbar from './components/Navbar.vue'
+import Dashboard from './components/Dashboard.vue'
 </script>
 
 <template>
-  <D3HelloWorld />
+  <Navbar />
+  <Dashboard />
 </template>
