@@ -18,39 +18,73 @@ const error = ref(null)
 
 let allNodes = []
 let allLinks = []
+const totalNotes = ref(0)
+const totalLinks = ref(0)
+let simNodes = []
 let simulation = null
 let svg = null
 let zoomBehavior = null
+let initialFitDone = false
 
-// ─── Tag colour scale ─────────────────────────────────────────────────────────
-const colorScale = d3.scaleOrdinal(d3.schemeTableau10)
+// ─── Single node colour ───────────────────────────────────────────────────────
+const NODE_COLOR = '#64748b'
+const NODE_STROKE = '#94a3b8'
+const LINK_COLOR = '#334155'
 
-// ─── Filtered data ────────────────────────────────────────────────────────────
+// ─── Filtered data (orphan + min connections only — focus handled via opacity) ─
 const visibleNodeIds = computed(() => {
+  void totalNotes.value // reactive dependency so this re-runs when data loads
   let nodes = allNodes
 
-  // Orphan filter
   if (!showOrphans.value) {
     const connectedIds = new Set(allLinks.flatMap(l => [l.source?.id ?? l.source, l.target?.id ?? l.target]))
     nodes = nodes.filter(n => connectedIds.has(n.id))
   }
 
-  // Min connections filter
   nodes = nodes.filter(n => n.connectionCount >= minConnections.value)
 
-  // Focus mode
-  if (focusedNode.value) {
-    const neighborIds = new Set([focusedNode.value.id])
-    allLinks.forEach(l => {
-      const s = l.source?.id ?? l.source
-      const t = l.target?.id ?? l.target
-      if (s === focusedNode.value.id) neighborIds.add(t)
-      if (t === focusedNode.value.id) neighborIds.add(s)
-    })
-    nodes = nodes.filter(n => neighborIds.has(n.id))
-  }
-
   return new Set(nodes.map(n => n.id))
+})
+
+// ─── Slider max (dynamic based on loaded data) ────────────────────────────────
+const maxConnectionCount = computed(() => {
+  void totalNotes.value
+  if (!allNodes.length) return 10
+  return Math.max(...allNodes.map(n => n.connectionCount), 10)
+})
+
+// ─── Stats ────────────────────────────────────────────────────────────────────
+const statsTotal = computed(() => totalNotes.value)
+
+const effectiveVisibleIds = computed(() => {
+  void totalNotes.value
+  const base = visibleNodeIds.value
+  if (!focusedNode.value && !searchQuery.value) return base
+
+  // In focus/search mode, only count nodes with opacity > 0
+  const matchedIds = focusedNode.value
+    ? new Set([focusedNode.value.id])
+    : new Set(allNodes.filter(n => n.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || n.tags.some(t => t.includes(searchQuery.value.toLowerCase()))).map(n => n.id))
+
+  const neighborIds = new Set()
+  allLinks.forEach(l => {
+    const s = l.source?.id ?? l.source
+    const t = l.target?.id ?? l.target
+    if (matchedIds.has(s)) neighborIds.add(t)
+    if (matchedIds.has(t)) neighborIds.add(s)
+  })
+
+  return new Set([...matchedIds, ...neighborIds].filter(id => base.has(id)))
+})
+
+const statsNodes = computed(() => effectiveVisibleIds.value.size)
+const statsLinks = computed(() => {
+  if (!totalLinks.value) return 0
+  return allLinks.filter(l => {
+    const src = l.source?.id ?? l.source
+    const tgt = l.target?.id ?? l.target
+    return effectiveVisibleIds.value.has(src) && effectiveVisibleIds.value.has(tgt)
+  }).length
 })
 
 // ─── Load data & draw ─────────────────────────────────────────────────────────
@@ -61,6 +95,8 @@ async function loadAndDraw() {
     const graph = buildGraphData(notes)
     allNodes = graph.nodes
     allLinks = graph.links
+    totalNotes.value = allNodes.length
+    totalLinks.value = allLinks.length
     draw()
   } catch (e) {
     error.value = e.message
@@ -110,6 +146,7 @@ function draw() {
     .filter(l => l.source && l.target)
 
   const visibleNodes = nodes.filter(n => visibleNodeIds.value.has(n.id))
+  simNodes = visibleNodes // keep reference for pan-to-node
 
   // Node radius scale
   const maxConn = d3.max(visibleNodes, d => d.connectionCount) || 1
@@ -121,18 +158,20 @@ function draw() {
 
   // Simulation
   simulation = d3.forceSimulation(visibleNodes)
-    .force('link', d3.forceLink(links).id(d => d.id).distance(120))
-    .force('charge', d3.forceManyBody().strength(-350))
+    .force('link', d3.forceLink(links).id(d => d.id).distance(220))
+    .force('charge', d3.forceManyBody().strength(-600))
     .force('center', d3.forceCenter(width / 2, height / 2))
     .force('collision', d3.forceCollide().radius(d => radiusScale(d.connectionCount) + 6))
+    .force('centerX', d3.forceX(width / 2).strength(d => d.connectionCount === 0 ? 0.15 : 0))
+    .force('centerY', d3.forceY(height / 2).strength(d => d.connectionCount === 0 ? 0.15 : 0))
 
   // Draw links
   const link = g.append('g').attr('class', 'links')
     .selectAll('line')
     .data(links)
     .join('line')
-    .attr('stroke', '#94a3b8')
-    .attr('stroke-opacity', 0.5)
+    .attr('stroke', LINK_COLOR)
+    .attr('stroke-opacity', 1)
     .attr('stroke-width', d => linkWidthScale(d.sharedTags.length))
 
   // Draw nodes
@@ -141,11 +180,11 @@ function draw() {
     .data(visibleNodes)
     .join('circle')
     .attr('r', d => radiusScale(d.connectionCount))
-    .attr('fill', d => colorScale(d.dominantTag))
-    .attr('stroke', '#fff')
+    .attr('fill', NODE_COLOR)
+    .attr('stroke', NODE_STROKE)
     .attr('stroke-width', 2)
     .attr('cursor', 'pointer')
-    .attr('opacity', d => getNodeOpacity(d))
+    .attr('opacity', d => getNodeOpacity(d, getEffectiveMatchedIds()))
     .call(dragBehavior())
     .on('mouseover', (event, d) => {
       hoveredNode.value = d
@@ -159,7 +198,7 @@ function draw() {
     })
     .on('mouseout', (event) => {
       hoveredNode.value = null
-      d3.select(event.currentTarget).attr('stroke', '#fff').attr('stroke-width', 2)
+      d3.select(event.currentTarget).attr('stroke', NODE_STROKE).attr('stroke-width', 2)
     })
     .on('click', (event, d) => {
       event.stopPropagation()
@@ -170,7 +209,7 @@ function draw() {
       }
     })
 
-  // Labels
+  // Labels — dark halo via paint-order stroke for readability in dense areas
   const label = g.append('g').attr('class', 'labels')
     .selectAll('text')
     .data(visibleNodes)
@@ -179,12 +218,40 @@ function draw() {
     .attr('dy', '0.35em')
     .text(d => d.title.length > 20 ? d.title.slice(0, 20) + '…' : d.title)
     .style('font-size', '11px')
+    .style('font-weight', '500')
     .style('font-family', 'ui-sans-serif, system-ui, sans-serif')
-    .style('fill', '#94a3b8')
+    .style('fill', '#e2e8f0')
+    .style('stroke', '#0f172a')
+    .style('stroke-width', '3px')
+    .style('stroke-linejoin', 'round')
+    .style('paint-order', 'stroke')
     .style('pointer-events', 'none')
 
   // Click on background to clear focus
   svg.on('click', () => { focusedNode.value = null })
+
+  // Auto-fit to viewport once simulation settles
+  simulation.on('end', () => {
+    if (initialFitDone) return
+    initialFitDone = true
+    const xExtent = d3.extent(visibleNodes, d => d.x)
+    const yExtent = d3.extent(visibleNodes, d => d.y)
+    const graphWidth = xExtent[1] - xExtent[0] || 1
+    const graphHeight = yExtent[1] - yExtent[0] || 1
+    const padding = 80
+    const scale = Math.min(
+      (width - padding * 2) / graphWidth,
+      (height - padding * 2) / graphHeight,
+      1.2
+    )
+    const cx = (xExtent[0] + xExtent[1]) / 2
+    const cy = (yExtent[0] + yExtent[1]) / 2
+    const transform = d3.zoomIdentity
+      .translate(width / 2, height / 2)
+      .scale(scale)
+      .translate(-cx, -cy)
+    svg.transition().duration(750).call(zoomBehavior.transform, transform)
+  })
 
   // Tick
   simulation.on('tick', () => {
@@ -198,11 +265,59 @@ function draw() {
   })
 }
 
-function getNodeOpacity(d) {
-  if (!searchQuery.value) return 1
-  const q = searchQuery.value.toLowerCase()
-  const matches = d.title.toLowerCase().includes(q) || d.tags.some(t => t.includes(q))
-  return matches ? 1 : 0.15
+// Returns the set of "primary" node IDs for search or focus
+function getEffectiveMatchedIds() {
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    return new Set(
+      allNodes
+        .filter(n => n.title.toLowerCase().includes(q) || n.tags.some(t => t.includes(q)))
+        .map(n => n.id)
+    )
+  }
+  if (focusedNode.value) {
+    return new Set([focusedNode.value.id])
+  }
+  return null
+}
+
+function getNodeOpacity(d, matchedIds) {
+  if (!matchedIds) return 1
+  if (matchedIds.has(d.id)) return 1
+  const isNeighbor = allLinks.some(l => {
+    const s = l.source?.id ?? l.source
+    const t = l.target?.id ?? l.target
+    return (matchedIds.has(s) && t === d.id) || (matchedIds.has(t) && s === d.id)
+  })
+  return isNeighbor ? 0.35 : 0
+}
+
+function getLinkOpacity(l, matchedIds) {
+  if (!matchedIds) return 1
+  const s = l.source?.id ?? l.source
+  const t = l.target?.id ?? l.target
+  return (matchedIds.has(s) || matchedIds.has(t)) ? 0.9 : 0
+}
+
+function updateOpacity() {
+  if (!svg) return
+  const matchedIds = getEffectiveMatchedIds()
+  svg.selectAll('.nodes circle').attr('opacity', d => getNodeOpacity(d, matchedIds))
+  svg.selectAll('.labels text').attr('opacity', d => getNodeOpacity(d, matchedIds))
+  svg.selectAll('.links line').attr('opacity', d => getLinkOpacity(d, matchedIds))
+}
+
+function panToNode(node) {
+  if (!svg || !zoomBehavior || !node) return
+  const simNode = simNodes.find(n => n.id === node.id)
+  if (!simNode) return
+  const w = containerRef.value?.clientWidth || 900
+  const h = containerRef.value?.clientHeight || 600
+  const k = d3.zoomTransform(svg.node()).k
+  const transform = d3.zoomIdentity
+    .translate(w / 2 - k * simNode.x, h / 2 - k * simNode.y)
+    .scale(k)
+  svg.transition().duration(400).call(zoomBehavior.transform, transform)
 }
 
 function dragBehavior() {
@@ -224,14 +339,15 @@ function resetZoom() {
   svg.transition().duration(500).call(zoomBehavior.transform, d3.zoomIdentity)
 }
 
-// Re-draw when filters change
-watch([showOrphans, minConnections, focusedNode], () => { draw() })
+// Re-draw only when structural filters change (not focus)
+// Also exit focus mode automatically when filters change
+watch([showOrphans, minConnections], () => { focusedNode.value = null; initialFitDone = false; draw() })
 
-// Update node opacity on search without full redraw
-watch(searchQuery, () => {
-  if (!svg) return
-  svg.selectAll('.nodes circle').attr('opacity', d => getNodeOpacity(d))
-  svg.selectAll('.labels text').attr('opacity', d => getNodeOpacity(d))
+// Search exits focus mode, then updates opacity
+watch(searchQuery, () => { focusedNode.value = null; updateOpacity() })
+watch(focusedNode, (node) => {
+  updateOpacity()
+  if (node) panToNode(node)
 })
 
 onMounted(() => { loadAndDraw() })
@@ -258,7 +374,7 @@ onUnmounted(() => { if (simulation) simulation.stop() })
         <span>Min links:</span>
         <input
           v-model.number="minConnections"
-          type="range" min="0" max="10" step="1"
+          type="range" min="0" :max="maxConnectionCount" step="1"
           class="w-24 accent-blue-500"
         />
         <span class="w-4 text-gray-200">{{ minConnections }}</span>
@@ -272,13 +388,24 @@ onUnmounted(() => { if (simulation) simulation.stop() })
 
       <!-- Focus mode badge -->
       <div v-if="focusedNode" class="flex items-center gap-2 text-sm bg-blue-900 text-blue-200 px-3 py-1 rounded-full">
-        Focus: {{ focusedNode.title }}
+        Focus: {{ focusedNode?.title }}
         <button @click="focusedNode = null" class="ml-1 text-blue-400 hover:text-white">✕</button>
       </div>
 
       <button @click="resetZoom" class="ml-auto text-xs text-gray-400 hover:text-white px-3 py-1.5 rounded-lg border border-gray-700 hover:border-gray-500 transition">
         Reset zoom
       </button>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="flex items-center gap-4 px-4 py-1.5 border-b border-gray-800 bg-gray-900 text-xs text-gray-500">
+      <span><span class="text-gray-300 font-medium">{{ statsNodes }}</span> nodes shown</span>
+      <span class="text-gray-700">·</span>
+      <span><span class="text-gray-300 font-medium">{{ statsLinks }}</span> links</span>
+      <span class="text-gray-700">·</span>
+      <span><span class="text-gray-300 font-medium">{{ statsTotal }}</span> total notes</span>
+      <span v-if="statsNodes !== statsTotal" class="text-gray-700">·</span>
+      <span v-if="statsNodes !== statsTotal" class="text-yellow-600">{{ statsTotal - statsNodes }} hidden by filters</span>
     </div>
 
     <!-- Graph area -->
