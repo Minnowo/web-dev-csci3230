@@ -10,10 +10,11 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      # Sync source code for Hot Module Replacement (HMR)
-      - ./frontend:/app
-      # Ignore node_modules from local machine so Docker uses the ones inside the container
-      - /app/node_modules
+      # Only mount source files — node_modules stays inside the container from the image build
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.js:/app/vite.config.js
     environment:
       - NODE_ENV=development
     restart: unless-stopped
