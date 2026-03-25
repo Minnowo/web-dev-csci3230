@@ -1,6 +1,10 @@
 <template>
   <div class="note-card">
-    <FileText class="icon" />
+    <span class="icon">
+      <slot name="icon">
+        <FileText />
+      </slot>
+    </span>
     <h3 class="title">{{ title }}</h3>
     <p class="date">{{ formattedDate }}</p>
   </div>
@@ -21,30 +25,53 @@ const props = defineProps({
   },
 })
 
-const formattedDate = computed(() => {
-  return new Date(props.date).toLocaleDateString('en-US', {
+const formattedDate = computed(() =>
+  new Date(props.date).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   })
-})
+)
 </script>
 
 <style scoped>
 .note-card {
-  @apply flex flex-col gap-3 p-5 w-48 rounded-2xl bg-[#161b27] border border-white/8 cursor-pointer
-         hover:bg-[#1e2535] hover:border-white/15 transition-colors;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  flex: 1;
+  transition: background 0.15s, border-color 0.15s;
+}
+.note-card:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
 }
 
 .icon {
-  @apply w-10 h-10 text-white/40;
+  display: flex;
+  color: var(--text-muted);
+}
+.icon :deep(svg) {
+  width: 36px;
+  height: 36px;
+  stroke-width: 1.5;
 }
 
 .title {
-  @apply text-white font-semibold text-base m-0 leading-snug;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text);
+  margin: 0;
 }
 
 .date {
-  @apply text-white/40 text-sm m-0;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
 }
 </style>

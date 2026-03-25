@@ -18,23 +18,36 @@ defineProps({
 
 <style scoped>
 .app-btn {
-  @apply flex items-center gap-3 px-5 py-3 rounded-xl
-         bg-[#161b27] border border-white/10
-         hover:bg-[#1e2535] hover:border-white/20
-         transition-colors cursor-pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  width: 220px;
+}
+.app-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
 }
 
 .icon {
-  @apply flex items-center justify-center text-white/50;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
 }
-
-.icon svg {
-  @apply w-5 h-5;
+.icon :deep(svg) {
+  width: 20px;
+  height: 20px;
 }
 
 .label {
-  @apply font-semibold text-base;
-  background: linear-gradient(90deg, #fff 0%, #7dd3fc 100%);
+  font-weight: 600;
+  font-size: 16px;
+  background: linear-gradient(90deg, var(--label-from) 0%, var(--label-to) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
