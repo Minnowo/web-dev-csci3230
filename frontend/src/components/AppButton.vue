@@ -1,9 +1,9 @@
 <template>
-  <button class="app-btn">
-    <span v-if="$slots.icon" class="icon">
+  <button class="flex items-center gap-3 px-6 py-3.5 w-56 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-hover)] transition-colors cursor-pointer">
+    <span v-if="$slots.icon" class="flex items-center text-[var(--text-muted)] [&>svg]:w-5 [&>svg]:h-5">
       <slot name="icon" />
     </span>
-    <span class="label">{{ label }}</span>
+    <span class="label font-semibold text-base">{{ label }}</span>
   </button>
 </template>
 
@@ -17,36 +17,7 @@ defineProps({
 </script>
 
 <style scoped>
-.app-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 24px;
-  border-radius: 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  width: 220px;
-}
-.app-btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-hover);
-}
-
-.icon {
-  display: flex;
-  align-items: center;
-  color: var(--text-muted);
-}
-.icon :deep(svg) {
-  width: 20px;
-  height: 20px;
-}
-
 .label {
-  font-weight: 600;
-  font-size: 16px;
   background: linear-gradient(90deg, var(--label-from) 0%, var(--label-to) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

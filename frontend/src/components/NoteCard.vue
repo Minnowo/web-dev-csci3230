@@ -1,12 +1,12 @@
 <template>
-  <div class="note-card">
-    <span class="icon">
+  <div class="flex flex-col gap-3 p-6 flex-1 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-hover)] transition-colors cursor-pointer">
+    <span class="flex text-[var(--text-muted)] [&>svg]:w-9 [&>svg]:h-9 [&>svg]:stroke-[1.5]">
       <slot name="icon">
         <FileText />
       </slot>
     </span>
-    <h3 class="title">{{ title }}</h3>
-    <p class="date">{{ formattedDate }}</p>
+    <h3 class="font-bold text-base text-[var(--text)] m-0 leading-snug">{{ title }}</h3>
+    <p class="text-sm text-[var(--text-muted)] m-0">{{ formattedDate }}</p>
   </div>
 </template>
 
@@ -33,45 +33,3 @@ const formattedDate = computed(() =>
   })
 )
 </script>
-
-<style scoped>
-.note-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 24px;
-  border-radius: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  flex: 1;
-  transition: background 0.15s, border-color 0.15s;
-}
-.note-card:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-hover);
-}
-
-.icon {
-  display: flex;
-  color: var(--text-muted);
-}
-.icon :deep(svg) {
-  width: 36px;
-  height: 36px;
-  stroke-width: 1.5;
-}
-
-.title {
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--text);
-  margin: 0;
-}
-
-.date {
-  font-size: 14px;
-  color: var(--text-muted);
-  margin: 0;
-}
-</style>
