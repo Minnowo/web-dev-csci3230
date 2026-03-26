@@ -163,7 +163,7 @@ onMounted(() => loadAndDraw())
     <!-- Matrix -->
     <div v-if="loading" class="flex-1 flex items-center justify-center text-gray-500">Loading…</div>
     <div v-else-if="error" class="flex-1 flex items-center justify-center text-red-400">{{ error }}</div>
-    <div v-else class="flex justify-center overflow-auto">
+    <div v-else class="flex-1 flex items-center justify-center overflow-auto">
       <svg ref="svgRef" />
     </div>
 

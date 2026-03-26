@@ -2,16 +2,14 @@
 import { ref } from 'vue'
 import GraphView from './components/visualizations/GraphView.vue'
 import SentimentCalendar from './components/visualizations/SentimentCalendar.vue'
-import ActivityChart from './components/visualizations/ActivityChart.vue'
 import TagMatrix from './components/visualizations/TagMatrix.vue'
 
 const activeTab = ref('graph')
 
 const tabs = [
-  { id: 'graph',    label: 'Graph View',      icon: '⬡' },
-  { id: 'calendar', label: 'Sentiment',        icon: '◫' },
-  { id: 'activity', label: 'Activity',         icon: '▦' },
-  { id: 'matrix',   label: 'Tag Matrix',       icon: '⊞' },
+  { id: 'graph',    label: 'Graph View', icon: '⬡' },
+  { id: 'calendar', label: 'Calendar',   icon: '◫' },
+  { id: 'matrix',   label: 'Tag Matrix', icon: '⊞' },
 ]
 </script>
 
@@ -38,10 +36,9 @@ const tabs = [
 
     <!-- Content -->
     <div class="flex-1 overflow-hidden">
-      <GraphView      v-if="activeTab === 'graph'"    class="h-full" />
+      <GraphView         v-if="activeTab === 'graph'"    class="h-full" />
       <SentimentCalendar v-if="activeTab === 'calendar'" class="h-full overflow-y-auto" />
-      <ActivityChart  v-if="activeTab === 'activity'" class="h-full overflow-y-auto" />
-      <TagMatrix      v-if="activeTab === 'matrix'"   class="h-full overflow-auto" />
+      <TagMatrix         v-if="activeTab === 'matrix'"   class="h-full overflow-auto" />
     </div>
   </div>
 </template>

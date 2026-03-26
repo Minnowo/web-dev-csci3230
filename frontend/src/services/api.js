@@ -125,6 +125,7 @@ export function buildCalendarData(notes) {
   Object.entries(byDate).forEach(([date, { scores, notes }]) => {
     result[date] = {
       score: scores.reduce((a, b) => a + b, 0) / scores.length,
+      count: notes.length,
       notes
     }
   })

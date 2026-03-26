@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import express from 'express'
+import pool from '../db.js'
 
 const router = express.Router()
 
@@ -7,19 +8,19 @@ const router = express.Router()
 router.post('/notes/:id/analyze', async (req, res) => {
   try {
     const { id } = req.params
-    const { content } = req.body
+    const { title = '', content, tags: existingTags = [] } = req.body
 
-    // Validate input
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ error: 'Note content is empty' })
     }
 
-    // Check API key
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ error: 'GEMINI_API_KEY is not configured' })
     }
 
-    // Build prompt
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+
+    // ── Step 1: Tags + Sentiment + Summary ──────────────────────────────────
     const prompt = `
 You are an assistant that analyzes personal notes.
 
@@ -36,13 +37,10 @@ ${content}
 """
     `.trim()
 
-    // Call Gemini
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
     const result = await model.generateContent(prompt)
     const text = result.response.text().trim()
 
-    // Parse response
     let parsed
     try {
       parsed = JSON.parse(text)
@@ -51,17 +49,32 @@ ${content}
       return res.status(500).json({ error: 'Failed to parse Gemini response', raw: text })
     }
 
-    // Validate shape
     const { tags, sentiment_score, summary } = parsed
     if (!Array.isArray(tags) || typeof sentiment_score !== 'number' || typeof summary !== 'string') {
       return res.status(500).json({ error: 'Unexpected response shape from Gemini', raw: parsed })
     }
 
-    // --- Phase 2: save to DB here (when Ryan's schema is ready) ---
-    // await db.notes.update(id, { tags, sentiment_score, summary })
+    // ── Step 2: Generate Embedding ───────────────────────────────────────────
+    const embeddingInput = [title, summary, tags.join(', '), content]
+      .filter(Boolean)
+      .join(' | ')
 
-    // Return result
-    res.json({ id, tags, sentiment_score, summary })
+    const embeddingModel = genAI.getGenerativeModel({ model: 'gemini-embedding-001' })
+    const embeddingResult = await embeddingModel.embedContent(embeddingInput)
+    const embedding = embeddingResult.embedding.values
+
+    // ── Step 3: Upsert embedding into Postgres ───────────────────────────────
+    await pool.query(
+      `INSERT INTO note_embeddings (note_id, embedding, updated_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (note_id) DO UPDATE
+         SET embedding = EXCLUDED.embedding,
+             updated_at = NOW()`,
+      [id, JSON.stringify(embedding)]
+    )
+    console.log(`✓ Embedding saved for note ${id} (${embedding.length} dims)`)
+
+    res.json({ id, tags, sentiment_score, summary, embedding_dims: embedding.length })
 
   } catch (err) {
     console.error('Analyze route error:', err)

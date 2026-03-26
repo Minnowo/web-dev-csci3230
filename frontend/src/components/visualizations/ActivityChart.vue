@@ -54,13 +54,14 @@ function draw() {
 
   const container = containerRef.value
   const totalWidth = container.clientWidth || 800
+  const totalHeight = container.clientHeight || 500
   const margin = { top: 30, right: 30, bottom: 70, left: 50 }
   const width = totalWidth - margin.left - margin.right
-  const height = 340 - margin.top - margin.bottom
+  const height = totalHeight - margin.top - margin.bottom
 
   const svg = d3.select(svgRef.value)
     .attr('width', totalWidth)
-    .attr('height', 340)
+    .attr('height', totalHeight)
 
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
 
@@ -193,8 +194,8 @@ onMounted(() => loadAndDraw())
     <!-- Chart -->
     <div v-if="loading" class="flex-1 flex items-center justify-center text-gray-500">Loading…</div>
     <div v-else-if="error" class="flex-1 flex items-center justify-center text-red-400">{{ error }}</div>
-    <div v-else ref="containerRef" class="w-full">
-      <svg ref="svgRef" class="w-full" />
+    <div v-else ref="containerRef" class="flex-1 w-full">
+      <svg ref="svgRef" class="w-full h-full" />
     </div>
 
     <!-- Tooltip -->

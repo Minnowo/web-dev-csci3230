@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # The frontend Vue application
   frontend:
     build:
       context: ./frontend
@@ -10,41 +9,50 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      # Sync source code for Hot Module Replacement (HMR)
       - ./frontend:/app
-      # Ignore node_modules from local machine so Docker uses the ones inside the container
       - /app/node_modules
     environment:
       - NODE_ENV=development
     restart: unless-stopped
 
-  # Placeholder for a future backend service (Express, Django, Flask, etc.)
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   container_name: app-backend
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./backend:/app
-  #   environment:
-  #     - NODE_ENV=development
-  #   depends_on:
-  #     - db
-  
-  # Placeholder for a future database (PostgreSQL, MySQL, MongoDB, Redis, etc.)
-  # db:
-  #   image: postgres:15-alpine
-  #   container_name: app-db
-  #   ports:
-  #     - "5432:5432"
-  #   environment:
-  #     POSTGRES_USER: user
-  #     POSTGRES_PASSWORD: password
-  #     POSTGRES_DB: mydatabase
-  #   volumes:
-  #     - db-data:/var/lib/postgresql/data
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: express-backend
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    env_file:
+      - ./server/.env
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:admin@db:5432/notes_app
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
-# volumes:
-#   db-data:
+  db:
+    image: pgvector/pgvector:pg17
+    container_name: notes-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: notes_app
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notes_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  db-data:
