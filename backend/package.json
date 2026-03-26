@@ -1,56 +1,64 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "lint": "eslint . --ext .ts",
-    "format": "prettier --write .",
-    "start": "node dist/app.js",
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "dependencies": {
-    "express": "^5.2.1"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.28.0",
-    "@types/express": "^5.0.6",
-    "@types/node": "^25.5.0",
-    "@typescript-eslint/eslint-plugin": "^8.33.0",
-    "@typescript-eslint/parser": "^8.33.0",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.5",
-    "prettier": "3.6.2",
-    "tsx": "^4.21.0",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.33.0"
-  },
-  "eslintConfig": {
-    "env": {
-      "node": true,
-      "es2020": true
-    },
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "sourceType": "module"
-    },
-    "plugins": [
-      "@typescript-eslint",
-      "prettier"
-    ],
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:prettier/recommended"
-    ],
-    "rules": {
-      "prettier/prettier": "error"
-    }
-  }
+	"name": "backend",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"lint": "eslint . --ext .ts",
+		"format": "prettier --write .",
+		"start": "node dist/app.js",
+		"dev": "tsx watch src/index.ts",
+		"build": "tsc"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "module",
+	"dependencies": {
+		"better-sqlite3": "^12.8.0",
+		"express": "^5.2.1"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.28.0",
+		"@types/better-sqlite3": "^7.6.13",
+		"@types/express": "^5.0.6",
+		"@types/node": "^25.5.0",
+		"@typescript-eslint/eslint-plugin": "^8.33.0",
+		"@typescript-eslint/parser": "^8.33.0",
+		"eslint": "^8.57.1",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-prettier": "^5.5.5",
+		"prettier": "3.6.2",
+		"tsx": "^4.21.0",
+		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.33.0"
+	},
+	"prettier": {
+		"tabWidth": 4,
+		"useTabs": true,
+		"semi": true,
+		"singleQuote": false
+	},
+	"eslintConfig": {
+		"env": {
+			"node": true,
+			"es2020": true
+		},
+		"parser": "@typescript-eslint/parser",
+		"parserOptions": {
+			"sourceType": "module"
+		},
+		"plugins": [
+			"@typescript-eslint",
+			"prettier"
+		],
+		"extends": [
+			"eslint:recommended",
+			"plugin:@typescript-eslint/recommended",
+			"plugin:prettier/recommended"
+		],
+		"rules": {
+			"prettier/prettier": "off"
+		}
+	}
 }
