@@ -41,7 +41,7 @@ const migrate_1: MigrationFunc = (database: DB) => {
 				)
 			`);
 
-			db.prepare("UPDATE DB_VERSION SET VERSION = ?").run(2);
+			db.prepare("UPDATE DB_VERSION SET VERSION = ?").run(1);
 		});
 
 		tx();
@@ -54,5 +54,5 @@ const migrate_1: MigrationFunc = (database: DB) => {
 
 export const Migrations: Array<{ version: number; func: MigrationFunc }> = [
 	{ version: 0, func: migrate_0 },
-	{ version: 2, func: migrate_1 }, // version: 2 so maxVer.version=2, loop runs past migrate_0
+	{ version: 1, func: migrate_1 },
 ];

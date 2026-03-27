@@ -70,7 +70,8 @@ export class DB {
 
 		let curVersion = version.data;
 
-		while (curVersion < maxVer.version) {
+		// <= so the last migration in the array runs (was < which skipped it)
+		while (curVersion <= maxVer.version) {
 			const curMigration = Migrations[Math.max(0, curVersion)];
 
 			if (curMigration === undefined) {
