@@ -2,7 +2,7 @@ import { mockNotes } from './mockData.js'
 
 // Flip to false when Ryan's backend is ready
 const USE_MOCK = true
-const API_BASE = 'http://localhost:4000/api'
+const API_BASE = 'http://localhost:3000/api'
 
 // ─── Notes ────────────────────────────────────────────────────────────────────
 
@@ -49,6 +49,25 @@ export async function analyzeNote(id, content) {
     body: JSON.stringify({ content })
   })
   if (!res.ok) throw new Error('Failed to analyze note')
+  return res.json()
+}
+
+// ─── Smart Search (David) ────────────────────────────────────────────────────
+// Semantic search using Gemini embeddings. Sends the query to the backend which
+// embeds it and finds the most similar notes by cosine similarity. Returns note
+// IDs + similarity scores — the frontend resolves these to actual note objects.
+
+/**
+ * Search notes semantically via Gemini embeddings.
+ * Returns: { query, total_searched, results: [{ id, similarity }] }
+ */
+export async function smartSearch(query, topK = 8) {
+  const res = await fetch(`${API_BASE}/search/smart`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, topK })
+  })
+  if (!res.ok) throw new Error('Smart search failed')
   return res.json()
 }
 

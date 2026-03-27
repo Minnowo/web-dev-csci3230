@@ -20,42 +20,18 @@ services:
 
   backend:
     build:
-      context: ./server
+      context: ./backend
       dockerfile: Dockerfile
     container_name: express-backend
     ports:
-      - "4000:4000"
+      - "3000:3000"
     volumes:
-      - ./server:/app
-      - /app/node_modules
+      - ./backend/src:/app/src
+      - ./backend/scripts:/app/scripts
+      - ./backend/.env:/app/.env
+      - ./frontend/src/services/mockData.js:/frontend/src/services/mockData.js
     env_file:
-      - ./server/.env
+      - ./backend/.env
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://postgres:admin@db:5432/notes_app
-    depends_on:
-      db:
-        condition: service_healthy
     restart: unless-stopped
-
-  db:
-    image: pgvector/pgvector:pg17
-    container_name: notes-db
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: notes_app
-    volumes:
-      - db-data:/var/lib/postgresql/data
-      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d notes_app"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-volumes:
-  db-data:

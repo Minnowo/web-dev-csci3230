@@ -1,12 +1,16 @@
 <script setup>
 import { onMounted, onUnmounted, ref, watch, computed } from 'vue'
 import * as d3 from 'd3'
-import { getNotes, buildGraphData } from '../../services/api.js'
+import { getNotes, buildGraphData, smartSearch } from '../../services/api.js'
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const svgRef = ref(null)
 const containerRef = ref(null)
 const searchQuery = ref('')
+const searchResults = ref([])     // smart search dropdown results
+const showDropdown = ref(false)   // controls dropdown visibility
+const searchLoading = ref(false)  // loading indicator during API call
+let searchDebounce = null         // debounce timer for search input
 const showOrphans = ref(true)
 const minConnections = ref(0)
 const focusedNode = ref(null)
@@ -25,6 +29,7 @@ let simulation = null
 let svg = null
 let zoomBehavior = null
 let initialFitDone = false
+const positionCache = new Map() // persists node positions across redraws
 
 // ─── Single node colour ───────────────────────────────────────────────────────
 const NODE_COLOR = '#64748b'
@@ -128,8 +133,11 @@ function draw() {
 
   svg.call(zoomBehavior)
 
-  // Clone nodes/links for simulation (D3 mutates them)
-  const nodes = allNodes.map(n => ({ ...n }))
+  // Clone nodes/links for simulation, seeding from position cache if available
+  const nodes = allNodes.map(n => {
+    const cached = positionCache.get(n.id)
+    return cached ? { ...n, x: cached.x, y: cached.y } : { ...n }
+  })
   const nodeById = Object.fromEntries(nodes.map(n => [n.id, n]))
 
   const links = allLinks
@@ -156,8 +164,10 @@ function draw() {
   const maxShared = d3.max(links, d => d.sharedTags.length) || 1
   const linkWidthScale = d3.scaleLinear().domain([1, maxShared]).range([1, 5])
 
-  // Simulation
+  // Use faster decay on redraws (positions cached), slow on first load for better layout
+  const isRedraw = visibleNodes.some(n => positionCache.has(n.id))
   simulation = d3.forceSimulation(visibleNodes)
+    .alphaDecay(isRedraw ? 0.15 : 0.0228)
     .force('link', d3.forceLink(links).id(d => d.id).distance(220))
     .force('charge', d3.forceManyBody().strength(-600))
     .force('center', d3.forceCenter(width / 2, height / 2))
@@ -230,12 +240,29 @@ function draw() {
   // Click on background to clear focus
   svg.on('click', () => { focusedNode.value = null })
 
-  // Auto-fit to viewport once simulation settles
+  // Auto-fit to viewport once simulation settles, save positions to cache
   simulation.on('end', () => {
+    visibleNodes.forEach(n => positionCache.set(n.id, { x: n.x, y: n.y }))
     if (initialFitDone) return
     initialFitDone = true
-    const xExtent = d3.extent(visibleNodes, d => d.x)
-    const yExtent = d3.extent(visibleNodes, d => d.y)
+
+    // Zoom to dense core: use nodes with at least 1 connection, fall back to all
+    const coreNodes = visibleNodes.filter(n => n.connectionCount > 0)
+    const fitNodes = coreNodes.length > 0 ? coreNodes : visibleNodes
+
+    // Trim outliers beyond 2 std deviations from the mean position
+    const meanX = d3.mean(fitNodes, d => d.x)
+    const meanY = d3.mean(fitNodes, d => d.y)
+    const stdX = Math.sqrt(d3.mean(fitNodes, d => (d.x - meanX) ** 2))
+    const stdY = Math.sqrt(d3.mean(fitNodes, d => (d.y - meanY) ** 2))
+    const coreOnly = fitNodes.filter(n =>
+      Math.abs(n.x - meanX) <= 2 * stdX &&
+      Math.abs(n.y - meanY) <= 2 * stdY
+    )
+    const target = coreOnly.length > 0 ? coreOnly : fitNodes
+
+    const xExtent = d3.extent(target, d => d.x)
+    const yExtent = d3.extent(target, d => d.y)
     const graphWidth = xExtent[1] - xExtent[0] || 1
     const graphHeight = yExtent[1] - yExtent[0] || 1
     const padding = 80
@@ -343,8 +370,63 @@ function resetZoom() {
 // Also exit focus mode automatically when filters change
 watch([showOrphans, minConnections], () => { focusedNode.value = null; initialFitDone = false; draw() })
 
-// Search exits focus mode, then updates opacity
-watch(searchQuery, () => { focusedNode.value = null; updateOpacity() })
+// ─── Smart search (David) ─────────────────────────────────────────────────────
+// Debounced: waits 500ms after the user stops typing, then calls the backend.
+// Results appear in a dropdown. Clicking a result focuses that node in the graph.
+// Falls back to local keyword filter while waiting / if backend is unavailable.
+watch(searchQuery, (query) => {
+  if (skipSearchWatch) return
+  focusedNode.value = null
+
+  // Clear previous debounce
+  if (searchDebounce) clearTimeout(searchDebounce)
+
+  // If empty, clear results and revert to full graph
+  if (!query || query.trim().length === 0) {
+    searchResults.value = []
+    showDropdown.value = false
+    searchLoading.value = false
+    updateOpacity()
+    return
+  }
+
+  // Immediate keyword filter for responsiveness
+  updateOpacity()
+
+  // Debounced smart search
+  searchDebounce = setTimeout(async () => {
+    searchLoading.value = true
+    try {
+      const res = await smartSearch(query.trim(), 8)
+      // Resolve note IDs to actual node data for display
+      searchResults.value = res.results
+        .map(r => {
+          const node = allNodes.find(n => n.id === r.id)
+          return node ? { ...node, similarity: r.similarity } : null
+        })
+        .filter(Boolean)
+      showDropdown.value = searchResults.value.length > 0
+    } catch (err) {
+      console.warn('Smart search unavailable, using keyword filter:', err.message)
+      searchResults.value = []
+      showDropdown.value = false
+    } finally {
+      searchLoading.value = false
+    }
+  }, 500)
+})
+
+let skipSearchWatch = false // prevents searchQuery watcher from clearing focus
+
+function selectSearchResult(node) {
+  skipSearchWatch = true
+  searchQuery.value = ''
+  searchResults.value = []
+  showDropdown.value = false
+  focusedNode.value = node
+  // Reset flag after the watcher fires
+  setTimeout(() => { skipSearchWatch = false }, 50)
+}
 watch(focusedNode, (node) => {
   updateOpacity()
   if (node) panToNode(node)
@@ -361,13 +443,41 @@ onUnmounted(() => { if (simulation) simulation.stop() })
     <div class="flex flex-wrap items-center gap-3 p-4 border-b border-gray-800">
       <h2 class="text-lg font-semibold text-white mr-2">Graph View</h2>
 
-      <!-- Search -->
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Search notes or tags…"
-        class="px-3 py-1.5 text-sm rounded-lg bg-gray-800 border border-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 w-52"
-      />
+      <!-- Smart Search with dropdown (David) -->
+      <div class="relative">
+        <div class="flex items-center gap-1">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Smart search…"
+            class="px-3 py-1.5 text-sm rounded-lg bg-gray-800 border border-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 w-64"
+            @focus="showDropdown = searchResults.length > 0"
+            @blur="setTimeout(() => showDropdown = false, 200)"
+          />
+          <span v-if="searchLoading" class="text-xs text-gray-500 animate-pulse">searching…</span>
+        </div>
+
+        <!-- Dropdown results -->
+        <div
+          v-if="showDropdown && searchResults.length > 0"
+          class="absolute top-full left-0 mt-1 w-96 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 max-h-80 overflow-y-auto"
+        >
+          <button
+            v-for="result in searchResults"
+            :key="result.id"
+            class="w-full text-left px-4 py-3 hover:bg-gray-800 border-b border-gray-800 last:border-0 transition"
+            @mousedown.prevent="selectSearchResult(result)"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-100 truncate">{{ result.title }}</span>
+              <span class="text-xs text-gray-500 ml-2 shrink-0">{{ (result.similarity * 100).toFixed(0) }}% match</span>
+            </div>
+            <div class="text-xs text-gray-500 mt-0.5 truncate">
+              {{ result.tags.join(', ') }}
+            </div>
+          </button>
+        </div>
+      </div>
 
       <!-- Min connections slider -->
       <div class="flex items-center gap-2 text-sm text-gray-400">

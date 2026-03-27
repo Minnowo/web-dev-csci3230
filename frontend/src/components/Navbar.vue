@@ -1,23 +1,75 @@
 <script setup>
-import { Pencil, GitFork, FileText, Sun, Moon, User } from 'lucide-vue-next'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { Pencil, FileText, Sun, Moon, User, BarChart2, ChevronDown } from 'lucide-vue-next'
 import { useTheme } from '../composables/useTheme'
 
 const { isDark, toggle } = useTheme()
+const insightsOpen = ref(false)
+const insightsRef = ref(null)
+
+function closeInsights() {
+  insightsOpen.value = false
+}
+
+function handleClickOutside(e) {
+  if (insightsRef.value && !insightsRef.value.contains(e.target)) {
+    insightsOpen.value = false
+  }
+}
+
+onMounted(() => document.addEventListener('click', handleClickOutside))
+onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 </script>
 
 <template>
   <nav class="flex items-center gap-1 px-4 h-12 bg-[var(--nav-bg)] border-b border-[var(--nav-border)] text-sm text-[var(--text-dim)] transition-colors">
     <span class="font-semibold text-[var(--text)] mr-3">Notes</span>
 
-    <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-[var(--border)] hover:text-[var(--text)] transition-colors cursor-pointer">
-      <Pencil class="w-4 h-4" /> Editor
-    </button>
-    <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-[var(--border)] hover:text-[var(--text)] transition-colors cursor-pointer">
-      <GitFork class="w-4 h-4" /> Graph View
-    </button>
-    <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-[var(--border)] hover:text-[var(--text)] transition-colors cursor-pointer">
-      <FileText class="w-4 h-4" /> Notes
-    </button>
+    <RouterLink to="/" custom v-slot="{ navigate, isActive }">
+      <button
+        @click="navigate"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-[var(--border)] transition-colors cursor-pointer"
+        :class="isActive ? 'text-[var(--text)]' : 'hover:text-[var(--text)]'"
+      >
+        <Pencil class="w-4 h-4" /> Editor
+      </button>
+    </RouterLink>
+
+    <!-- Insights dropdown -->
+    <div class="relative" ref="insightsRef">
+      <button
+        @click="insightsOpen = !insightsOpen"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-[var(--border)] hover:text-[var(--text)] transition-colors cursor-pointer"
+      >
+        <BarChart2 class="w-4 h-4" /> Insights <ChevronDown class="w-3 h-3 ml-0.5" />
+      </button>
+
+      <div
+        v-if="insightsOpen"
+        class="absolute top-full left-0 mt-1 w-36 bg-[var(--nav-bg)] border border-[var(--nav-border)] rounded-md shadow-lg z-50 py-1"
+      >
+        <RouterLink to="/graph" @click="closeInsights"
+          class="flex items-center gap-2 px-3 py-2 text-sm text-[var(--text-dim)] hover:bg-[var(--border)] hover:text-[var(--text)] transition-colors cursor-pointer"
+        >
+          Graph
+        </RouterLink>
+        <RouterLink to="/calendar" @click="closeInsights"
+          class="flex items-center gap-2 px-3 py-2 text-sm text-[var(--text-dim)] hover:bg-[var(--border)] hover:text-[var(--text)] transition-colors cursor-pointer"
+        >
+          Calendar
+        </RouterLink>
+      </div>
+    </div>
+
+    <RouterLink to="/notes" custom v-slot="{ navigate, isActive }">
+      <button
+        @click="navigate"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-[var(--border)] transition-colors cursor-pointer"
+        :class="isActive ? 'text-[var(--text)]' : 'hover:text-[var(--text)]'"
+      >
+        <FileText class="w-4 h-4" /> Notes
+      </button>
+    </RouterLink>
 
     <div class="flex-1" />
 

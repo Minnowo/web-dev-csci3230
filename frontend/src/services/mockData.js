@@ -5532,5 +5532,65 @@ export const mockNotes = [
     summary: "Early morning sunrise hike delivered breathtaking light views.",
     created_at: "2026-03-25T18:00:00Z",
     updated_at: "2026-03-25T19:00:00Z"
+  },
+  {
+    id: "554",
+    title: "Team Meeting Notes - Architecture Discussion",
+    content: "Had a long meeting today about the future of our backend infrastructure. Started with a review of our current Node.js monolith. Jake brought up some concerns about memory usage under load — we've been seeing spikes up to 4GB on the production servers during peak hours.\n\nSarah suggested we look into migrating the image processing pipeline to Rust. She showed benchmarks where a Rust implementation of our thumbnail generator ran 40x faster and used a tenth of the memory. The team was skeptical at first but the numbers were hard to argue with.\n\nWe also discussed breaking out the notification service into a separate microservice. Currently it's tightly coupled with the user auth module which makes it hard to scale independently. Ahmed proposed using RabbitMQ for the message queue — he's used it before and said it handles millions of messages per day reliably.\n\nSide note: the office coffee machine is broken again. Third time this month. Everyone is cranky. This might actually be affecting our productivity more than the architecture issues.\n\nAction items:\n- Sarah to write a proof of concept for the Rust thumbnail service by Friday\n- Ahmed to benchmark RabbitMQ vs Kafka for our use case\n- Jake to profile the memory leak in the auth module\n- Someone fix the coffee machine (assigned to no one, will never happen)",
+    tags: ["engineering","leadership"],
+    sentiment_score: 0.5,
+    summary: "Architecture meeting covered backend infrastructure concerns and proposed solutions.",
+    created_at: "2026-03-10T09:00:00Z",
+    updated_at: "2026-03-10T11:00:00Z"
+  },
+  {
+    id: "555",
+    title: "Personal Journal - Weekend Reflections",
+    content: "Spent the weekend at the cabin up north. No phone signal which was honestly exactly what I needed. Read two full books — one on stoicism (Marcus Aurelius, Meditations) and a novel about a lighthouse keeper in Norway.\n\nThe stoicism stuff really stuck with me. The idea that you can't control what happens, only your response to it. I've been applying this to the situation at work with the performance reviews. Instead of dreading the outcome, I'm focusing on what I can actually do: document my contributions clearly, be honest about what I could have done better, and not catastrophize.\n\nDid a lot of hiking. The trail around the lake is about 12km and I did it twice on Saturday. My knee was acting up by the end — probably the old running injury flaring up. Should book a physiotherapy appointment when I get back to the city.\n\nCooked everything over a fire. Made a surprisingly good chili with whatever was in the pantry. Kidney beans, canned tomatoes, some old spices. No wifi, no delivery apps, no choice but to figure it out. Felt very capable.\n\nComing back to the city felt jarring. The noise, the notifications, the pace. I want to find a way to bring some of that stillness back with me.",
+    tags: ["wellbeing","reflection"],
+    sentiment_score: 0.6,
+    summary: "Peaceful weekend at the cabin with reading, hiking, and self-reflection.",
+    created_at: "2026-03-15T20:00:00Z",
+    updated_at: "2026-03-15T21:30:00Z"
+  },
+  {
+    id: "556",
+    title: "Research Notes - ML Paper Review",
+    content: "Spent the afternoon going through three papers on transformer architectures. Notes below.\n\nPaper 1: Attention Is All You Need (Vaswani et al.) The original transformer paper. Re-reading it for the third time. The multi-head attention mechanism is elegant — instead of one attention function, you run h parallel attention heads, each learning different aspects of the relationships between tokens. The positional encoding using sine and cosine functions of different frequencies is clever — it lets the model generalize to sequence lengths not seen during training.\n\nPaper 2: Recent work on sparse attention. Standard attention is O(n²) in sequence length which becomes prohibitive for long documents. Sparse attention patterns (local windows + strided global tokens) bring this down to O(n√n). The tradeoff is you lose some global context but for most practical tasks this doesn't matter much.\n\nPaper 3: Mixture of Experts scaling. Instead of making one big dense model, route each token to a small subset of specialized expert subnetworks. GPT-4 is rumoured to use this approach. The routing mechanism is the tricky part — you want load balancing so no single expert gets overwhelmed, but the routing decisions need to be differentiable for backpropagation to work.\n\nOverall takeaway: the field is moving toward models that are sparse, modular, and efficient rather than just bigger and denser. The era of just scale it up seems to be giving way to smarter architectures.",
+    tags: ["learning","engineering"],
+    sentiment_score: 0.7,
+    summary: "Reviewed three papers on transformer architectures and scaling approaches.",
+    created_at: "2026-03-18T14:00:00Z",
+    updated_at: "2026-03-18T17:00:00Z"
+  },
+  {
+    id: "557",
+    title: "Cooking Experiments Log",
+    content: "Tried three new recipes this week. The first was a Thai green curry from scratch — grinding my own curry paste with lemongrass, galangal, green chilies, and shrimp paste. The smell while pounding everything in the mortar was incredible. Added bamboo shoots and Thai eggplant which I found at the Asian grocery on Dundas. Served it over jasmine rice with crispy shallots on top.\n\nSecond attempt was homemade sourdough. My starter Gertrude has been going strong for six months now. The crumb was more open than usual — I think the longer bulk ferment at room temperature helped. The crust had that perfect shatter when you squeeze it. Gave a loaf to the neighbours and they asked for the recipe. There is no recipe. It's vibes and flour ratios.\n\nThird was a disaster. Tried to make cacio e pepe which is supposed to be the simplest pasta — just pecorino, pepper, and pasta water. The cheese clumped into a solid mass instead of forming a creamy sauce. Apparently the trick is tempering the cheese mixture with pasta water off the heat. Will try again next week. The pepper was good at least.\n\nI've been thinking about doing a pop-up dinner for friends. Maybe 12 people, five courses, BYOB. Need to figure out the logistics of cooking for that many in my tiny kitchen. The oven only fits one sheet pan at a time.",
+    tags: ["cooking","hobbies"],
+    sentiment_score: 0.8,
+    summary: "Documented three cooking experiments with mixed results this week.",
+    created_at: "2026-03-20T19:00:00Z",
+    updated_at: "2026-03-20T20:30:00Z"
+  },
+  {
+    id: "558",
+    title: "Startup Ideas Brainstorm",
+    content: "Been collecting ideas in my head for a while, dumping them here before I forget.\n\nIdea 1: A platform that connects retired professionals with students for mentorship. Not generic career advice but actual skill transfer — a retired electrical engineer helping a student debug their circuit designs, a former CFO reviewing a student's financial models. Monetize through university partnerships. The key insight is that retirees have time and knowledge, students have energy and questions, and there's no good marketplace connecting them.\n\nIdea 2: Neighbourhood tool library. Like a real library but for power tools, camping gear, kitchen appliances you use once a year. There's one in Toronto already (the Toronto Tool Library) but it could be an app-based model with peer-to-peer lending, insurance built in, and delivery. The environmental angle is strong — why does every household need their own drill?\n\nIdea 3: AI-powered lease agreement analyzer. You upload your rental lease and it highlights predatory clauses, compares your rent to neighbourhood averages, flags things your landlord can't legally do. Target market is first-time renters who don't know their rights. Could partner with legal aid organizations. In Ontario specifically, the Residential Tenancies Act has a lot of protections that tenants don't know about.\n\nIdea 4: A dead simple budgeting app that just tracks one thing — your daily spending limit. Take your monthly income, subtract fixed costs, divide by days in the month. That's your number. Every purchase either keeps you under or puts you over. No categories, no sync, no AI insights. Just the number.\n\nNeed to validate which of these has actual demand vs which ones just sound clever to me.",
+    tags: ["engineering","design"],
+    sentiment_score: 0.7,
+    summary: "Brainstormed four startup concepts spanning mentorship, sharing economy, and fintech.",
+    created_at: "2026-03-22T22:00:00Z",
+    updated_at: "2026-03-22T23:30:00Z"
+  },
+  {
+    id: "559",
+    title: "Guitar Practice Session Notes",
+    content: "Two hour practice session today. Started with scales — working through all modes of C major. Dorian and Mixolydian are feeling natural now but Locrian still trips me up. The half-diminished quality of it just doesn't sit in my ear yet.\n\nSpent most of the session working on fingerpicking patterns for Blackbird by the Beatles. The Paul McCartney technique of using the thumb for the bass line while the index and middle fingers handle the melody is deceptively hard. My right hand keeps wanting to default to a standard arpeggio pattern instead of the independent thumb movement.\n\nAlso transcribed the intro to Neon by John Mayer. The slap technique he uses is insane — he's essentially playing bass, rhythm, and lead simultaneously on an acoustic guitar. I can get through the first four bars at about 60% speed. The thumb slap on the low E while pulling off on the high strings requires coordination I definitely don't have yet.\n\nNew gear note: tried the Fishman Rare Earth microphone pickup at the shop. It sounded way more natural than my undersaddle piezo. The feedback rejection was impressive too — I could stand right in front of the amp with no issues. It's $250 though, which is steep. Maybe for my birthday.\n\nGoal for next week: get Blackbird up to tempo and memorize the full arrangement. Also want to start learning some jazz standards — Autumn Leaves seems like a good entry point.",
+    tags: ["hobbies","learning"],
+    sentiment_score: 0.7,
+    summary: "Detailed guitar practice covering scales, fingerpicking, and transcription work.",
+    created_at: "2026-03-24T16:00:00Z",
+    updated_at: "2026-03-24T18:00:00Z"
   }
 ]
