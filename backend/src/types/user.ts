@@ -8,8 +8,8 @@ export type User = {
 	CREATED: string;
 };
 
-export type JwtPayloadUser = User & JwtPayload;
+export type JwtUserPayload = User & JwtPayload;
 
 export interface AuthenticatedRequest extends Request {
-	user?: JwtPayloadUser;
+	user?: JwtUserPayload;
 }

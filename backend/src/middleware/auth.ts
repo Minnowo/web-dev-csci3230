@@ -1,9 +1,6 @@
 import { type Response, type NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import type {
-	AuthenticatedRequest,
-	JwtPayloadUser as JwtUserPayload,
-} from "../types/user.js";
+import type { AuthenticatedRequest, JwtUserPayload } from "../types/user.js";
 import { JWT_SECRET } from "../constants/jwt_secret.js";
 
 export function MiddleWareAuthenticateToken(
