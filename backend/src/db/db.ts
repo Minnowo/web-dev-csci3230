@@ -53,7 +53,7 @@ export class DB {
 			}
 
 			console.info("Version table not found, assuming empty database");
-			version = { data: -1, error: null };
+			version = { data: 0, error: null };
 		}
 
 		const maxVer = Migrations[Migrations.length - 1];
@@ -65,33 +65,43 @@ export class DB {
 		}
 
 		console.debug(
-			`Starting migration loop. this version: ${version.data} max version: ${maxVer.version}`,
+			`Starting migration loop. this version: ${version.data} max version: ${maxVer.toVersion}`,
 		);
 
 		let curVersion = version.data;
 
-		while (curVersion < maxVer.version) {
-			const curMigration = Migrations[Math.max(0, curVersion)];
+		for (let i = 0; i < Migrations.length; i++) {
+			const migration = Migrations[i];
 
-			if (curMigration === undefined) {
+			if (migration === undefined) {
 				throw new Error(
 					`Migration version ${curVersion} is undefined, this is impossible`,
 				);
 			}
 
-			console.info("Migrating database from version: ", curVersion);
-
-			const result = curMigration.func(this);
-
-			if (result.error !== null) {
-				console.info(
-					`Migrating database from version ${curVersion} failed: ${result.error}`,
-				);
-
-				return result.error;
+			if (curVersion !== migration.fromVersion) {
+				continue;
 			}
 
-			curVersion = result.data;
+			console.info(
+				`Migrating database from version ${migration.fromVersion} to ${migration.toVersion}`,
+			);
+
+			const err = migration.func(
+				this,
+				migration.fromVersion,
+				migration.toVersion,
+			);
+
+			if (err !== null) {
+				console.info(
+					`Migrating database from version ${migration.fromVersion} failed: ${err}`,
+				);
+
+				return err;
+			}
+
+			curVersion = migration.toVersion;
 		}
 
 		console.info("Migration finished. DB Version:", curVersion);
