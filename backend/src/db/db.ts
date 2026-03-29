@@ -1,6 +1,8 @@
 import Database from "better-sqlite3";
 import { DBError } from "./errors.js";
 import { Migrations } from "./migrations.js";
+import crypto from "crypto";
+import type { User } from "../types/user.js";
 
 export type Result<T> =
 	| { data: T; error: null }
@@ -12,7 +14,8 @@ export class DB {
 
 	private constructor() {
 		this.db = new Database("./db.sqlite3");
-		this.db.pragma("journal_mode = WAL");
+		// Don't really care about this, it just adds junk to the filesystem
+		// this.db.pragma("journal_mode = WAL");
 		this.db.pragma("foreign_keys = ON");
 	}
 
@@ -39,6 +42,49 @@ export class DB {
 		}
 	}
 
+	public GetUser(username: string, password: string): Result<User> {
+		try {
+			const hashedPassword = crypto
+				.createHash("sha256")
+				.update(password)
+				.digest();
+
+			const stmt = this.db.prepare(
+				"SELECT ID, NAME, EMAIL, CREATED FROM DB_USER WHERE NAME = ? AND PASSWORD = ?",
+			);
+
+			const info = stmt.get(username, hashedPassword) as User;
+
+			return { data: info, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+	public AddUser(
+		username: string,
+		email: string,
+		password: string,
+	): Result<number> {
+		try {
+			// I said we were gonna use bcrypt because it's good, but it's way easier to just use a builtin than add a new library just for that.
+			// Who really cares anyways since we're not being marked on good security practices. This should do well enough.
+			const hashedPassword = crypto
+				.createHash("sha256")
+				.update(password)
+				.digest();
+
+			const stmt = this.db.prepare(
+				"INSERT INTO DB_USER(NAME, EMAIL, PASSWORD) VALUES (?, ?, ?)",
+			);
+
+			const info = stmt.run(username, email, hashedPassword);
+
+			return { data: Number(info.lastInsertRowid), error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
 	public Migrate(): Error | null {
 		let version = this.Version();
 
@@ -53,7 +99,7 @@ export class DB {
 			}
 
 			console.info("Version table not found, assuming empty database");
-			version = { data: -1, error: null };
+			version = { data: 0, error: null };
 		}
 
 		const maxVer = Migrations[Migrations.length - 1];
@@ -65,33 +111,43 @@ export class DB {
 		}
 
 		console.debug(
-			`Starting migration loop. this version: ${version.data} max version: ${maxVer.version}`,
+			`Starting migration loop. this version: ${version.data} max version: ${maxVer.toVersion}`,
 		);
 
 		let curVersion = version.data;
 
-		while (curVersion < maxVer.version) {
-			const curMigration = Migrations[Math.max(0, curVersion)];
+		for (let i = 0; i < Migrations.length; i++) {
+			const migration = Migrations[i];
 
-			if (curMigration === undefined) {
+			if (migration === undefined) {
 				throw new Error(
 					`Migration version ${curVersion} is undefined, this is impossible`,
 				);
 			}
 
-			console.info("Migrating database from version: ", curVersion);
-
-			const result = curMigration.func(this);
-
-			if (result.error !== null) {
-				console.info(
-					`Migrating database from version ${curVersion} failed: ${result.error}`,
-				);
-
-				return result.error;
+			if (curVersion !== migration.fromVersion) {
+				continue;
 			}
 
-			curVersion = result.data;
+			console.info(
+				`Migrating database from version ${migration.fromVersion} to ${migration.toVersion}`,
+			);
+
+			const err = migration.func(
+				this,
+				migration.fromVersion,
+				migration.toVersion,
+			);
+
+			if (err !== null) {
+				console.info(
+					`Migrating database from version ${migration.fromVersion} failed: ${err}`,
+				);
+
+				return err;
+			}
+
+			curVersion = migration.toVersion;
 		}
 
 		console.info("Migration finished. DB Version:", curVersion);
