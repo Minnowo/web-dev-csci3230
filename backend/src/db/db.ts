@@ -3,6 +3,7 @@ import { DBError } from "./errors.js";
 import { Migrations } from "./migrations.js";
 import crypto from "crypto";
 import type { User } from "../types/user.js";
+import type { Note } from "../types/note.js";
 
 export type Result<T> =
 	| { data: T; error: null }
@@ -60,6 +61,7 @@ export class DB {
 			return { data: null, error: DBError.from(err) };
 		}
 	}
+
 	public AddUser(
 		username: string,
 		email: string,
@@ -82,6 +84,80 @@ export class DB {
 			return { data: Number(info.lastInsertRowid), error: null };
 		} catch (err) {
 			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public CreateNote(userId: number, title: string, content: string): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				"INSERT INTO DB_NOTES (USER_ID, TITLE, CONTENT) VALUES (?, ?, ?)",
+			);
+
+			const info = stmt.run(userId, title, content);
+
+			return { data: Number(info.lastInsertRowid), error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}	
+	}
+
+	public GetNotes(userId: number): Result<Note[]> {
+		try {
+			const stmt = this.db.prepare(
+				"SELECT ID, USER_ID, TITLE, CONTENT, CREATED, UPDATED FROM DB_NOTES WHERE USER_ID = ?",
+			);
+
+			const rows = stmt.all(userId) as Note[];
+
+			return { data: rows, error: null};				
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public GetSingleNote(noteId: number, userId: number): Result<Note> {
+		try {
+			const stmt = this.db.prepare(
+				"SELECT ID, USER_ID, TITLE, CONTENT, CREATED, UPDATED FROM DB_NOTES WHERE ID = ? AND USER_ID = ?",
+			);
+
+			const row = stmt.get(noteId, userId) as Note;
+
+			return { data: row, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public UpdateNote(noteId: number, userId: number, title: string, content: string): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				`UPDATE DB_NOTES
+				 SET TITLE = ?,
+				 	 CONTENT = ?,
+					 UPDATED = CURRENT_TIMESTAMP
+			 	 WHERE ID = ? AND USER_ID = ?`
+			);
+
+			const row = stmt.run(title, content, noteId, userId);
+
+			return { data: row.changes, error: null};
+		} catch (err) {
+			return { data: null, error: DBError.from(err)};
+		}
+	} 
+
+	public DeleteNote(noteId: number, userId: number): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				"DELETE FROM DB_NOTES WHERE ID = ? AND USER_ID = ?",
+			);
+
+			const row = stmt.run(noteId, userId);
+
+			return { data: row.changes, error: null};
+		} catch (err) {
+			return { data: null, error: DBError.from(err)};
 		}
 	}
 

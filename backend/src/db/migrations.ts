@@ -100,6 +100,7 @@ const migrate_2: MigrationFunc = (
 
 	return null;
 };
+
 export const Migrations: Array<{
 	fromVersion: number;
 	toVersion: number;
