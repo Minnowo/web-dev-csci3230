@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # The frontend Vue application
   frontend:
     build:
       context: ./frontend
@@ -19,33 +18,20 @@ services:
       - NODE_ENV=development
     restart: unless-stopped
 
-  # Placeholder for a future backend service (Express, Django, Flask, etc.)
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   container_name: app-backend
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./backend:/app
-  #   environment:
-  #     - NODE_ENV=development
-  #   depends_on:
-  #     - db
-  
-  # Placeholder for a future database (PostgreSQL, MySQL, MongoDB, Redis, etc.)
-  # db:
-  #   image: postgres:15-alpine
-  #   container_name: app-db
-  #   ports:
-  #     - "5432:5432"
-  #   environment:
-  #     POSTGRES_USER: user
-  #     POSTGRES_PASSWORD: password
-  #     POSTGRES_DB: mydatabase
-  #   volumes:
-  #     - db-data:/var/lib/postgresql/data
-
-# volumes:
-#   db-data:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: express-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/scripts:/app/scripts
+      - ./backend/.env:/app/.env
+      - ./frontend/src/services/mockData.js:/frontend/src/services/mockData.js
+    env_file:
+      - ./backend/.env
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
