@@ -12,7 +12,7 @@ import analyzeRouter from "./routes/analyze.js";
 import smartSearchRouter from "./routes/smartSearch.js";
 
 export const ExpressApp = express();
-const PORT = process.env.PORT ?? 3000;
+const PORT = 3000;
 
 ExpressApp.use(cors());
 ExpressApp.use(express.json());
@@ -28,6 +28,7 @@ ExpressApp.use("/api", smartSearchRouter);
 
 ExpressApp.get("/", (req: Request, res: Response) => {
 	res.send("Hello from TypeScript + Express 🚀");
+	console.log("hello world");
 });
 
 // keep it simple, put literally all endpoints here so we can easily read them.
@@ -45,4 +46,5 @@ ExpressApp.listen(PORT, () => {
 	// Run DB migrations on startup (creates tables if they don't exist)
 	const db = DB.Instance();
 	db.Migrate();
+	console.info("Got DB", db);
 });
