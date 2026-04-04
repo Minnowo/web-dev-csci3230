@@ -1,15 +1,14 @@
 export type Note = {
-	ID: number;
-	USER_ID: number;
-	TITLE: string;
-	CONTENT: string;
-	CREATED: string;
-	UPDATED: string;
-};
-
-export type NoteListItem = {
-	ID: number;
-	TITLE: string;
-	UPDATED: string;
-};
+	id: number;
+	title: string;
+	content: string;
+	created_at: string;
+	updated_at: string;
+  };
+  
+  export type NoteListItem = {
+	id: number;
+	title: string;
+	updated_at: string;
+  };
 

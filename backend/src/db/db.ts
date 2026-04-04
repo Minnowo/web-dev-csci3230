@@ -104,7 +104,12 @@ export class DB {
 	public GetNotesList(userId: number): Result<NoteListItem[]> {
 		try {
 			const stmt = this.db.prepare(
-				"SELECT ID, TITLE, UPDATED FROM DB_NOTES WHERE USER_ID = ? ORDER BY UPDATED DESC",
+				`SELECT 
+					ID AS id, 
+					TITLE AS title, 
+					UPDATED AS updated_at
+					FROM DB_NOTES 
+					WHERE USER_ID = ? ORDER BY UPDATED DESC`,
 			);
 
 			const rows = stmt.all(userId) as NoteListItem[];
@@ -118,7 +123,14 @@ export class DB {
 	public GetSingleNote(noteId: number, userId: number): Result<Note> {
 		try {
 			const stmt = this.db.prepare(
-				"SELECT ID, USER_ID, TITLE, CONTENT, CREATED, UPDATED FROM DB_NOTES WHERE ID = ? AND USER_ID = ?",
+				`SELECT 
+					ID AS id, 
+					TITLE AS title, 
+					CONTENT AS content, 
+					CREATED AS created_at, 
+					UPDATED AS updated_at 
+				 FROM DB_NOTES 
+				 WHERE ID = ? AND USER_ID = ?`,
 			);
 
 			const row = stmt.get(noteId, userId) as Note;
