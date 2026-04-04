@@ -1,12 +1,43 @@
+/**
+ * useEditorStore.js — Client-side data store for the GraphNotes editor.
+ *
+ * CURRENT IMPLEMENTATION: All data is persisted to localStorage under the key
+ * "graphnotes-vault". This is a temporary stand-in until the backend is ready.
+ *
+ * FOR BACKEND INTEGRATION:
+ * Each function below is annotated with the expected REST API endpoint it should
+ * call once the backend is available. The UI components do not need to change —
+ * only this file needs to be updated to swap localStorage calls for API calls.
+ *
+ * EXPECTED DATA SHAPE (note/folder item):
+ * {
+ *   id:        string   — unique identifier (UUID from backend)
+ *   name:      string   — display name of the file or folder
+ *   content:   string   — markdown content (files only, omit for folders)
+ *   parentId:  string | null — ID of the parent folder, null = root level
+ *   type:      "file" | "folder"
+ *   updatedAt: string   — ISO 8601 timestamp of last modification
+ * }
+ *
+ * AUTHENTICATION:
+ * All API calls should include the user's auth token. The api.js service layer
+ * in services/api.js is the recommended place to attach headers/interceptors.
+ */
+
 import { reactive, computed, watch } from 'vue'
 
 const STORAGE_KEY = 'graphnotes-vault'
 
+// ─── Temporary localStorage helpers (remove when backend is connected) ────────
+
 function generateId() {
+  // TODO: Remove this once backend generates IDs server-side (UUIDs)
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 }
 
 function loadFromStorage() {
+  // TODO: Replace with GET /api/notes — fetch all notes and folders for the
+  // authenticated user. Expected response: { items: Item[], activeFileId: string }
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) return JSON.parse(raw)
@@ -15,6 +46,8 @@ function loadFromStorage() {
 }
 
 function createDefaultData() {
+  // TODO: Remove this entire function once loadFromStorage() calls the real API.
+  // This only exists to seed the UI with sample data during local development.
   const folderId = generateId()
   const file1Id = generateId()
   const file2Id = generateId()
@@ -30,30 +63,56 @@ function createDefaultData() {
   }
 }
 
+// ─── Reactive state (module-level singleton so all components share one store) ─
+
 const saved = loadFromStorage()
 const state = reactive(saved || createDefaultData())
 
+// TODO: Remove this watch block once backend is connected. Currently it auto-saves
+// the entire state to localStorage on every change. With a real backend, each
+// individual function below will call its own API endpoint instead.
 watch(state, () => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
 }, { deep: true })
 
+// ─── Composable ───────────────────────────────────────────────────────────────
+
 export function useEditorStore() {
+
+  /** The currently open file object, or null if none is selected. */
   const activeFile = computed(() =>
     state.items.find(i => i.id === state.activeFileId && i.type === 'file') || null
   )
 
+  /** All top-level items (files and folders with no parent). */
   const rootItems = computed(() =>
     state.items.filter(i => i.parentId === null)
   )
 
+  /**
+   * Returns the direct children of a given folder.
+   * Used by the sidebar tree to render nested items recursively.
+   */
   function getChildren(parentId) {
     return state.items.filter(i => i.parentId === parentId)
   }
 
+  /**
+   * Sets the currently active/open file by ID.
+   * No API call needed — this is purely local UI state.
+   */
   function setActiveFile(id) {
     state.activeFileId = id
   }
 
+  /**
+   * Creates a new empty note and opens it in the editor.
+   *
+   * TODO — Backend: POST /api/notes
+   * Request body:  { name: "Untitled", content: "", parentId: string | null, type: "file" }
+   * Expected response: the created Item object (including server-generated id and updatedAt)
+   * On success: push the returned item into state.items and set state.activeFileId
+   */
   function createFile(parentId = null) {
     const id = generateId()
     const name = 'Untitled'
@@ -65,6 +124,14 @@ export function useEditorStore() {
     return id
   }
 
+  /**
+   * Creates a new folder in the sidebar tree.
+   *
+   * TODO — Backend: POST /api/notes
+   * Request body:  { name: "New Folder", parentId: string | null, type: "folder" }
+   * Expected response: the created Item object
+   * On success: push the returned item into state.items
+   */
   function createFolder(parentId = null) {
     const id = generateId()
     state.items.push({
@@ -74,6 +141,16 @@ export function useEditorStore() {
     return id
   }
 
+  /**
+   * Saves the markdown content of a note. Called on every keystroke (debounced
+   * by Vue's reactivity). Consider debouncing the API call (e.g. 500ms) to avoid
+   * hammering the server on every keypress.
+   *
+   * TODO — Backend: PATCH /api/notes/:id
+   * Request body:  { content: string, updatedAt: string }
+   * Expected response: { updatedAt: string } (return updated timestamp from server)
+   * On success: update item.updatedAt with the server-returned value
+   */
   function updateFileContent(id, content) {
     const item = state.items.find(i => i.id === id)
     if (item && item.type === 'file') {
@@ -82,6 +159,14 @@ export function useEditorStore() {
     }
   }
 
+  /**
+   * Renames a file or folder. Triggered by double-clicking an item in the sidebar.
+   *
+   * TODO — Backend: PATCH /api/notes/:id
+   * Request body:  { name: string }
+   * Expected response: { updatedAt: string }
+   * On success: update item.name and item.updatedAt
+   */
   function renameItem(id, newName) {
     const item = state.items.find(i => i.id === id)
     if (item) {
@@ -90,8 +175,19 @@ export function useEditorStore() {
     }
   }
 
+  /**
+   * Deletes a file or folder. If a folder is deleted, all of its children are
+   * deleted recursively first (handled client-side here; the backend may handle
+   * cascading deletes at the database level instead).
+   *
+   * TODO — Backend: DELETE /api/notes/:id
+   * No request body needed.
+   * The backend should cascade-delete all children if the item is a folder.
+   * On success: remove the item (and its children) from state.items
+   * If the deleted item was the active file, open the next available file.
+   */
   function deleteItem(id) {
-    // Recursively delete children if folder
+    // Recursively delete children client-side (remove this if backend cascades)
     const children = state.items.filter(i => i.parentId === id)
     children.forEach(c => deleteItem(c.id))
     const idx = state.items.findIndex(i => i.id === id)
@@ -102,8 +198,17 @@ export function useEditorStore() {
     }
   }
 
+  /** Total number of notes (files only) in the vault. Shown in the sidebar footer. */
   const fileCount = computed(() => state.items.filter(i => i.type === 'file').length)
 
+  /**
+   * Searches notes and folders by name (client-side, case-insensitive).
+   *
+   * TODO — Backend (optional): GET /api/notes/search?q=:query
+   * If full-text search across note *content* is needed, this should hit the
+   * backend. For name-only search the current client-side filter is sufficient.
+   * Expected response: Item[]
+   */
   function searchItems(query) {
     if (!query) return []
     const q = query.toLowerCase()
