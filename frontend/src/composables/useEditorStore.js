@@ -55,9 +55,9 @@ function createDefaultData() {
 
   return {
     items: [
-      { id: file1Id, name: 'test text', content: 'hello world', parentId: null, type: 'file', updatedAt: now },
+      { id: file1Id, name: 'test text', content: 'hello world', parentId: null, type: 'file', icon: 'FileText', updatedAt: now },
       { id: folderId, name: 'New Folder', parentId: null, type: 'folder', updatedAt: now },
-      { id: file2Id, name: 'text in folder', content: '# this is an h1', parentId: folderId, type: 'file', updatedAt: now },
+      { id: file2Id, name: 'text in folder', content: '# this is an h1', parentId: folderId, type: 'file', icon: 'Lightbulb', updatedAt: now },
     ],
     activeFileId: file1Id,
   }
@@ -118,7 +118,7 @@ export function useEditorStore() {
     const name = 'Untitled'
     state.items.push({
       id, name, content: '', parentId, type: 'file',
-      updatedAt: new Date().toISOString(),
+      icon: 'FileText', updatedAt: new Date().toISOString(),
     })
     state.activeFileId = id
     return id
@@ -155,6 +155,21 @@ export function useEditorStore() {
     const item = state.items.find(i => i.id === id)
     if (item && item.type === 'file') {
       item.content = content
+      item.updatedAt = new Date().toISOString()
+    }
+  }
+
+  /**
+   * Updates the icon of a file. Called when the user picks from the IconPicker.
+   *
+   * TODO — Backend: PATCH /api/notes/:id
+   * Request body:  { icon: string }  (icon name key, e.g. "Lightbulb")
+   * Expected response: { updatedAt: string }
+   */
+  function updateItemIcon(id, iconName) {
+    const item = state.items.find(i => i.id === id)
+    if (item) {
+      item.icon = iconName
       item.updatedAt = new Date().toISOString()
     }
   }
@@ -228,5 +243,6 @@ export function useEditorStore() {
     deleteItem,
     fileCount,
     searchItems,
+    updateItemIcon,
   }
 }

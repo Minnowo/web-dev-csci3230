@@ -7,16 +7,30 @@
       @click="handleClick"
       @dblclick="startRename"
     >
-      <!-- Folder toggle -->
+      <!-- Folder toggle chevron -->
       <ChevronRight
         v-if="item.type === 'folder'"
         class="w-3 h-3 toggle-icon"
         :class="{ rotated: expanded }"
       />
-      <span v-else class="w-3 h-3 inline-block" />
+      <span v-else class="w-3 h-3 inline-block shrink-0" />
 
-      <component :is="icon" class="w-4 h-4 item-icon" />
+      <!-- Icon — clickable on files to open picker -->
+      <button
+        v-if="item.type === 'file'"
+        class="icon-btn"
+        :title="'Change icon'"
+        @click.stop="openPicker"
+      >
+        <component :is="fileIcon" class="w-4 h-4" />
+      </button>
+      <component
+        v-else
+        :is="folderIcon"
+        class="w-4 h-4 item-icon shrink-0"
+      />
 
+      <!-- Name / rename input -->
       <input
         v-if="isRenaming"
         ref="renameInput"
@@ -33,6 +47,17 @@
         <Trash2 class="w-3 h-3" />
       </button>
     </div>
+
+    <!-- Icon picker (teleported to body to avoid clipping) -->
+    <Teleport to="body">
+      <IconPicker
+        v-if="pickerOpen"
+        :current="item.icon || 'FileText'"
+        :position="pickerPos"
+        @select="handleIconSelect"
+        @close="pickerOpen = false"
+      />
+    </Teleport>
 
     <!-- Children (if folder is expanded) -->
     <template v-if="item.type === 'folder' && expanded">
@@ -53,7 +78,10 @@
 
 <script setup>
 import { ref, computed, nextTick } from 'vue'
-import { ChevronRight, FileText, Folder, FolderOpen, Trash2 } from 'lucide-vue-next'
+import { ChevronRight, Folder, FolderOpen, Trash2 } from 'lucide-vue-next'
+import { resolveIcon } from './iconMap.js'
+import { useEditorStore } from '../../composables/useEditorStore.js'
+import IconPicker from './IconPicker.vue'
 
 const props = defineProps({
   item: { type: Object, required: true },
@@ -64,17 +92,19 @@ const props = defineProps({
 
 const emit = defineEmits(['select', 'delete', 'rename'])
 
+const { updateItemIcon } = useEditorStore()
+
 const expanded = ref(true)
 const isRenaming = ref(false)
 const renamingName = ref('')
 const renameInput = ref(null)
+const pickerOpen = ref(false)
+const pickerPos = ref({ top: 0, left: 0 })
 
 const children = computed(() => props.getChildren(props.item.id))
 
-const icon = computed(() => {
-  if (props.item.type === 'folder') return expanded.value ? FolderOpen : Folder
-  return FileText
-})
+const fileIcon = computed(() => resolveIcon(props.item.icon || 'FileText'))
+const folderIcon = computed(() => expanded.value ? FolderOpen : Folder)
 
 function handleClick() {
   if (props.item.type === 'folder') {
@@ -82,6 +112,19 @@ function handleClick() {
   } else {
     emit('select', props.item.id)
   }
+}
+
+function openPicker(e) {
+  const rect = e.currentTarget.getBoundingClientRect()
+  pickerPos.value = {
+    top: rect.bottom + 4,
+    left: Math.min(rect.left, window.innerWidth - 270),
+  }
+  pickerOpen.value = true
+}
+
+function handleIconSelect(iconName) {
+  updateItemIcon(props.item.id, iconName)
 }
 
 function startRename() {
@@ -133,12 +176,31 @@ function cancelRename() {
 .toggle-icon.rotated {
   transform: rotate(90deg);
 }
-.item-icon {
-  flex-shrink: 0;
+/* Clickable icon button for files */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  border: none;
+  background: none;
   color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.1s, color 0.1s;
 }
-.tree-item.active .item-icon {
+.icon-btn:hover {
+  background: var(--border);
   color: var(--label-to);
+}
+.tree-item.active .icon-btn {
+  color: var(--label-to);
+}
+.item-icon {
+  color: var(--text-muted);
 }
 .item-name {
   flex: 1;

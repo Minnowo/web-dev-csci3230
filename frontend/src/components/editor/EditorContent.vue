@@ -2,17 +2,34 @@
   <div class="editor-content" v-if="file">
     <!-- Note title -->
     <div class="note-header">
-      <input
-        class="note-title"
-        :value="file.name"
-        @input="$emit('rename', file.id, $event.target.value)"
-        @keydown.enter.prevent="focusEditor"
-      />
+      <div class="title-row">
+        <!-- Clickable icon -->
+        <button class="note-icon-btn" title="Change icon" @click="openPicker">
+          <component :is="noteIcon" class="w-8 h-8" />
+        </button>
+        <input
+          class="note-title"
+          :value="file.name"
+          @input="$emit('rename', file.id, $event.target.value)"
+          @keydown.enter.prevent="focusEditor"
+        />
+      </div>
       <div class="note-meta">
         <Clock class="w-3 h-3" />
         Modified {{ formatDate(file.updatedAt) }}
       </div>
     </div>
+
+    <!-- Icon picker -->
+    <Teleport to="body">
+      <IconPicker
+        v-if="pickerOpen"
+        :current="file.icon || 'FileText'"
+        :position="pickerPos"
+        @select="handleIconSelect"
+        @close="pickerOpen = false"
+      />
+    </Teleport>
 
     <!-- Editable area -->
     <div
@@ -36,14 +53,37 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { Clock, FileText } from 'lucide-vue-next'
+import { resolveIcon } from './iconMap.js'
+import { useEditorStore } from '../../composables/useEditorStore.js'
+import IconPicker from './IconPicker.vue'
 
 const props = defineProps({
   file: { type: Object, default: null },
 })
 
 const emit = defineEmits(['update', 'rename', 'createFirst'])
+
+const { updateItemIcon } = useEditorStore()
+
+const pickerOpen = ref(false)
+const pickerPos = ref({ top: 0, left: 0 })
+
+const noteIcon = computed(() => resolveIcon(props.file?.icon || 'FileText'))
+
+function openPicker(e) {
+  const rect = e.currentTarget.getBoundingClientRect()
+  pickerPos.value = {
+    top: rect.bottom + 6,
+    left: rect.left,
+  }
+  pickerOpen.value = true
+}
+
+function handleIconSelect(iconName) {
+  if (props.file) updateItemIcon(props.file.id, iconName)
+}
 
 const editorRef = ref(null)
 let isUpdatingFromProp = false
@@ -195,9 +235,33 @@ defineExpose({ applyFormat })
 .note-header {
   padding: 24px 32px 0;
 }
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.note-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.12s, color 0.12s;
+}
+.note-icon-btn:hover {
+  background: var(--surface-hover);
+  color: var(--label-to);
+}
 .note-title {
-  display: block;
-  width: 100%;
+  flex: 1;
   font-size: 28px;
   font-weight: 600;
   color: var(--text);
@@ -205,7 +269,7 @@ defineExpose({ applyFormat })
   border: none;
   outline: none;
   padding: 0;
-  margin: 0 0 4px;
+  margin: 0;
 }
 .note-meta {
   display: flex;
