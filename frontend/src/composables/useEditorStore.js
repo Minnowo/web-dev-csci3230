@@ -55,9 +55,9 @@ function createDefaultData() {
 
   return {
     items: [
-      { id: file1Id, name: 'test text', content: 'hello world', parentId: null, type: 'file', icon: 'FileText', updatedAt: now },
+      { id: file1Id, name: 'test text', content: 'hello world', parentId: null, type: 'file', icon: 'FileText', updatedAt: now, lastVisitedAt: now },
       { id: folderId, name: 'New Folder', parentId: null, type: 'folder', updatedAt: now },
-      { id: file2Id, name: 'text in folder', content: '# this is an h1', parentId: folderId, type: 'file', icon: 'Lightbulb', updatedAt: now },
+      { id: file2Id, name: 'text in folder', content: '# this is an h1', parentId: folderId, type: 'file', icon: 'Lightbulb', updatedAt: now, lastVisitedAt: null },
     ],
     activeFileId: file1Id,
   }
@@ -98,12 +98,36 @@ export function useEditorStore() {
   }
 
   /**
-   * Sets the currently active/open file by ID.
-   * No API call needed — this is purely local UI state.
+   * Sets the currently active/open file by ID and stamps its lastVisitedAt time.
+   * No API call needed for activeFileId — this is purely local UI state.
+   *
+   * TODO — Backend (optional): PATCH /api/notes/:id
+   * Request body: { lastVisitedAt: string } — useful if you want cross-device
+   * "recently visited" to sync. Otherwise keep client-side only.
    */
   function setActiveFile(id) {
     state.activeFileId = id
+    const item = state.items.find(i => i.id === id && i.type === 'file')
+    if (item) item.lastVisitedAt = new Date().toISOString()
   }
+
+  /**
+   * The 8 most recently visited files, sorted newest-first.
+   * Falls back to updatedAt for files that have never been explicitly opened
+   * (e.g. created before this field existed, or via the backend).
+   * Used by the Dashboard "Recently visited" section.
+   */
+  const recentFiles = computed(() =>
+    state.items
+      .filter(i => i.type === 'file')
+      .slice()
+      .sort((a, b) => {
+        const ta = a.lastVisitedAt || a.updatedAt || ''
+        const tb = b.lastVisitedAt || b.updatedAt || ''
+        return tb.localeCompare(ta)
+      })
+      .slice(0, 8)
+  )
 
   /**
    * Creates a new empty note and opens it in the editor.
@@ -118,7 +142,7 @@ export function useEditorStore() {
     const name = 'Untitled'
     state.items.push({
       id, name, content: '', parentId, type: 'file',
-      icon: 'FileText', updatedAt: new Date().toISOString(),
+      icon: 'FileText', updatedAt: new Date().toISOString(), lastVisitedAt: null,
     })
     state.activeFileId = id
     return id
@@ -242,6 +266,7 @@ export function useEditorStore() {
     renameItem,
     deleteItem,
     fileCount,
+    recentFiles,
     searchItems,
     updateItemIcon,
   }
