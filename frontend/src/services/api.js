@@ -52,22 +52,23 @@ export async function analyzeNote(id, content) {
   return res.json()
 }
 
-// ─── Smart Search (David) ────────────────────────────────────────────────────
-// Semantic search using Gemini embeddings. Sends the query to the backend which
-// embeds it and finds the most similar notes by cosine similarity. Returns note
-// IDs + similarity scores — the frontend resolves these to actual note objects.
+
+// ─── Hybrid Search (David) ───────────────────────────────────────────────────
+// Full-text search via SQLite FTS5 + BM25 ranking. Each term is prefix-matched
+// (guitar* → guitars, guitarist). Returns note IDs + normalised scores.
+// The frontend resolves IDs to node objects for the graph dropdown.
 
 /**
- * Search notes semantically via Gemini embeddings.
- * Returns: { query, total_searched, results: [{ id, similarity }] }
+ * Search notes using FTS5 BM25 hybrid search.
+ * Returns: { query, total_searched, results: [{ id, title, tags, summary, score }] }
  */
-export async function smartSearch(query, topK = 8) {
-  const res = await fetch(`${API_BASE}/search/smart`, {
+export async function hybridSearch(query, topK = 8) {
+  const res = await fetch(`${API_BASE}/search/hybrid`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, topK })
   })
-  if (!res.ok) throw new Error('Smart search failed')
+  if (!res.ok) throw new Error('Hybrid search failed')
   return res.json()
 }
 

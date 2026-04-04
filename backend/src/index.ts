@@ -9,7 +9,7 @@ import { ApiGetWhoAmI } from "./api/api_whoami_get.js";
 
 // ── David's routes ────────────────────────────────────────────────────────────
 import analyzeRouter from "./routes/analyze.js";
-import smartSearchRouter from "./routes/smartSearch.js";
+import hybridSearchRouter from "./routes/hybridSearch.js";
 
 export const ExpressApp = express();
 const PORT = 3000;
@@ -22,9 +22,9 @@ ExpressApp.get("/api/health", (req: Request, res: Response) => {
 	res.json({ status: "ok", message: "Server is running" });
 });
 
-// ── Gemini routes (David) ─────────────────────────────────────────────────────
+// ── David's routes ────────────────────────────────────────────────────────────
 ExpressApp.use("/api", analyzeRouter);
-ExpressApp.use("/api", smartSearchRouter);
+ExpressApp.use("/api", hybridSearchRouter);
 
 ExpressApp.get("/", (req: Request, res: Response) => {
 	res.send("Hello from TypeScript + Express 🚀");

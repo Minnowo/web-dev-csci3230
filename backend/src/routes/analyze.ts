@@ -6,14 +6,10 @@
 //   - sentiment_score: number    (-1.0 very negative → 1.0 very positive)
 //   - summary       : string     (≤15 word sentence)
 //
-// Then generates a semantic embedding for the note using gemini-embedding-001
-// and upserts it into the note_embeddings table for later smart search.
-//
 // Requires GEMINI_API_KEY in the environment.
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import express, { type Request, type Response } from "express";
-import { DB } from "../db/db.js";
 
 const router = express.Router();
 
@@ -80,39 +76,11 @@ ${content}
 			});
 		}
 
-		// ── Step 2: Generate embedding via gemini-embedding-001 ───────────────
-		// We embed title + summary + tags + content together for the richest
-		// semantic representation of the note.
-		const embeddingInput = [title, summary, tags.join(", "), content]
-			.filter(Boolean)
-			.join(" | ");
-
-		const embeddingModel = genAI.getGenerativeModel({
-			model: "gemini-embedding-001",
-		});
-		const embeddingResult = await embeddingModel.embedContent(embeddingInput);
-		const embedding: number[] = embeddingResult.embedding.values;
-
-		// ── Step 3: Upsert embedding into SQLite ──────────────────────────────
-		// Stored as a JSON string since SQLite has no vector type.
-		// Cosine similarity is computed in JS at search time (see smartSearch.ts).
-		const db = DB.Instance().DB();
-		db.prepare(`
-			INSERT INTO note_embeddings (note_id, embedding, updated_at)
-			VALUES (?, ?, unixepoch())
-			ON CONFLICT (note_id) DO UPDATE
-				SET embedding  = excluded.embedding,
-				    updated_at = unixepoch()
-		`).run(id, JSON.stringify(embedding));
-
-		console.log(`✓ Embedding saved for note ${id} (${embedding.length} dims)`);
-
 		return res.json({
 			id,
 			tags,
 			sentiment_score,
 			summary,
-			embedding_dims: embedding.length,
 		});
 	} catch (err) {
 		console.error("Analyze route error:", err);
