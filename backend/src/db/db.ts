@@ -107,7 +107,7 @@ export class DB {
 				"SELECT ID, TITLE, UPDATED FROM DB_NOTES WHERE USER_ID = ? ORDER BY UPDATED DESC",
 			);
 
-			const rows = stmt.all(userId) as Note[];
+			const rows = stmt.all(userId) as NoteListItem[];
 
 			return { data: rows, error: null};				
 		} catch (err) {

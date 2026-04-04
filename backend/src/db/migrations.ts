@@ -101,6 +101,41 @@ const migrate_2: MigrationFunc = (
 	return null;
 };
 
+// ── Migration 2 (David) ───────────────────────────────────────────────────────
+// Creates the note_embeddings table used for Gemini semantic search.
+// Embeddings are stored as a JSON-stringified float array (TEXT) since SQLite
+// has no native vector type. Cosine similarity is computed in JavaScript at
+// query time — acceptable for the scale of this project (~hundreds of notes).
+const migrate_3: MigrationFunc = (
+	database: DB,
+	fromVersion: number,
+	toVersion: number,
+) => {
+	const db = database.DB();
+
+	try {
+		const tx = db.transaction(() => {
+			db.exec(`
+				CREATE TABLE IF NOT EXISTS note_embeddings (
+					note_id    TEXT    PRIMARY KEY NOT NULL,
+					embedding  TEXT    NOT NULL,
+					updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+				)
+			`);
+
+			db.prepare(
+				"UPDATE DB_VERSION SET VERSION = ? WHERE VERSION = ?",
+			).run(toVersion, fromVersion);
+		});
+
+		tx();
+	} catch (err) {
+		return DBError.from(err);
+	}
+
+	return null;
+};
+
 export const Migrations: Array<{
 	fromVersion: number;
 	toVersion: number;
@@ -109,4 +144,5 @@ export const Migrations: Array<{
 	{ fromVersion: 0, toVersion: 1, func: migrate_0 },
 	{ fromVersion: 1, toVersion: 2, func: migrate_1 },
 	{ fromVersion: 2, toVersion: 3, func: migrate_2 },
+	{ fromVersion: 3, toVersion: 4, func: migrate_3 },
 ];
