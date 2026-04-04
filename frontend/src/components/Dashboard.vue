@@ -2,7 +2,7 @@
   <div class="flex flex-col min-h-[calc(100vh-48px)]">
     <!-- Actions -->
     <div class="flex flex-col items-center justify-center gap-3 flex-1">
-      <AppButton label="Create Note">
+      <AppButton label="Create Note" @click="handleCreateNote">
         <template #icon><CirclePlus /></template>
       </AppButton>
       <AppButton label="Search Notes">
@@ -17,7 +17,12 @@
           <Clock class="w-4 h-4" /> Recently visited
         </h2>
 
-        <div class="relative">
+        <!-- Empty state -->
+        <p v-if="recentFiles.length === 0" class="text-sm text-[var(--text-muted)]">
+          No notes yet — create your first note above.
+        </p>
+
+        <div v-else class="relative">
           <!-- Left arrow -->
           <button
             v-if="canScrollLeft"
@@ -29,8 +34,17 @@
 
           <!-- Scroll container -->
           <div ref="scrollRef" class="flex gap-3 overflow-x-auto scrollbar-hide" @scroll="updateScroll">
-            <NoteCard v-for="card in cards" :key="card.title" :title="card.title" :date="card.date" class="shrink-0 w-[calc(25%-9px)]">
-              <template #icon><component :is="card.icon" /></template>
+            <NoteCard
+              v-for="file in recentFiles"
+              :key="file.id"
+              :title="file.name"
+              :date="file.lastVisitedAt || file.updatedAt"
+              class="shrink-0 w-[calc(25%-9px)]"
+              @click="openNote(file.id)"
+            >
+              <template #icon>
+                <component :is="resolveIcon(file.icon || 'FileText')" />
+              </template>
             </NoteCard>
           </div>
 
@@ -50,20 +64,25 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
-import { CirclePlus, Search, Clock, ChevronLeft, ChevronRight, FileText, Lightbulb, BookOpen, Target, CalendarCheck, List, Pen, Layers } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+import { CirclePlus, Search, Clock, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import AppButton from './AppButton.vue'
 import NoteCard from './NoteCard.vue'
+import { useEditorStore } from '../composables/useEditorStore'
+import { resolveIcon } from './editor/iconMap.js'
 
-const cards = [
-  { title: 'Meeting Notes',            date: '2026-03-24', icon: FileText      },
-  { title: 'Project Ideas',            date: '2026-03-23', icon: Lightbulb     },
-  { title: 'Research Paper',           date: '2026-03-22', icon: BookOpen      },
-  { title: 'Goals 2026',               date: '2026-03-20', icon: Target        },
-  { title: 'Weekly Review',            date: '2026-03-19', icon: CalendarCheck },
-  { title: 'Reading List',             date: '2026-03-18', icon: List          },
-  { title: 'Design Notes',             date: '2026-03-17', icon: Pen           },
-  { title: 'Sprint Plan',              date: '2026-03-15', icon: Layers        },
-]
+const router = useRouter()
+const { createFile, setActiveFile, recentFiles } = useEditorStore()
+
+function handleCreateNote() {
+  createFile()
+  router.push('/editor')
+}
+
+function openNote(id) {
+  setActiveFile(id)
+  router.push('/editor')
+}
 
 const scrollRef = ref(null)
 const canScrollLeft = ref(false)
@@ -71,6 +90,7 @@ const canScrollRight = ref(false)
 
 function updateScroll() {
   const el = scrollRef.value
+  if (!el) return
   canScrollLeft.value = el.scrollLeft > 0
   canScrollRight.value = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
 }
