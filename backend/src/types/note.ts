@@ -7,3 +7,9 @@ export type Note = {
 	UPDATED: string;
 };
 
+export type NoteListItem = {
+	ID: number;
+	TITLE: string;
+	UPDATED: string;
+};
+

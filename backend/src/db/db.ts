@@ -3,7 +3,7 @@ import { DBError } from "./errors.js";
 import { Migrations } from "./migrations.js";
 import crypto from "crypto";
 import type { User } from "../types/user.js";
-import type { Note } from "../types/note.js";
+import type { Note, NoteListItem } from "../types/note.js";
 
 export type Result<T> =
 	| { data: T; error: null }
@@ -101,10 +101,10 @@ export class DB {
 		}	
 	}
 
-	public GetNotes(userId: number): Result<Note[]> {
+	public GetNotesList(userId: number): Result<NoteListItem[]> {
 		try {
 			const stmt = this.db.prepare(
-				"SELECT ID, USER_ID, TITLE, CONTENT, CREATED, UPDATED FROM DB_NOTES WHERE USER_ID = ?",
+				"SELECT ID, TITLE, UPDATED FROM DB_NOTES WHERE USER_ID = ? ORDER BY UPDATED DESC",
 			);
 
 			const rows = stmt.all(userId) as Note[];
