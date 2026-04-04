@@ -2,7 +2,7 @@
   <div class="flex flex-col min-h-[calc(100vh-48px)]">
     <!-- Actions -->
     <div class="flex flex-col items-center justify-center gap-3 flex-1">
-      <AppButton label="Create Note">
+      <AppButton label="Create Note" @click="handleCreateNote">
         <template #icon><CirclePlus /></template>
       </AppButton>
       <AppButton label="Search Notes">
@@ -50,9 +50,19 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { CirclePlus, Search, Clock, ChevronLeft, ChevronRight, FileText, Lightbulb, BookOpen, Target, CalendarCheck, List, Pen, Layers } from 'lucide-vue-next'
 import AppButton from './AppButton.vue'
 import NoteCard from './NoteCard.vue'
+import { useEditorStore } from '../composables/useEditorStore'
+
+const router = useRouter()
+const { createFile } = useEditorStore()
+
+function handleCreateNote() {
+  createFile()
+  router.push('/editor')
+}
 
 const cards = [
   { title: 'Meeting Notes',            date: '2026-03-24', icon: FileText      },
