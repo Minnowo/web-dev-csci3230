@@ -532,7 +532,7 @@ onUnmounted(() => { if (simulation) simulation.stop() })
         :style="{ left: tooltipX + 'px', top: tooltipY + 'px' }"
       >
         <p class="font-semibold text-white mb-1">{{ hoveredNode.title }}</p>
-        <p class="text-gray-400 text-xs mb-2">{{ hoveredNode.summary }}</p>
+        <p class="text-gray-400 text-xs mb-2">{{ hoveredNode.tags.join(', ') }}</p>
         <div class="flex flex-wrap gap-1 mb-2">
           <span
             v-for="tag in hoveredNode.tags" :key="tag"

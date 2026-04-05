@@ -66,11 +66,46 @@ const migrate_1: MigrationFunc = (
 	return null;
 };
 
-// ── Migration 2 (David) ───────────────────────────────────────────────────────
+const migrate_2: MigrationFunc = (
+	database: DB,
+	fromVersion: number,
+	toVersion: number,
+) => {
+    const db = database.DB();
+
+	try {
+		const tx = db.transaction (() => {
+			db.exec(
+				`CREATE TABLE IF NOT EXISTS DB_NOTES (
+					ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+					USER_ID INTEGER NOT NULL,
+					TITLE TEXT NOT NULL,
+					CONTENT TEXT NOT NULL DEFAULT "",
+					CREATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					UPDATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					FOREIGN KEY (USER_ID) REFERENCES DB_USER(ID) ON DELETE CASCADE
+				)`
+			);
+			
+			db.prepare(
+				"UPDATE DB_VERSION SET VERSION = ? WHERE VERSION = ?",
+			).run(toVersion, fromVersion);
+		});
+
+		tx();
+		
+	} catch (err) {
+		return DBError.from(err);
+	}
+
+	return null;
+};
+
+// ── Migration 3 (David) ───────────────────────────────────────────────────────
 // Creates the notes_fts FTS5 virtual table for hybrid keyword search.
 // Porter stemmer: "running" and "run" match the same note.
-// Field weights via bm25(): title=10×, tags=5×, summary=3×, content=1×.
-const migrate_2: MigrationFunc = (
+// Field weights via bm25(): title=10×, tags=5×, content=1×.
+const migrate_3: MigrationFunc = (
 	database: DB,
 	fromVersion: number,
 	toVersion: number,
@@ -84,7 +119,6 @@ const migrate_2: MigrationFunc = (
 					note_id  UNINDEXED,
 					title,
 					tags,
-					summary,
 					content,
 					tokenize = 'porter ascii'
 				)
@@ -111,4 +145,5 @@ export const Migrations: Array<{
 	{ fromVersion: 0, toVersion: 1, func: migrate_0 },
 	{ fromVersion: 1, toVersion: 2, func: migrate_1 },
 	{ fromVersion: 2, toVersion: 3, func: migrate_2 },
+	{ fromVersion: 3, toVersion: 4, func: migrate_3 },
 ];

@@ -24,7 +24,25 @@
         type="text"
         placeholder="Search notes..."
         class="search-input"
+        @focus="showDropdown = hybridResults.length > 0"
+        @blur="closeDropdown"
       />
+      <span v-if="searchLoading" class="search-loading">searching...</span>
+
+      <!-- Hybrid search dropdown -->
+      <div
+        v-if="showDropdown && hybridResults.length > 0"
+        class="search-dropdown"
+      >
+        <button
+          v-for="result in hybridResults"
+          :key="result.id"
+          class="search-result"
+          @mousedown.prevent="selectHybridResult(result)"
+        >
+          <span class="result-title">{{ result.title }}</span>
+        </button>
+      </div>
     </div>
 
     <!-- File tree -->
@@ -63,9 +81,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Home, Plus, FolderPlus, Search } from 'lucide-vue-next'
 import TreeItem from './TreeItem.vue'
+import { hybridSearch } from '../../services/api.js'
 
 const props = defineProps({
   items: { type: Array, required: true },
@@ -76,14 +95,57 @@ const props = defineProps({
   searchItems: { type: Function, required: true },
 })
 
-defineEmits(['createFile', 'createFolder', 'selectFile', 'deleteItem', 'renameItem'])
+const emit = defineEmits(['createFile', 'createFolder', 'selectFile', 'deleteItem', 'renameItem'])
 
 const searchQuery = ref('')
 
+// ─── Local name-only filter (instant, existing behavior) ─────────────────────
 const searchResults = computed(() => {
   if (!searchQuery.value) return []
   return props.searchItems(searchQuery.value)
 })
+
+// ─── Hybrid search (debounced backend call, same pattern as GraphView) ───────
+const hybridResults = ref([])
+const showDropdown = ref(false)
+const searchLoading = ref(false)
+let searchDebounce = null
+
+watch(searchQuery, (query) => {
+  if (searchDebounce) clearTimeout(searchDebounce)
+
+  if (!query || query.trim().length === 0) {
+    hybridResults.value = []
+    showDropdown.value = false
+    return
+  }
+
+  searchDebounce = setTimeout(async () => {
+    searchLoading.value = true
+    try {
+      const res = await hybridSearch(query.trim(), 8)
+      hybridResults.value = res.results
+      showDropdown.value = hybridResults.value.length > 0
+    } catch (err) {
+      console.warn('Hybrid search unavailable, using local filter:', err.message)
+      hybridResults.value = []
+      showDropdown.value = false
+    } finally {
+      searchLoading.value = false
+    }
+  }, 500)
+})
+
+function selectHybridResult(result) {
+  emit('selectFile', result.id)
+  searchQuery.value = ''
+  hybridResults.value = []
+  showDropdown.value = false
+}
+
+function closeDropdown() {
+  setTimeout(() => { showDropdown.value = false }, 200)
+}
 </script>
 
 <style scoped>
@@ -193,5 +255,67 @@ const searchResults = computed(() => {
   font-size: 11px;
   color: var(--text-muted);
   border-top: 1px solid var(--border);
+}
+.search-loading {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: -4px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 12px;
+  right: 12px;
+  margin-top: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  z-index: 50;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.search-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s, color 0.12s;
+}
+.search-result:last-child {
+  border-bottom: none;
+}
+.search-result:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.result-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.result-score {
+  flex-shrink: 0;
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
 }
 </style>

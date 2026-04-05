@@ -3,7 +3,7 @@
 //
 // Full-text search using SQLite FTS5 with BM25 ranking and Porter stemming.
 // Each query term is prefix-matched (guitar* matches guitars, guitarist).
-// Field weights: title=10×, tags=5×, summary=3×, content=1×.
+// Field weights: title=10×, tags=5×, content=1×.
 // BM25 returns negative values — most negative = best match.
 // Scores are normalised to 0–1 before returning to the frontend.
 
@@ -39,7 +39,6 @@ router.post("/search/hybrid", (req: Request, res: Response) => {
 			note_id: string;
 			title: string;
 			tags: string;
-			summary: string;
 			rank: number;
 		};
 
@@ -49,8 +48,7 @@ router.post("/search/hybrid", (req: Request, res: Response) => {
 					note_id,
 					title,
 					tags,
-					summary,
-					bm25(notes_fts, 0, 10, 5, 3, 1) AS rank
+					bm25(notes_fts, 0, 10, 5, 1) AS rank
 				FROM notes_fts
 				WHERE notes_fts MATCH ?
 				ORDER BY rank
@@ -74,7 +72,6 @@ router.post("/search/hybrid", (req: Request, res: Response) => {
 			id: r.note_id,
 			title: r.title,
 			tags: r.tags.split(" ").filter((t) => t.length > 0),
-			summary: r.summary,
 			score: (maxScore - r.rank) / range,
 		}));
 
@@ -82,7 +79,7 @@ router.post("/search/hybrid", (req: Request, res: Response) => {
 	} catch (err) {
 		console.error("Hybrid search error:", err);
 		res.status(500).json({
-			error: "Search index unavailable. Run: npx tsx scripts/seedFTS.ts",
+			error: "Search index unavailable",
 		});
 	}
 });
