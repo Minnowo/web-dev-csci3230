@@ -6,6 +6,11 @@ import { ApiPostLogin } from "./api/api_login_post.js";
 import { ApiPostCreateUser } from "./api/api_create_user_post.js";
 import { MiddleWareAuthenticateToken } from "./middleware/auth.js";
 import { ApiGetWhoAmI } from "./api/api_whoami_get.js";
+import { ApiGetNote } from "./api/api_note_get.js";
+import { ApiGetNotesList } from "./api/api_notes_list_get.js";
+import { ApiPostCreateNote } from "./api/api_create_note_post.js";
+import { ApiPostUpdateNote } from "./api/api_update_note_post.js";
+import { ApiPostDeleteNote } from "./api/api_delete_note_post.js";
 
 // ── David's routes ────────────────────────────────────────────────────────────
 import analyzeRouter from "./routes/analyze.js";
@@ -35,6 +40,13 @@ ExpressApp.get("/", (req: Request, res: Response) => {
 ExpressApp.post("/api/login", ApiPostLogin);
 ExpressApp.post("/api/register", ApiPostCreateUser);
 ExpressApp.get("/api/whoami", MiddleWareAuthenticateToken, ApiGetWhoAmI);
+
+// API endpoints for notes
+ExpressApp.get("/api/notes", MiddleWareAuthenticateToken, ApiGetNotesList);
+ExpressApp.post("/api/notes", MiddleWareAuthenticateToken, ApiPostCreateNote);
+ExpressApp.get("/api/notes/:id", MiddleWareAuthenticateToken, ApiGetNote);
+ExpressApp.post("/api/notes/:id/update", MiddleWareAuthenticateToken, ApiPostUpdateNote);
+ExpressApp.post("/api/notes/:id/delete", MiddleWareAuthenticateToken, ApiPostDeleteNote);
 
 ExpressApp.listen(PORT, () => {
 	console.log(`Server running at http://localhost:${PORT}`);
