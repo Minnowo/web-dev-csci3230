@@ -4,16 +4,11 @@
 // Accepts a note's title + content, calls Gemini to produce:
 //   - tags          : string[]   (3-6 short topic tags)
 //   - sentiment_score: number    (-1.0 very negative → 1.0 very positive)
-//   - summary       : string     (≤15 word sentence)
-//
-// Then generates a semantic embedding for the note using gemini-embedding-001
-// and upserts it into the note_embeddings table for later smart search.
 //
 // Requires GEMINI_API_KEY in the environment.
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import express, { type Request, type Response } from "express";
-import { DB } from "../db/db.js";
 
 const router = express.Router();
 
@@ -35,15 +30,14 @@ router.post("/notes/:id/analyze", async (req: Request, res: Response) => {
 
 		const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-		// ── Step 1: Tags + Sentiment + Summary via gemini-2.5-flash ──────────
+		// ── Step 1: Tags + Sentiment via gemini-2.5-flash ───────────────────
 		// We ask the model to return structured JSON so we can parse it reliably.
 		const prompt = `
 You are an assistant that analyzes personal notes.
 
-Given the following note content, return a JSON object with exactly these three fields:
+Given the following note content, return a JSON object with exactly these two fields:
 1. "tags": an array of 3-6 short, lowercase topic tags (e.g. ["work", "planning", "ideas"])
 2. "sentiment_score": a float between -1.0 (very negative) and 1.0 (very positive) representing the emotional tone of the note
-3. "summary": a single sentence (max 15 words) summarizing the note
 
 Return ONLY valid JSON. No explanation. No markdown. No code blocks.
 
@@ -57,7 +51,7 @@ ${content}
 		const result = await model.generateContent(prompt);
 		const text = result.response.text().trim();
 
-		let parsed: { tags: string[]; sentiment_score: number; summary: string };
+		let parsed: { tags: string[]; sentiment_score: number };
 		try {
 			parsed = JSON.parse(text);
 		} catch {
@@ -67,12 +61,11 @@ ${content}
 				.json({ error: "Failed to parse Gemini response", raw: text });
 		}
 
-		const { tags, sentiment_score, summary } = parsed;
+		const { tags, sentiment_score } = parsed;
 
 		if (
 			!Array.isArray(tags) ||
-			typeof sentiment_score !== "number" ||
-			typeof summary !== "string"
+			typeof sentiment_score !== "number"
 		) {
 			return res.status(500).json({
 				error: "Unexpected response shape from Gemini",
@@ -80,39 +73,10 @@ ${content}
 			});
 		}
 
-		// ── Step 2: Generate embedding via gemini-embedding-001 ───────────────
-		// We embed title + summary + tags + content together for the richest
-		// semantic representation of the note.
-		const embeddingInput = [title, summary, tags.join(", "), content]
-			.filter(Boolean)
-			.join(" | ");
-
-		const embeddingModel = genAI.getGenerativeModel({
-			model: "gemini-embedding-001",
-		});
-		const embeddingResult = await embeddingModel.embedContent(embeddingInput);
-		const embedding: number[] = embeddingResult.embedding.values;
-
-		// ── Step 3: Upsert embedding into SQLite ──────────────────────────────
-		// Stored as a JSON string since SQLite has no vector type.
-		// Cosine similarity is computed in JS at search time (see smartSearch.ts).
-		const db = DB.Instance().DB();
-		db.prepare(`
-			INSERT INTO note_embeddings (note_id, embedding, updated_at)
-			VALUES (?, ?, unixepoch())
-			ON CONFLICT (note_id) DO UPDATE
-				SET embedding  = excluded.embedding,
-				    updated_at = unixepoch()
-		`).run(id, JSON.stringify(embedding));
-
-		console.log(`✓ Embedding saved for note ${id} (${embedding.length} dims)`);
-
 		return res.json({
 			id,
 			tags,
 			sentiment_score,
-			summary,
-			embedding_dims: embedding.length,
 		});
 	} catch (err) {
 		console.error("Analyze route error:", err);

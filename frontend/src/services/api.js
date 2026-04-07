@@ -8,7 +8,7 @@ const API_BASE = 'http://localhost:3000/api'
 
 /**
  * Fetch all notes.
- * Returns: [{ id, title, content, tags, sentiment_score, summary, created_at, updated_at }]
+ * Returns: [{ id, title, content, tags, sentiment_score, created_at, updated_at }]
  */
 export async function getNotes() {
   if (USE_MOCK) return mockNotes
@@ -30,17 +30,15 @@ export async function getNote(id) {
 // ─── Gemini Analysis ──────────────────────────────────────────────────────────
 
 /**
- * Analyze a note with Gemini — returns tags, sentiment_score, summary.
+ * Analyze a note with Gemini — returns tags, sentiment_score.
  * Called after a note is saved.
  */
 export async function analyzeNote(id, content) {
   if (USE_MOCK) {
-    // Simulate a short delay like a real API call
     await new Promise(r => setTimeout(r, 500))
     return {
       tags: ['work', 'planning'],
       sentiment_score: 0.6,
-      summary: 'A mock summary for development purposes.'
     }
   }
   const res = await fetch(`${API_BASE}/notes/${id}/analyze`, {
@@ -52,22 +50,51 @@ export async function analyzeNote(id, content) {
   return res.json()
 }
 
-// ─── Smart Search (David) ────────────────────────────────────────────────────
-// Semantic search using Gemini embeddings. Sends the query to the backend which
-// embeds it and finds the most similar notes by cosine similarity. Returns note
-// IDs + similarity scores — the frontend resolves these to actual note objects.
+
+// ─── Hybrid Search (David) ───────────────────────────────────────────────────
+// Full-text search via SQLite FTS5 + BM25 ranking. Each term is prefix-matched
+// (guitar* → guitars, guitarist). Returns note IDs + normalised scores.
+// The frontend resolves IDs to node objects for the graph dropdown.
 
 /**
- * Search notes semantically via Gemini embeddings.
- * Returns: { query, total_searched, results: [{ id, similarity }] }
+ * Search notes using FTS5 BM25 hybrid search.
+ * Returns: { query, total_searched, results: [{ id, title, tags, score }] }
  */
-export async function smartSearch(query, topK = 8) {
-  const res = await fetch(`${API_BASE}/search/smart`, {
+export async function hybridSearch(query, topK = 8) {
+  const res = await fetch(`${API_BASE}/search/hybrid`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, topK })
   })
-  if (!res.ok) throw new Error('Smart search failed')
+  if (!res.ok) throw new Error('Hybrid search failed')
+  return res.json()
+}
+
+// ─── Note Indexing (FTS) ────────────────────────────────────────────────────
+// Upsert / remove a note from the FTS5 search index.
+// Called by the editor store when notes are saved or deleted.
+
+/**
+ * Upsert a note into the FTS5 index.
+ */
+export async function indexNote(id, { title = '', tags = '', content = '' } = {}) {
+  const res = await fetch(`${API_BASE}/notes/${id}/index`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, tags, content })
+  })
+  if (!res.ok) throw new Error('Failed to index note')
+  return res.json()
+}
+
+/**
+ * Remove a note from the FTS5 index.
+ */
+export async function deleteNoteIndex(id) {
+  const res = await fetch(`${API_BASE}/notes/${id}/index`, {
+    method: 'DELETE'
+  })
+  if (!res.ok) throw new Error('Failed to remove note from index')
   return res.json()
 }
 
@@ -113,7 +140,6 @@ export function buildGraphData(notes) {
     id: n.id,
     title: n.title,
     tags: n.tags,
-    summary: n.summary,
     updated_at: n.updated_at,
     connectionCount: connectionCount[n.id],
     dominantTag: n.tags[0] ?? 'untagged'

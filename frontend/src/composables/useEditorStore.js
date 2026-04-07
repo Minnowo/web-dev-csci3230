@@ -25,8 +25,22 @@
  */
 
 import { reactive, computed, watch } from 'vue'
+import { indexNote, deleteNoteIndex } from '../services/api.js'
 
 const STORAGE_KEY = 'graphnotes-vault'
+
+// ─── FTS index sync (debounced to avoid firing on every keystroke) ────────────
+let indexDebounceTimer = null
+const INDEX_DEBOUNCE_MS = 1000
+
+function debouncedIndexNote(id, name, content) {
+  if (indexDebounceTimer) clearTimeout(indexDebounceTimer)
+  indexDebounceTimer = setTimeout(() => {
+    indexNote(id, { title: name, content }).catch(err => {
+      console.warn('Failed to index note:', err.message)
+    })
+  }, INDEX_DEBOUNCE_MS)
+}
 
 // ─── Temporary localStorage helpers (remove when backend is connected) ────────
 
@@ -49,17 +63,26 @@ function createDefaultData() {
   // TODO: Remove this entire function once loadFromStorage() calls the real API.
   // This only exists to seed the UI with sample data during local development.
   const folderId = generateId()
-  const file1Id = generateId()
-  const file2Id = generateId()
+  const ids = Array.from({ length: 12 }, () => generateId())
   const now = new Date().toISOString()
 
   return {
     items: [
-      { id: file1Id, name: 'test text', content: 'hello world', parentId: null, type: 'file', icon: 'FileText', updatedAt: now, lastVisitedAt: now },
-      { id: folderId, name: 'New Folder', parentId: null, type: 'folder', updatedAt: now },
-      { id: file2Id, name: 'text in folder', content: '# this is an h1', parentId: folderId, type: 'file', icon: 'Lightbulb', updatedAt: now, lastVisitedAt: null },
+      { id: ids[0], name: 'Meeting Notes', content: 'Discussed the new dashboard layout with the team. We agreed on a sidebar navigation pattern and will use D3 for the graph visualization. Next sprint starts Monday.', parentId: null, type: 'file', icon: 'FileText', updatedAt: now, lastVisitedAt: now },
+      { id: ids[1], name: 'Recipe Collection', content: 'Grandmas pasta sauce recipe: tomatoes, garlic, basil, olive oil. Simmer for two hours on low heat. Add parmesan at the end. Perfect for Sunday dinners.', parentId: null, type: 'file', icon: 'FileText', updatedAt: now, lastVisitedAt: null },
+      { id: folderId, name: 'Project Notes', parentId: null, type: 'folder', updatedAt: now },
+      { id: ids[2], name: 'Backend Architecture', content: 'The backend uses Express with TypeScript and SQLite. Authentication is handled via JWT tokens. We have a migration system for database schema changes.', parentId: folderId, type: 'file', icon: 'Lightbulb', updatedAt: now, lastVisitedAt: null },
+      { id: ids[3], name: 'Frontend Components', content: 'Vue 3 composition API with reactive stores. Editor uses contenteditable div with markdown conversion. Sidebar has a recursive tree for nested folders.', parentId: folderId, type: 'file', icon: 'Lightbulb', updatedAt: now, lastVisitedAt: null },
+      { id: ids[4], name: 'Workout Plan', content: 'Monday: chest and triceps. Wednesday: back and biceps. Friday: legs and shoulders. Run three times a week for cardio. Rest on weekends.', parentId: null, type: 'file', icon: 'FileText', updatedAt: now, lastVisitedAt: null },
+      { id: ids[5], name: 'Book Recommendations', content: 'Clean Code by Robert Martin. Designing Data Intensive Applications by Martin Kleppmann. The Pragmatic Programmer by Hunt and Thomas. All great for software engineering.', parentId: null, type: 'file', icon: 'FileText', updatedAt: now, lastVisitedAt: null },
+      { id: ids[6], name: 'Sprint Retro', content: 'The team discussed what went well with the dashboard sprint. Frontend components are solid but the backend migration took longer than expected. Need better testing next sprint.', parentId: folderId, type: 'file', icon: 'FileText', updatedAt: now, lastVisitedAt: null },
+      { id: ids[7], name: 'Database Design', content: 'SQLite with FTS5 for full-text search. Migration system handles schema versioning. Backend stores notes with title and content. TypeScript types keep the API layer clean.', parentId: folderId, type: 'file', icon: 'Lightbulb', updatedAt: now, lastVisitedAt: null },
+      { id: ids[8], name: 'Cooking Journal', content: 'Tried a new pasta recipe tonight with garlic bread on the side. The sauce needed more basil. Sunday dinners are becoming a tradition.', parentId: null, type: 'file', icon: 'FileText', updatedAt: now, lastVisitedAt: null },
+      { id: ids[9], name: 'Running Log', content: 'Ran five kilometers today. Cardio is improving since starting the workout plan. Legs were sore from Friday but pushed through.', parentId: null, type: 'file', icon: 'FileText', updatedAt: now, lastVisitedAt: null },
+      { id: ids[10], name: 'Dashboard Wireframe', content: 'Sketched the sidebar navigation and graph visualization layout. D3 force simulation for the node graph. Team meeting tomorrow to review the dashboard design.', parentId: folderId, type: 'file', icon: 'Lightbulb', updatedAt: now, lastVisitedAt: null },
+      { id: ids[11], name: 'Reading Notes', content: 'Finished Clean Code chapter on functions. Software engineering principles apply to our frontend components and backend architecture. Good patterns for the team to follow.', parentId: null, type: 'file', icon: 'FileText', updatedAt: now, lastVisitedAt: null },
     ],
-    activeFileId: file1Id,
+    activeFileId: ids[0],
   }
 }
 
@@ -67,6 +90,13 @@ function createDefaultData() {
 
 const saved = loadFromStorage()
 const state = reactive(saved || createDefaultData())
+
+// ─── Index all existing files into FTS on startup ────────────────────────────
+state.items
+  .filter(i => i.type === 'file')
+  .forEach(item => {
+    indexNote(item.id, { title: item.name, content: item.content || '' }).catch(() => {})
+  })
 
 // TODO: Remove this watch block once backend is connected. Currently it auto-saves
 // the entire state to localStorage on every change. With a real backend, each
@@ -145,6 +175,9 @@ export function useEditorStore() {
       icon: 'FileText', updatedAt: new Date().toISOString(), lastVisitedAt: null,
     })
     state.activeFileId = id
+    indexNote(id, { title: name, content: '' }).catch(err => {
+      console.warn('Failed to index new note:', err.message)
+    })
     return id
   }
 
@@ -180,6 +213,7 @@ export function useEditorStore() {
     if (item && item.type === 'file') {
       item.content = content
       item.updatedAt = new Date().toISOString()
+      debouncedIndexNote(id, item.name, content)
     }
   }
 
@@ -211,6 +245,9 @@ export function useEditorStore() {
     if (item) {
       item.name = newName
       item.updatedAt = new Date().toISOString()
+      if (item.type === 'file') {
+        debouncedIndexNote(id, newName, item.content || '')
+      }
     }
   }
 
@@ -226,6 +263,13 @@ export function useEditorStore() {
    * If the deleted item was the active file, open the next available file.
    */
   function deleteItem(id) {
+    // Remove from FTS index (fire-and-forget)
+    const item = state.items.find(i => i.id === id)
+    if (item && item.type === 'file') {
+      deleteNoteIndex(id).catch(err => {
+        console.warn('Failed to remove note from index:', err.message)
+      })
+    }
     // Recursively delete children client-side (remove this if backend cascades)
     const children = state.items.filter(i => i.parentId === id)
     children.forEach(c => deleteItem(c.id))

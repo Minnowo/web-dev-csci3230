@@ -5,7 +5,6 @@ export const mockNotes = [
     content: "Had a great meeting today. We finalized the project plan and everyone seems motivated. Next steps are clear and the team is aligned.",
     tags: ["engineering","leadership"],
     sentiment_score: 0.9,
-    summary: "A successful meeting finalized the project plan, leaving the team motivated and aligned.",
     created_at: "2026-01-05T09:00:00Z",
     updated_at: "2026-01-05T10:30:00Z"
   },
@@ -15,7 +14,6 @@ export const mockNotes = [
     content: "Brainstorming new features for the roadmap. Lots of creative ideas on the table. Need to prioritize and cut scope.",
     tags: ["engineering","design"],
     sentiment_score: 0.7,
-    summary: "Brainstorming session generated many creative roadmap ideas needing prioritization.",
     created_at: "2026-01-08T14:00:00Z",
     updated_at: "2026-01-08T15:00:00Z"
   },
@@ -25,7 +23,6 @@ export const mockNotes = [
     content: "Really struggling this week. Deadlines piling up, feeling overwhelmed. Need to find a better way to manage my time.",
     tags: ["wellbeing","reflection"],
     sentiment_score: -0.7,
-    summary: "Feeling overwhelmed by deadlines and struggling with time management this week.",
     created_at: "2026-01-12T20:00:00Z",
     updated_at: "2026-01-12T20:30:00Z"
   },
@@ -35,7 +32,6 @@ export const mockNotes = [
     content: "Started learning D3 today. It's complex but powerful. Force simulations are really interesting for graph visualizations.",
     tags: ["d3","learning"],
     sentiment_score: 0.6,
-    summary: "Began learning D3.js, finding force simulations particularly interesting for graphs.",
     created_at: "2026-01-15T11:00:00Z",
     updated_at: "2026-01-15T13:00:00Z"
   },
@@ -45,7 +41,6 @@ export const mockNotes = [
     content: "Spent time understanding Vue 3 composition API. Much cleaner than options API. Components are easier to reason about.",
     tags: ["vue","design"],
     sentiment_score: 0.8,
-    summary: "Vue 3 composition API feels cleaner and more intuitive than the options API.",
     created_at: "2026-01-18T10:00:00Z",
     updated_at: "2026-01-18T11:30:00Z"
   },
@@ -55,7 +50,6 @@ export const mockNotes = [
     content: "Retrospective went well. Team identified key blockers and agreed on action items. Communication needs improvement.",
     tags: ["leadership","writing"],
     sentiment_score: 0.4,
-    summary: "Sprint retrospective identified blockers and action items with focus on improving communication.",
     created_at: "2026-01-22T15:00:00Z",
     updated_at: "2026-01-22T16:00:00Z"
   },
@@ -65,7 +59,6 @@ export const mockNotes = [
     content: "Noticed I haven't been sleeping well. Work has been consuming everything. Need to set better boundaries and take breaks.",
     tags: ["wellbeing","sleep"],
     sentiment_score: -0.6,
-    summary: "Poor sleep and work-life imbalance are warning signs of approaching burnout.",
     created_at: "2026-01-25T22:00:00Z",
     updated_at: "2026-01-25T22:15:00Z"
   },
@@ -75,7 +68,6 @@ export const mockNotes = [
     content: "Worked through the schema design today. SQLite vs Postgres trade-offs. For this scale, SQLite is probably fine.",
     tags: ["nodejs","databases"],
     sentiment_score: 0.5,
-    summary: "Evaluated SQLite vs Postgres trade-offs, concluding SQLite is sufficient for current scale.",
     created_at: "2026-02-02T09:30:00Z",
     updated_at: "2026-02-02T11:00:00Z"
   },
@@ -85,7 +77,6 @@ export const mockNotes = [
     content: "Best run in weeks. 5km in under 25 minutes. Feeling energized and clear-headed. Exercise really helps with focus.",
     tags: ["fitness","wellbeing"],
     sentiment_score: 0.95,
-    summary: "Excellent 5km run boosted energy and mental clarity significantly.",
     created_at: "2026-02-05T07:00:00Z",
     updated_at: "2026-02-05T07:30:00Z"
   },
@@ -95,7 +86,6 @@ export const mockNotes = [
     content: "Long debate about REST vs GraphQL. Settled on REST for simplicity. Defined core endpoints for the project.",
     tags: ["nodejs","performance"],
     sentiment_score: 0.5,
-    summary: "Team chose REST over GraphQL for simplicity and defined core API endpoints.",
     created_at: "2026-02-08T13:00:00Z",
     updated_at: "2026-02-08T14:30:00Z"
   },
@@ -105,7 +95,6 @@ export const mockNotes = [
     content: "We missed the sprint deadline. Underestimated the complexity of the auth system. Stakeholders are unhappy. Need a better estimation process.",
     tags: ["wellbeing","journaling"],
     sentiment_score: -0.8,
-    summary: "Sprint deadline missed due to underestimated auth complexity, stakeholders are dissatisfied.",
     created_at: "2026-02-12T17:00:00Z",
     updated_at: "2026-02-12T17:30:00Z"
   },
@@ -115,7 +104,6 @@ export const mockNotes = [
     content: "Started reading Deep Work by Cal Newport. Already feeling inspired to restructure my schedule for focused work blocks.",
     tags: ["wellbeing","journaling"],
     sentiment_score: 0.85,
-    summary: "Reading Deep Work is inspiring a schedule restructure around focused work blocks.",
     created_at: "2026-02-15T19:00:00Z",
     updated_at: "2026-02-15T20:00:00Z"
   },
@@ -125,7 +113,6 @@ export const mockNotes = [
     content: "Got the Gemini API working today. The prompt engineering took a while but it's returning clean JSON with tags and sentiment. Really satisfying.",
     tags: ["d3","engineering"],
     sentiment_score: 0.9,
-    summary: "Successfully integrated Gemini API with clean JSON output for tags and sentiment.",
     created_at: "2026-03-01T11:00:00Z",
     updated_at: "2026-03-01T13:00:00Z"
   },
@@ -135,7 +122,6 @@ export const mockNotes = [
     content: "Presenting to the class next week. Nervous about the demo working live. Need to prepare fallback plans and practice more.",
     tags: ["writing","journaling"],
     sentiment_score: -0.4,
-    summary: "Nervousness about upcoming class presentation prompts need for fallback plans and more practice.",
     created_at: "2026-03-05T21:00:00Z",
     updated_at: "2026-03-05T21:30:00Z"
   },
@@ -145,7 +131,6 @@ export const mockNotes = [
     content: "The D3 force graph is finally looking great. Nodes cluster by tag, links show connections. Added zoom and pan. Really proud of this.",
     tags: ["d3","creativity"],
     sentiment_score: 0.95,
-    summary: "D3 force graph with tag clustering, zoom, and pan is working beautifully.",
     created_at: "2026-03-10T16:00:00Z",
     updated_at: "2026-03-10T17:30:00Z"
   },
@@ -155,7 +140,6 @@ export const mockNotes = [
     content: "Good sync with the team today. Everyone is making progress. Ryan has the DB schema ready. Sid's editor is looking solid.",
     tags: ["vue","d3"],
     sentiment_score: 0.8,
-    summary: "Productive team sync with DB schema and editor both progressing well.",
     created_at: "2026-03-15T14:00:00Z",
     updated_at: "2026-03-15T15:00:00Z"
   },
@@ -165,7 +149,6 @@ export const mockNotes = [
     content: "Reviewed my fitness goals for the year. Behind on most of them. Need to be more consistent but not going to be too hard on myself.",
     tags: ["design","leadership"],
     sentiment_score: -0.2,
-    summary: "Fitness goals review reveals being behind schedule, with a resolve to be more consistent.",
     created_at: "2026-03-18T08:00:00Z",
     updated_at: "2026-03-18T08:30:00Z"
   },
@@ -175,7 +158,6 @@ export const mockNotes = [
     content: "Finished the sentiment calendar visualization. The color gradient from red to green looks great. Writing streaks are a nice touch.",
     tags: ["finance","budgeting"],
     sentiment_score: 0.9,
-    summary: "Sentiment calendar with red-to-green gradient and writing streaks is complete.",
     created_at: "2026-03-20T15:00:00Z",
     updated_at: "2026-03-20T16:30:00Z"
   },
@@ -185,7 +167,6 @@ export const mockNotes = [
     content: "Went through Q1 spending. Overspent on subscriptions and eating out. Need a tighter monthly budget going forward.",
     tags: ["reading","engineering"],
     sentiment_score: -0.3,
-    summary: "Q1 budget review reveals overspending on subscriptions and dining.",
     created_at: "2026-01-06T18:00:00Z",
     updated_at: "2026-01-06T18:45:00Z"
   },
@@ -195,7 +176,6 @@ export const mockNotes = [
     content: "Outlined a plan to migrate the codebase to TypeScript. Will take a few sprints but the type safety will be worth it.",
     tags: ["nodejs","databases"],
     sentiment_score: 0.6,
-    summary: "TypeScript migration plan outlined across a few sprints for improved type safety.",
     created_at: "2026-01-09T10:00:00Z",
     updated_at: "2026-01-09T11:30:00Z"
   },
@@ -205,7 +185,6 @@ export const mockNotes = [
     content: "Started a 10-minute morning meditation routine using Headspace. Feels awkward but I'm committing to 30 days.",
     tags: ["fitness","nutrition"],
     sentiment_score: 0.5,
-    summary: "Beginning a 30-day morning meditation routine with Headspace.",
     created_at: "2026-01-10T07:30:00Z",
     updated_at: "2026-01-10T08:00:00Z"
   },
@@ -215,7 +194,6 @@ export const mockNotes = [
     content: "Researched design systems — Material, Ant, Radix. Radix UI primitives seem most flexible for our use case.",
     tags: ["engineering","learning"],
     sentiment_score: 0.6,
-    summary: "Radix UI primitives identified as the most flexible design system option.",
     created_at: "2026-01-13T14:00:00Z",
     updated_at: "2026-01-13T16:00:00Z"
   },
@@ -225,7 +203,6 @@ export const mockNotes = [
     content: "Made homemade ramen from scratch. Broth took 6 hours but it was absolutely worth it. Will definitely do again.",
     tags: ["nodejs","databases"],
     sentiment_score: 0.92,
-    summary: "Homemade ramen from scratch was a time-intensive but deeply satisfying success.",
     created_at: "2026-01-14T20:00:00Z",
     updated_at: "2026-01-14T21:00:00Z"
   },
@@ -235,7 +212,6 @@ export const mockNotes = [
     content: "Our PR review process is too slow. Proposed async reviews with 24h SLA. Team agreed. Will trial next sprint.",
     tags: ["nodejs","performance"],
     sentiment_score: 0.55,
-    summary: "Async PR review with 24h SLA proposed and agreed upon to speed up code reviews.",
     created_at: "2026-01-17T13:00:00Z",
     updated_at: "2026-01-17T14:00:00Z"
   },
@@ -245,7 +221,6 @@ export const mockNotes = [
     content: "Listened to Lex interview a robotics researcher. Fascinating discussion on embodied intelligence and the gap between LLMs and physical world interaction.",
     tags: ["d3","engineering"],
     sentiment_score: 0.75,
-    summary: "Lex Fridman podcast sparked thoughts on embodied intelligence vs LLM limitations.",
     created_at: "2026-01-20T18:30:00Z",
     updated_at: "2026-01-20T19:15:00Z"
   },
@@ -255,7 +230,6 @@ export const mockNotes = [
     content: "Using my watch to track sleep stages. Turns out I'm getting way less deep sleep than I thought. Cutting caffeine after 2pm.",
     tags: ["fitness","habits"],
     sentiment_score: -0.15,
-    summary: "Sleep tracking reveals lack of deep sleep, prompting a caffeine cutoff at 2pm.",
     created_at: "2026-01-23T07:45:00Z",
     updated_at: "2026-01-23T08:15:00Z"
   },
@@ -265,7 +239,6 @@ export const mockNotes = [
     content: "Spent an afternoon comparing React and Vue 3 for a side project. Vue's single-file components and reactivity system feel more ergonomic to me.",
     tags: ["engineering","leadership"],
     sentiment_score: 0.65,
-    summary: "Vue 3 feels more ergonomic than React for single-file component development.",
     created_at: "2026-01-26T15:00:00Z",
     updated_at: "2026-01-26T17:00:00Z"
   },
@@ -275,7 +248,6 @@ export const mockNotes = [
     content: "Hiked the Bruce Trail section near Rattlesnake Point. 12km, stunning views. Exactly the reset I needed after a rough week.",
     tags: ["fitness","wellbeing"],
     sentiment_score: 0.95,
-    summary: "12km Bruce Trail hike provided a much-needed mental reset after a difficult week.",
     created_at: "2026-01-31T16:00:00Z",
     updated_at: "2026-01-31T17:00:00Z"
   },
@@ -285,7 +257,6 @@ export const mockNotes = [
     content: "Got GitHub Actions running for the project. Auto-deploys on merge to main. Linting and tests gate the PR. Big productivity win.",
     tags: ["engineering","testing"],
     sentiment_score: 0.85,
-    summary: "GitHub Actions CI/CD pipeline with auto-deploy and gated PRs is now live.",
     created_at: "2026-02-03T11:00:00Z",
     updated_at: "2026-02-03T13:30:00Z"
   },
@@ -295,7 +266,6 @@ export const mockNotes = [
     content: "Set three financial goals: emergency fund at 3 months expenses, max TFSA contribution, pay off line of credit by December.",
     tags: ["vue","design"],
     sentiment_score: 0.7,
-    summary: "Three clear 2026 financial goals set: emergency fund, TFSA max, and debt payoff.",
     created_at: "2026-02-06T20:00:00Z",
     updated_at: "2026-02-06T20:45:00Z"
   },
@@ -305,7 +275,6 @@ export const mockNotes = [
     content: "Prepping for user interviews tomorrow. Drafted 8 open-ended questions around note-taking habits and pain points. Trying not to lead the witness.",
     tags: ["vue","typescript"],
     sentiment_score: 0.5,
-    summary: "Eight open-ended user interview questions prepared around note-taking pain points.",
     created_at: "2026-02-09T19:00:00Z",
     updated_at: "2026-02-09T20:00:00Z"
   },
@@ -315,7 +284,6 @@ export const mockNotes = [
     content: "Picked up the guitar after six months. Fingers hurt but it felt so good. Working through some fingerpicking patterns.",
     tags: ["travel","journaling"],
     sentiment_score: 0.8,
-    summary: "Returning to guitar after a six-month break with renewed focus on fingerpicking.",
     created_at: "2026-02-11T21:00:00Z",
     updated_at: "2026-02-11T21:45:00Z"
   },
@@ -325,7 +293,6 @@ export const mockNotes = [
     content: "Ran axe on the frontend. 12 violations, mostly missing aria labels and low contrast text. Filed issues for each one.",
     tags: ["vue","design"],
     sentiment_score: -0.1,
-    summary: "Accessibility audit found 12 violations; issues filed for aria labels and contrast problems.",
     created_at: "2026-02-14T10:00:00Z",
     updated_at: "2026-02-14T11:30:00Z"
   },
@@ -335,7 +302,6 @@ export const mockNotes = [
     content: "Starting to plan a Japan trip for fall. Tokyo, Kyoto, Hiroshima. Bullet train pass seems worth it. Budget around $4k CAD.",
     tags: ["design","leadership"],
     sentiment_score: 0.88,
-    summary: "Japan trip planned for fall: Tokyo, Kyoto, Hiroshima on a $4k CAD budget.",
     created_at: "2026-02-16T19:00:00Z",
     updated_at: "2026-02-16T20:30:00Z"
   },
@@ -345,7 +311,6 @@ export const mockNotes = [
     content: "Had a disagreement with a teammate over architecture decisions. Got heated. Sent a follow-up message to clear the air. Feeling better now.",
     tags: ["wellbeing","reflection"],
     sentiment_score: -0.35,
-    summary: "Architecture disagreement with teammate resolved after a follow-up conversation.",
     created_at: "2026-02-18T17:30:00Z",
     updated_at: "2026-02-18T22:00:00Z"
   },
@@ -355,7 +320,6 @@ export const mockNotes = [
     content: "Re-reading The Pragmatic Programmer. The section on orthogonality is hitting differently now that I have more experience. Highly recommend revisiting classics.",
     tags: ["reading","learning"],
     sentiment_score: 0.82,
-    summary: "Revisiting The Pragmatic Programmer reveals new insights on orthogonality with experience.",
     created_at: "2026-02-20T20:00:00Z",
     updated_at: "2026-02-20T21:30:00Z"
   },
@@ -365,7 +329,6 @@ export const mockNotes = [
     content: "Implemented a GTD-style weekly review. 30 minutes every Sunday to clear inbox, review projects, and set priorities. Game changer for clarity.",
     tags: ["wellbeing","meditation"],
     sentiment_score: 0.88,
-    summary: "GTD-style Sunday weekly review implemented for inbox clearing and priority setting.",
     created_at: "2026-02-22T11:00:00Z",
     updated_at: "2026-02-22T11:30:00Z"
   },
@@ -375,7 +338,6 @@ export const mockNotes = [
     content: "Profiled the frontend and found two slow renders. Memoized computed properties and lazy-loaded three routes. Page load cut from 3.2s to 0.9s.",
     tags: ["journaling","reflection"],
     sentiment_score: 0.9,
-    summary: "Frontend profiling and memoization cut page load time from 3.2s to 0.9s.",
     created_at: "2026-02-25T14:00:00Z",
     updated_at: "2026-02-25T16:00:00Z"
   },
@@ -385,7 +347,6 @@ export const mockNotes = [
     content: "Committed to writing at least 3 sentences every night. Not for productivity, just to process the day. Easier than I expected.",
     tags: ["cooking","creativity"],
     sentiment_score: 0.7,
-    summary: "Starting a nightly 3-sentence journaling habit for daily emotional processing.",
     created_at: "2026-02-27T22:00:00Z",
     updated_at: "2026-02-27T22:15:00Z"
   },
@@ -395,7 +356,6 @@ export const mockNotes = [
     content: "Preparing slides and a live demo for next Thursday's stakeholder review. Hoping the data visualizations land well.",
     tags: ["design","leadership"],
     sentiment_score: 0.3,
-    summary: "Preparing stakeholder demo slides and live data visualization walkthrough.",
     created_at: "2026-03-02T18:00:00Z",
     updated_at: "2026-03-02T19:30:00Z"
   },
@@ -405,7 +365,6 @@ export const mockNotes = [
     content: "Studied D3 transition internals today. Understanding the update pattern properly finally clicked — enter, update, exit. Clean animations now.",
     tags: ["d3","creativity"],
     sentiment_score: 0.88,
-    summary: "D3 enter-update-exit transition pattern finally clicked, enabling clean animations.",
     created_at: "2026-03-04T13:00:00Z",
     updated_at: "2026-03-04T15:00:00Z"
   },
@@ -415,7 +374,6 @@ export const mockNotes = [
     content: "First sourdough loaf. Starter took 7 days. The loaf came out dense but it tasted great. Crust was perfect. Will try again with better shaping.",
     tags: ["journaling","leadership"],
     sentiment_score: 0.72,
-    summary: "First sourdough loaf was dense but tasty with a perfect crust; will improve shaping.",
     created_at: "2026-03-06T14:00:00Z",
     updated_at: "2026-03-06T15:00:00Z"
   },
@@ -425,7 +383,6 @@ export const mockNotes = [
     content: "Got feedback that my code is hard to review because commits are too large. Fair point. Will start making smaller, atomic commits.",
     tags: ["journaling","engineering"],
     sentiment_score: -0.25,
-    summary: "Received feedback about large commits; committing to smaller, atomic changes.",
     created_at: "2026-03-07T16:00:00Z",
     updated_at: "2026-03-07T16:30:00Z"
   },
@@ -435,7 +392,6 @@ export const mockNotes = [
     content: "Curated a 3-hour lo-fi + ambient playlist for deep work sessions. Brian Eno's Music for Airports is a revelation.",
     tags: ["cooking","nutrition"],
     sentiment_score: 0.8,
-    summary: "Curated focus playlist featuring lo-fi and Brian Eno ambient music for deep work.",
     created_at: "2026-03-08T10:00:00Z",
     updated_at: "2026-03-08T10:30:00Z"
   },
@@ -445,7 +401,6 @@ export const mockNotes = [
     content: "Built the tag co-occurrence matrix. Sorting by most co-occurring pairs toward top-left makes the patterns obvious immediately.",
     tags: ["engineering","typescript"],
     sentiment_score: 0.85,
-    summary: "Tag co-occurrence matrix sorts by frequency, making topic relationship patterns immediately clear.",
     created_at: "2026-03-09T14:00:00Z",
     updated_at: "2026-03-09T15:30:00Z"
   },
@@ -455,7 +410,6 @@ export const mockNotes = [
     content: "Looked into JR Pass options. 21-day pass is probably overkill. 14-day covers Tokyo-Kyoto-Hiroshima comfortably. Booked in principle.",
     tags: ["nodejs","engineering"],
     sentiment_score: 0.78,
-    summary: "14-day JR Pass identified as optimal for Tokyo-Kyoto-Hiroshima itinerary.",
     created_at: "2026-03-11T20:00:00Z",
     updated_at: "2026-03-11T21:00:00Z"
   },
@@ -465,7 +419,6 @@ export const mockNotes = [
     content: "Drafted a blog post about D3 force simulations. Hard to explain without interactive examples. Considering embedding CodeSandbox demos.",
     tags: ["writing","engineering"],
     sentiment_score: 0.6,
-    summary: "Drafting a D3 force simulation blog post with plans for embedded interactive examples.",
     created_at: "2026-03-12T21:00:00Z",
     updated_at: "2026-03-12T22:30:00Z"
   },
@@ -475,7 +428,6 @@ export const mockNotes = [
     content: "Hit a new deadlift PR today — 160kg. Six months of consistent training paid off. Feeling strong and motivated to keep going.",
     tags: ["fitness","wellbeing"],
     sentiment_score: 0.97,
-    summary: "New 160kg deadlift PR achieved after six months of consistent training.",
     created_at: "2026-03-13T18:00:00Z",
     updated_at: "2026-03-13T18:30:00Z"
   },
@@ -485,7 +437,6 @@ export const mockNotes = [
     content: "Researching low-cost index ETFs for the TFSA. VFV vs XEQT debate. XEQT wins for simplicity and built-in diversification.",
     tags: ["vue","design"],
     sentiment_score: 0.6,
-    summary: "XEQT chosen over VFV for TFSA investing due to simplicity and broader diversification.",
     created_at: "2026-03-14T19:30:00Z",
     updated_at: "2026-03-14T20:30:00Z"
   },
@@ -495,7 +446,6 @@ export const mockNotes = [
     content: "Wrapped up the writing activity chart. Daily and weekly views with animated transitions. The color scale by count is a nice touch.",
     tags: ["d3","creativity"],
     sentiment_score: 0.9,
-    summary: "Writing activity chart with daily/weekly animated views and count color scale complete.",
     created_at: "2026-03-16T15:00:00Z",
     updated_at: "2026-03-16T16:00:00Z"
   },
@@ -505,7 +455,6 @@ export const mockNotes = [
     content: "Great call with my mentor. He pushed back on my plan to rewrite the whole backend. Start with tests, then refactor incrementally. Wise advice.",
     tags: ["journaling","learning"],
     sentiment_score: 0.8,
-    summary: "Mentor advised incremental refactoring with tests rather than a full backend rewrite.",
     created_at: "2026-03-17T11:00:00Z",
     updated_at: "2026-03-17T12:00:00Z"
   },
@@ -515,7 +464,6 @@ export const mockNotes = [
     content: "Finished Atomic Habits. The identity-based habits framing is powerful — focus on being the type of person who does the thing, not just doing it.",
     tags: ["reading","productivity"],
     sentiment_score: 0.88,
-    summary: "Atomic Habits identity-based habit framing reframes goals around who you want to become.",
     created_at: "2026-03-19T20:00:00Z",
     updated_at: "2026-03-19T21:00:00Z"
   },
@@ -525,7 +473,6 @@ export const mockNotes = [
     content: "Reviewed Sid's Figma mockups. The sidebar layout is clean but the note editor needs more breathing room. Left some comments.",
     tags: ["design","leadership"],
     sentiment_score: 0.55,
-    summary: "Figma mockup review found clean sidebar but editor needs more whitespace.",
     created_at: "2026-03-21T14:00:00Z",
     updated_at: "2026-03-21T15:00:00Z"
   },
@@ -535,7 +482,6 @@ export const mockNotes = [
     content: "April 17 is creeping up. Still have integration testing and documentation left. Feeling the crunch but staying focused.",
     tags: ["wellbeing","journaling"],
     sentiment_score: -0.45,
-    summary: "Deadline pressure from April 17 submission with integration testing and docs remaining.",
     created_at: "2026-03-22T22:00:00Z",
     updated_at: "2026-03-22T22:30:00Z"
   },
@@ -545,7 +491,6 @@ export const mockNotes = [
     content: "Went deep on Node.js streams for a data pipeline idea. Transform streams are elegant for building composable data processors.",
     tags: ["travel","finance"],
     sentiment_score: 0.7,
-    summary: "Node.js transform streams explored as elegant building blocks for composable data pipelines.",
     created_at: "2026-01-16T14:00:00Z",
     updated_at: "2026-01-16T16:00:00Z"
   },
@@ -555,7 +500,6 @@ export const mockNotes = [
     content: "Made dumplings with my roommate. Folding is harder than it looks but we got the hang of it. Made about 60 and ate almost all of them.",
     tags: ["journaling","wellbeing"],
     sentiment_score: 0.93,
-    summary: "Homemade dumpling session with roommate resulted in 60 dumplings and lots of laughs.",
     created_at: "2026-01-19T19:00:00Z",
     updated_at: "2026-01-19T21:00:00Z"
   },
@@ -565,7 +509,6 @@ export const mockNotes = [
     content: "My todo list had 80 items and I was ignoring it. Cleared everything and started fresh with a max-10-items rule. Already feels better.",
     tags: ["reading","productivity"],
     sentiment_score: 0.6,
-    summary: "Productivity reset with a max-10-item todo rule replaced an 80-item backlog.",
     created_at: "2026-01-28T09:00:00Z",
     updated_at: "2026-01-28T09:30:00Z"
   },
@@ -575,7 +518,6 @@ export const mockNotes = [
     content: "Watched a JSConf talk on rendering performance in large D3 visualizations. Canvas vs SVG trade-offs well explained. Relevant for the graph view.",
     tags: ["sleep","wellbeing"],
     sentiment_score: 0.75,
-    summary: "JSConf talk on D3 canvas vs SVG rendering trade-offs directly applicable to graph view.",
     created_at: "2026-02-04T20:00:00Z",
     updated_at: "2026-02-04T21:00:00Z"
   },
@@ -585,7 +527,6 @@ export const mockNotes = [
     content: "Working on a personal essay about how note-taking changed how I think. It's harder to write personally than technically but more rewarding.",
     tags: ["reading","productivity"],
     sentiment_score: 0.65,
-    summary: "Personal essay on note-taking's cognitive impact proves harder but more rewarding than technical writing.",
     created_at: "2026-02-10T21:00:00Z",
     updated_at: "2026-02-10T22:30:00Z"
   },
@@ -595,7 +536,6 @@ export const mockNotes = [
     content: "Planned the final sprint before the April deadline. Broke down the remaining work into day-sized tasks. Feels achievable.",
     tags: ["cooking","wellbeing"],
     sentiment_score: 0.7,
-    summary: "Final sprint planned with day-sized tasks making the April deadline feel achievable.",
     created_at: "2026-03-23T10:00:00Z",
     updated_at: "2026-03-23T11:00:00Z"
   },
@@ -605,7 +545,6 @@ export const mockNotes = [
     content: "Switched from 5-day to 4-day training split to allow more recovery time. Body feels less beaten up and performance is up.",
     tags: ["fitness","wellbeing"],
     sentiment_score: 0.78,
-    summary: "Switching to a 4-day training split improved recovery and overall performance.",
     created_at: "2026-02-07T18:00:00Z",
     updated_at: "2026-02-07T18:30:00Z"
   },
@@ -615,7 +554,6 @@ export const mockNotes = [
     content: "Discovered the i-VI-III-VII minor progression today. Used it to write a short instrumental piece. Very melancholic but satisfying.",
     tags: ["journaling","writing"],
     sentiment_score: 0.75,
-    summary: "i-VI-III-VII minor progression used to compose a melancholic short instrumental piece.",
     created_at: "2026-02-19T21:30:00Z",
     updated_at: "2026-02-19T22:30:00Z"
   },
@@ -625,7 +563,6 @@ export const mockNotes = [
     content: "Big meeting today with senior engineers. Felt completely out of my depth. Reminded myself that everyone starts somewhere and I'm still learning.",
     tags: ["travel","hiking"],
     sentiment_score: -0.5,
-    summary: "Feeling out of depth with senior engineers prompted a reflection on growth mindset.",
     created_at: "2026-02-26T17:00:00Z",
     updated_at: "2026-02-26T22:00:00Z"
   },
@@ -635,7 +572,6 @@ export const mockNotes = [
     content: "Deep dive into Japanese food I need to try: tsukemen, tamagoyaki, kaiseki, conveyor belt sushi. Made a running list by city.",
     tags: ["journaling","meditation"],
     sentiment_score: 0.92,
-    summary: "City-by-city Japan food bucket list compiled with ramen, tamagoyaki, and kaiseki highlights.",
     created_at: "2026-03-03T20:00:00Z",
     updated_at: "2026-03-03T21:00:00Z"
   },
@@ -645,7 +581,6 @@ export const mockNotes = [
     content: "Refactored the notes API route handlers into a service layer. Much cleaner separation of concerns. Tests are easier to write now too.",
     tags: ["vue","design"],
     sentiment_score: 0.8,
-    summary: "Notes API refactored into a service layer, improving separation of concerns and testability.",
     created_at: "2026-03-24T09:00:00Z",
     updated_at: "2026-03-24T11:00:00Z"
   },
@@ -655,7 +590,6 @@ export const mockNotes = [
     content: "Started Structure and Interpretation of Computer Programs. Chapter 1 on substitution model is brain-bending but essential. Lisp is strange.",
     tags: ["reading","learning"],
     sentiment_score: 0.7,
-    summary: "SICP Chapter 1 substitution model is challenging but foundational for computational thinking.",
     created_at: "2026-01-30T20:00:00Z",
     updated_at: "2026-01-30T21:30:00Z"
   },
@@ -665,7 +599,6 @@ export const mockNotes = [
     content: "Filed my taxes early for once. Getting a small refund. Going straight to the emergency fund.",
     tags: ["finance","budgeting"],
     sentiment_score: 0.65,
-    summary: "Early tax filing yields a small refund earmarked directly for the emergency fund.",
     created_at: "2026-02-28T19:00:00Z",
     updated_at: "2026-02-28T19:30:00Z"
   },
@@ -675,7 +608,6 @@ export const mockNotes = [
     content: "Fixed a bug where zooming on the graph also triggered scroll on the parent page. Solution: call event.preventDefault() in the zoom handler.",
     tags: ["finance","travel"],
     sentiment_score: 0.7,
-    summary: "Graph scroll-zoom conflict fixed by calling preventDefault in the D3 zoom handler.",
     created_at: "2026-03-24T14:00:00Z",
     updated_at: "2026-03-24T14:30:00Z"
   },
@@ -685,7 +617,6 @@ export const mockNotes = [
     content: "Attended a local tech meetup. Met three interesting engineers, swapped contacts. These events feel awkward but always pay off.",
     tags: ["fitness","habits"],
     sentiment_score: 0.65,
-    summary: "Tech meetup yielded three new contacts despite initial awkwardness.",
     created_at: "2026-01-21T21:00:00Z",
     updated_at: "2026-01-21T22:00:00Z"
   },
@@ -695,7 +626,6 @@ export const mockNotes = [
     content: "Explored Postgres full-text search with tsvector. Surprisingly powerful without needing Elasticsearch. May use it for note search.",
     tags: ["engineering","databases"],
     sentiment_score: 0.72,
-    summary: "Postgres full-text search with tsvector explored as a simpler alternative to Elasticsearch.",
     created_at: "2026-01-27T14:00:00Z",
     updated_at: "2026-01-27T16:00:00Z"
   },
@@ -705,7 +635,6 @@ export const mockNotes = [
     content: "Had a rough night. Couldn't stop catastrophizing about the future. Wrote it all out and it helped. Journaling is genuinely therapeutic.",
     tags: ["wellbeing","journaling"],
     sentiment_score: -0.55,
-    summary: "Late-night anxiety managed through journaling, reinforcing its therapeutic value.",
     created_at: "2026-02-01T23:30:00Z",
     updated_at: "2026-02-01T23:59:00Z"
   },
@@ -715,7 +644,6 @@ export const mockNotes = [
     content: "Had an idea for a minimal habit tracker with a streak visualization. Could be a good D3 practice project after the course wraps.",
     tags: ["design","creativity"],
     sentiment_score: 0.78,
-    summary: "Minimal habit tracker with D3 streak visualization planned as a post-course side project.",
     created_at: "2026-02-13T20:00:00Z",
     updated_at: "2026-02-13T20:30:00Z"
   },
@@ -725,7 +653,6 @@ export const mockNotes = [
     content: "Went down a rabbit hole on pour-over coffee ratios. 1:15 coffee-to-water, bloom for 30s, total brew time 3 minutes. Life-changing.",
     tags: ["travel","cooking"],
     sentiment_score: 0.82,
-    summary: "Optimal pour-over coffee ratio and technique discovered through deep research.",
     created_at: "2026-02-17T09:00:00Z",
     updated_at: "2026-02-17T09:30:00Z"
   },
@@ -735,7 +662,6 @@ export const mockNotes = [
     content: "Submitted my first open source PR — a small bug fix in a D3 utility library. Merged same day. Huge confidence boost.",
     tags: ["fitness","nutrition"],
     sentiment_score: 0.95,
-    summary: "First open source PR merged same day, providing a significant confidence boost.",
     created_at: "2026-02-21T15:00:00Z",
     updated_at: "2026-02-21T16:00:00Z"
   },
@@ -745,7 +671,6 @@ export const mockNotes = [
     content: "Retro got tense today. Two team members have very different communication styles and it caused friction. Need to address this directly.",
     tags: ["wellbeing","leadership"],
     sentiment_score: -0.4,
-    summary: "Team retrospective exposed communication style clashes requiring direct resolution.",
     created_at: "2026-02-24T16:30:00Z",
     updated_at: "2026-02-24T17:30:00Z"
   },
@@ -755,7 +680,6 @@ export const mockNotes = [
     content: "Took the camera out for a walk downtown. Shot in manual mode the whole time. Some great geometry shots. Need to edit and sort.",
     tags: ["journaling","reading"],
     sentiment_score: 0.85,
-    summary: "Downtown photography walk in full manual mode yielded strong geometric compositions.",
     created_at: "2026-02-28T14:00:00Z",
     updated_at: "2026-02-28T15:30:00Z"
   },
@@ -765,7 +689,6 @@ export const mockNotes = [
     content: "Set up Docker Compose for the project with separate containers for frontend, backend, and DB. Dev environment is now fully reproducible.",
     tags: ["nodejs","databases"],
     sentiment_score: 0.82,
-    summary: "Docker Compose environment with frontend, backend, and DB containers now fully reproducible.",
     created_at: "2026-03-01T10:00:00Z",
     updated_at: "2026-03-01T12:00:00Z"
   },
@@ -775,7 +698,6 @@ export const mockNotes = [
     content: "Read Austin Kleon's Show Your Work in one sitting. The idea of sharing process not just outcomes is liberating. Want to start a dev blog.",
     tags: ["fitness","hiking"],
     sentiment_score: 0.88,
-    summary: "Show Your Work inspires sharing the development process publicly through a blog.",
     created_at: "2026-03-05T19:00:00Z",
     updated_at: "2026-03-05T20:00:00Z"
   },
@@ -785,7 +707,6 @@ export const mockNotes = [
     content: "Found a 25km cycling loop through the greenbelt. Did it in just under an hour. Beautiful route, will become a regular weekend ride.",
     tags: ["finance","meditation"],
     sentiment_score: 0.93,
-    summary: "25km greenbelt cycling loop completed in under an hour, earmarked as a regular weekend ride.",
     created_at: "2026-03-08T09:00:00Z",
     updated_at: "2026-03-08T10:00:00Z"
   },
@@ -795,7 +716,6 @@ export const mockNotes = [
     content: "Standardized error responses across the API. All errors now return a consistent JSON shape with code, message, and details fields.",
     tags: ["engineering","design"],
     sentiment_score: 0.75,
-    summary: "API error responses standardized into a consistent JSON shape across all endpoints.",
     created_at: "2026-03-10T10:00:00Z",
     updated_at: "2026-03-10T11:30:00Z"
   },
@@ -805,7 +725,6 @@ export const mockNotes = [
     content: "Booked a mix of capsule hotels and ryokan stays for Japan. The ryokan in Kyoto was pricey but it felt like a must-do.",
     tags: ["journaling","habits"],
     sentiment_score: 0.8,
-    summary: "Japan accommodation booked — capsule hotels plus a splurge ryokan stay in Kyoto.",
     created_at: "2026-03-13T21:00:00Z",
     updated_at: "2026-03-13T21:30:00Z"
   },
@@ -815,7 +734,6 @@ export const mockNotes = [
     content: "Picked up a Focusrite Scarlett Solo. Recorded a rough guitar demo. The tone is way better than using the laptop mic.",
     tags: ["reading","habits"],
     sentiment_score: 0.85,
-    summary: "Focusrite Scarlett Solo setup dramatically improved home guitar recording quality.",
     created_at: "2026-03-15T20:00:00Z",
     updated_at: "2026-03-15T21:00:00Z"
   },
@@ -825,7 +743,6 @@ export const mockNotes = [
     content: "Outlined an E2E test plan using Playwright. Will cover the critical paths: create note, analyze, view graph. Aiming for 80% critical path coverage.",
     tags: ["nodejs","performance"],
     sentiment_score: 0.65,
-    summary: "Playwright E2E test plan targets critical note creation, analysis, and graph view paths.",
     created_at: "2026-03-17T14:00:00Z",
     updated_at: "2026-03-17T15:00:00Z"
   },
@@ -835,7 +752,6 @@ export const mockNotes = [
     content: "Published my first technical blog post on force-directed graphs. Shared on Twitter and got 40 likes. Small but feels meaningful.",
     tags: ["vue","typescript"],
     sentiment_score: 0.9,
-    summary: "First technical blog post on force-directed graphs published and received warmly.",
     created_at: "2026-03-19T18:00:00Z",
     updated_at: "2026-03-19T18:30:00Z"
   },
@@ -845,7 +761,6 @@ export const mockNotes = [
     content: "Made fresh tagliatelle by hand for the first time. Rolled it way too thick on the first pass but the second attempt was perfect.",
     tags: ["cooking","nutrition"],
     sentiment_score: 0.88,
-    summary: "Second attempt at handmade tagliatelle achieved the right thickness after an initial failure.",
     created_at: "2026-03-21T18:00:00Z",
     updated_at: "2026-03-21T20:00:00Z"
   },
@@ -855,7 +770,6 @@ export const mockNotes = [
     content: "Read several papers on context window management in LLMs. RAG vs long context is still an open question depending on use case.",
     tags: ["travel","learning"],
     sentiment_score: 0.68,
-    summary: "LLM context window research reveals RAG vs long-context as a use-case-dependent trade-off.",
     created_at: "2026-01-29T15:00:00Z",
     updated_at: "2026-01-29T17:00:00Z"
   },
@@ -865,7 +779,6 @@ export const mockNotes = [
     content: "Reviewed portfolio performance. Down slightly YTD but long-term holdings are solid. Staying the course, not panic selling.",
     tags: ["wellbeing","reflection"],
     sentiment_score: 0.35,
-    summary: "Portfolio down slightly YTD but long-term position is solid; staying the course.",
     created_at: "2026-02-23T19:00:00Z",
     updated_at: "2026-02-23T19:45:00Z"
   },
@@ -875,7 +788,6 @@ export const mockNotes = [
     content: "Spent an afternoon polishing the dark mode. Fixed inconsistent grays, improved contrast ratios, and unified border colors throughout.",
     tags: ["d3","engineering"],
     sentiment_score: 0.78,
-    summary: "Dark mode polished with consistent grays, improved contrast, and unified border colors.",
     created_at: "2026-03-06T15:00:00Z",
     updated_at: "2026-03-06T17:00:00Z"
   },
@@ -885,7 +797,6 @@ export const mockNotes = [
     content: "Tried Julia Cameron's morning pages — 3 pages of stream-of-consciousness writing first thing. Felt weird but unlocked some stuck ideas.",
     tags: ["design","creativity"],
     sentiment_score: 0.6,
-    summary: "Morning pages experiment unlocked creative blocks through stream-of-consciousness writing.",
     created_at: "2026-03-11T07:30:00Z",
     updated_at: "2026-03-11T08:15:00Z"
   },
@@ -895,7 +806,6 @@ export const mockNotes = [
     content: "Hit a wall on bench press. Same weight for three weeks. Coach says I need to deload and come back fresher. Trusting the process.",
     tags: ["fitness","hiking"],
     sentiment_score: -0.2,
-    summary: "Bench press plateau addressed with a planned deload week on coach's advice.",
     created_at: "2026-03-14T18:30:00Z",
     updated_at: "2026-03-14T19:00:00Z"
   },
@@ -905,7 +815,6 @@ export const mockNotes = [
     content: "Started the project README and API docs. Good documentation is the part I always procrastinate on. Forcing myself to do it now.",
     tags: ["vue","design"],
     sentiment_score: 0.45,
-    summary: "Project README and API documentation drafted early to avoid last-minute procrastination.",
     created_at: "2026-03-18T14:00:00Z",
     updated_at: "2026-03-18T16:00:00Z"
   },
@@ -915,7 +824,6 @@ export const mockNotes = [
     content: "Added composite indexes on notes table for (user_id, created_at) and (user_id, updated_at). Query time dropped from 120ms to 4ms.",
     tags: ["design","writing"],
     sentiment_score: 0.88,
-    summary: "Composite indexes on notes table reduced query time from 120ms to 4ms.",
     created_at: "2026-03-20T11:00:00Z",
     updated_at: "2026-03-20T12:00:00Z"
   },
@@ -925,7 +833,6 @@ export const mockNotes = [
     content: "Started time blocking my calendar with 90-minute deep work sessions. Turning off notifications during blocks. Focus quality is noticeably better.",
     tags: ["travel","writing"],
     sentiment_score: 0.82,
-    summary: "90-minute calendar time blocks with notifications off significantly improved focus quality.",
     created_at: "2026-02-05T08:00:00Z",
     updated_at: "2026-02-05T08:30:00Z"
   },
@@ -935,7 +842,6 @@ export const mockNotes = [
     content: "Building a Japan packing list. Going carry-on only. Key items: portable charger, IC card, pocket wifi, merino wool layers.",
     tags: ["reading","habits"],
     sentiment_score: 0.72,
-    summary: "Carry-on only Japan packing list built around merino layers, IC card, and pocket wifi.",
     created_at: "2026-03-22T19:00:00Z",
     updated_at: "2026-03-22T20:00:00Z"
   },
@@ -945,7 +851,6 @@ export const mockNotes = [
     content: "Excellent book on managing complexity in software. The idea of deep modules — simple interfaces hiding complex implementation — is central to good design.",
     tags: ["reading","writing"],
     sentiment_score: 0.85,
-    summary: "Deep modules with simple interfaces identified as the core principle of managing software complexity.",
     created_at: "2026-03-02T20:00:00Z",
     updated_at: "2026-03-02T21:30:00Z"
   },
@@ -955,7 +860,6 @@ export const mockNotes = [
     content: "Completed a full instrumental track. Guitar, bass, and a simple drum loop. Four minutes. Really happy with how the bridge turned out.",
     tags: ["writing","creativity"],
     sentiment_score: 0.96,
-    summary: "First complete instrumental track finished with guitar, bass, and drums.",
     created_at: "2026-03-23T21:00:00Z",
     updated_at: "2026-03-23T22:30:00Z"
   },
@@ -965,7 +869,6 @@ export const mockNotes = [
     content: "Studied BFS, DFS, and Dijkstra's algorithm. Thinking about how to implement shortest path between notes for the graph view as a future feature.",
     tags: ["engineering","learning"],
     sentiment_score: 0.75,
-    summary: "Graph algorithm study sparked idea for note shortest-path feature in future graph view.",
     created_at: "2026-03-16T19:00:00Z",
     updated_at: "2026-03-16T21:00:00Z"
   },
@@ -975,7 +878,6 @@ export const mockNotes = [
     content: "Prepped the whole week's lunches in 90 minutes. Grain bowls with roasted veggies and tahini. Saves so much time and money mid-week.",
     tags: ["cooking","nutrition"],
     sentiment_score: 0.87,
-    summary: "90-minute Sunday meal prep for the week saves mid-week time and money.",
     created_at: "2026-03-08T15:00:00Z",
     updated_at: "2026-03-08T16:30:00Z"
   },
@@ -985,7 +887,6 @@ export const mockNotes = [
     content: "Reminder to myself: perfection is not the goal. Shipping something imperfect beats polishing forever. Progress over perfection.",
     tags: ["nodejs","engineering"],
     sentiment_score: 0.7,
-    summary: "Personal reminder that shipping imperfect work beats endless polishing.",
     created_at: "2026-03-24T08:00:00Z",
     updated_at: "2026-03-24T08:15:00Z"
   },
@@ -995,7 +896,6 @@ export const mockNotes = [
     content: "Looking back at this whole project. Learned more than any course before it. D3, Vue, Gemini API, team collaboration — it all came together.",
     tags: ["journaling","engineering"],
     sentiment_score: 0.95,
-    summary: "Final project retrospective reflects on significant growth across D3, Vue, APIs, and teamwork.",
     created_at: "2026-03-24T17:00:00Z",
     updated_at: "2026-03-24T17:30:00Z"
   },
@@ -1007,7 +907,6 @@ export const mockNotes = [
     content: "Started reading about urban beekeeping. Fascinating hobby but requires a lot of equipment upfront.",
     tags: ["beekeeping"],
     sentiment_score: 0.5,
-    summary: "Initial research into urban beekeeping as a potential hobby.",
     created_at: "2026-02-10T10:00:00Z",
     updated_at: "2026-02-10T10:30:00Z"
   },
@@ -1017,7 +916,6 @@ export const mockNotes = [
     content: "Testing 80% vs 90% hydration doughs. The higher hydration creates a more open crumb but is harder to shape.",
     tags: ["sourdough"],
     sentiment_score: 0.6,
-    summary: "Experimenting with different hydration levels in sourdough bread.",
     created_at: "2026-02-14T09:00:00Z",
     updated_at: "2026-02-14T11:00:00Z"
   },
@@ -1027,7 +925,6 @@ export const mockNotes = [
     content: "Spent the evening calibrating the new refractor telescope. Jupiter's moons were clearly visible.",
     tags: ["astronomy"],
     sentiment_score: 0.85,
-    summary: "Calibrated new telescope and observed Jupiter's moons.",
     created_at: "2026-02-18T22:00:00Z",
     updated_at: "2026-02-18T23:30:00Z"
   },
@@ -1037,7 +934,6 @@ export const mockNotes = [
     content: "First time on a pottery wheel. Centering the clay is much harder than it looks. Ended up with a lopsided bowl.",
     tags: ["pottery"],
     sentiment_score: 0.4,
-    summary: "First pottery wheel session — centering clay proved more difficult than expected.",
     created_at: "2026-02-22T14:00:00Z",
     updated_at: "2026-02-22T15:30:00Z"
   },
@@ -1047,7 +943,6 @@ export const mockNotes = [
     content: "Went on a guided foraging walk. Identified wild garlic, nettles and wood sorrel. Need to buy a field guide.",
     tags: ["foraging"],
     sentiment_score: 0.7,
-    summary: "Guided foraging walk identified several edible wild plants.",
     created_at: "2026-03-01T11:00:00Z",
     updated_at: "2026-03-01T12:00:00Z"
   },
@@ -1057,7 +952,6 @@ export const mockNotes = [
     content: "Folded 20 paper cranes today. Trying to reach 1000 for the traditional wish. Patience is key.",
     tags: ["origami"],
     sentiment_score: 0.65,
-    summary: "Progress toward folding 1000 origami cranes — patience is essential.",
     created_at: "2026-03-05T16:00:00Z",
     updated_at: "2026-03-05T18:00:00Z"
   },
@@ -1067,7 +961,6 @@ export const mockNotes = [
     content: "Been learning lockpicking as a hobby. Picked my first padlock today after weeks of practice. Very satisfying.",
     tags: ["lockpicking"],
     sentiment_score: 0.8,
-    summary: "Successfully picked first padlock after weeks of lockpicking practice.",
     created_at: "2026-03-08T19:00:00Z",
     updated_at: "2026-03-08T20:00:00Z"
   },
@@ -1077,7 +970,6 @@ export const mockNotes = [
     content: "Made a batch of soy candles with lavender and cedarwood scents. The pour temperature matters a lot.",
     tags: ["candlemaking"],
     sentiment_score: 0.75,
-    summary: "First soy candle batch with lavender and cedarwood — pour temperature is critical.",
     created_at: "2026-03-12T13:00:00Z",
     updated_at: "2026-03-12T14:30:00Z"
   },
@@ -1087,7 +979,6 @@ export const mockNotes = [
     content: "First time at an archery range. Shot 30 arrows, hit the target maybe 10 times. Long way to go.",
     tags: ["archery"],
     sentiment_score: 0.5,
-    summary: "First archery range visit — accuracy needs significant improvement.",
     created_at: "2026-03-16T10:00:00Z",
     updated_at: "2026-03-16T11:30:00Z"
   },
@@ -1097,7 +988,6 @@ export const mockNotes = [
     content: "Set up a first oyster mushroom grow kit. Keeping humidity high and waiting for pinning. Exciting experiment.",
     tags: ["mycology"],
     sentiment_score: 0.7,
-    summary: "Started oyster mushroom cultivation — monitoring humidity for pinning.",
     created_at: "2026-03-20T09:00:00Z",
     updated_at: "2026-03-20T10:00:00Z"
   }
@@ -1108,7 +998,6 @@ export const mockNotes = [
     content: "Deep dive into microservices today. The separation of concerns is powerful but adds complexity. Need to understand service discovery and load balancing better.",
     tags: ["engineering","learning"],
     sentiment_score: 0.46,
-    summary: "Researched microservices benefits and challenges including service discovery.",
     created_at: "2025-01-02T08:00:00Z",
     updated_at: "2025-01-02T09:00:00Z"
   },
@@ -1118,7 +1007,6 @@ export const mockNotes = [
     content: "Finally understood the Node.js event loop properly. The libuv thread pool is separate from the main event loop. This changes how I think about async operations.",
     tags: ["engineering","nodejs"],
     sentiment_score: 0.66,
-    summary: "Gained clarity on Node.js event loop and libuv thread pool mechanics.",
     created_at: "2025-01-04T12:00:00Z",
     updated_at: "2025-01-04T13:00:00Z"
   },
@@ -1128,7 +1016,6 @@ export const mockNotes = [
     content: "Spent time practicing TypeScript generics. They're complex but make code much more reusable. Conditional types are particularly mind-bending.",
     tags: ["engineering","typescript"],
     sentiment_score: 0.63,
-    summary: "Practiced TypeScript generics and conditional types for reusable code.",
     created_at: "2025-01-05T12:00:00Z",
     updated_at: "2025-01-05T13:00:00Z"
   },
@@ -1138,7 +1025,6 @@ export const mockNotes = [
     content: "Revisiting our unit testing approach. We have too many integration tests and not enough unit tests. Need to shift the testing pyramid.",
     tags: ["engineering","testing"],
     sentiment_score: 0.45,
-    summary: "Evaluated testing strategy, identified need to increase unit test coverage.",
     created_at: "2025-01-07T15:00:00Z",
     updated_at: "2025-01-07T16:00:00Z"
   },
@@ -1148,7 +1034,6 @@ export const mockNotes = [
     content: "Learned about multi-stage Docker builds today. Production images are now 60% smaller. The build cache optimization is a game changer.",
     tags: ["engineering","docker"],
     sentiment_score: 0.77,
-    summary: "Implemented multi-stage Docker builds reducing image size by 60%.",
     created_at: "2025-01-10T12:00:00Z",
     updated_at: "2025-01-10T13:00:00Z"
   },
@@ -1158,7 +1043,6 @@ export const mockNotes = [
     content: "Implemented rate limiting on our API endpoints. Used a token bucket algorithm. Testing edge cases with concurrent requests was tricky.",
     tags: ["engineering"],
     sentiment_score: 0.62,
-    summary: "Implemented token bucket rate limiting for API endpoints.",
     created_at: "2025-01-11T17:00:00Z",
     updated_at: "2025-01-11T18:00:00Z"
   },
@@ -1168,7 +1052,6 @@ export const mockNotes = [
     content: "Team discussion about switching parts of our API to GraphQL. REST is simpler but GraphQL solves our over-fetching problem. Still undecided.",
     tags: ["engineering","design"],
     sentiment_score: 0.32,
-    summary: "Team debated REST vs GraphQL trade-offs for API architecture.",
     created_at: "2025-01-14T08:00:00Z",
     updated_at: "2025-01-14T09:00:00Z"
   },
@@ -1178,7 +1061,6 @@ export const mockNotes = [
     content: "Refactoring old Options API code to Composition API. The code is much cleaner. Composables are like React hooks but feel more natural to me.",
     tags: ["engineering","vue"],
     sentiment_score: 0.71,
-    summary: "Refactored Vue components from Options to Composition API using composables.",
     created_at: "2025-01-15T16:00:00Z",
     updated_at: "2025-01-15T17:00:00Z"
   },
@@ -1188,7 +1070,6 @@ export const mockNotes = [
     content: "Noticing early burnout signs. Irritable, tired, losing interest in things I usually enjoy. Need to slow down and recover before it gets worse.",
     tags: ["wellbeing"],
     sentiment_score: -0.69,
-    summary: "Identified early burnout signs and need to prioritize recovery.",
     created_at: "2025-01-18T09:00:00Z",
     updated_at: "2025-01-18T10:00:00Z"
   },
@@ -1198,7 +1079,6 @@ export const mockNotes = [
     content: "Took stock of my work-life balance this week. I've been putting in too many late nights. Making a rule to stop working at 7pm.",
     tags: ["wellbeing","reflection"],
     sentiment_score: -0.18,
-    summary: "Assessed work-life balance and set boundaries around evening work hours.",
     created_at: "2025-01-20T15:00:00Z",
     updated_at: "2025-01-20T16:00:00Z"
   },
@@ -1208,7 +1088,6 @@ export const mockNotes = [
     content: "Day 5 of daily meditation. Noticing a real difference in how I respond to stressful situations. 10 minutes in the morning is all it takes.",
     tags: ["wellbeing","meditation"],
     sentiment_score: 0.61,
-    summary: "Five days into meditation practice, noticing improved stress responses.",
     created_at: "2025-01-22T15:00:00Z",
     updated_at: "2025-01-22T16:00:00Z"
   },
@@ -1218,7 +1097,6 @@ export const mockNotes = [
     content: "The research is clear - exercise directly improves mental health. Had a bad day, went for a run, felt completely different after. Need to make this a non-negotiable.",
     tags: ["wellbeing","fitness"],
     sentiment_score: 0.43,
-    summary: "Experienced firsthand how exercise transformed a difficult mental health day.",
     created_at: "2025-01-24T11:00:00Z",
     updated_at: "2025-01-24T12:00:00Z"
   },
@@ -1228,7 +1106,6 @@ export const mockNotes = [
     content: "Had a hard conversation with my manager about workload. It went better than expected. Being direct was the right call. Feeling lighter now.",
     tags: ["wellbeing"],
     sentiment_score: 0.39,
-    summary: "Had productive direct conversation with manager about workload concerns.",
     created_at: "2025-02-02T10:00:00Z",
     updated_at: "2025-02-02T11:00:00Z"
   },
@@ -1238,7 +1115,6 @@ export const mockNotes = [
     content: "Looking back at everything this year. Despite the hard patches, there's so much to be grateful for. Growth, friendships, skills learned. A good year overall.",
     tags: ["wellbeing","journaling"],
     sentiment_score: 0.84,
-    summary: "Reflected on the year with gratitude, noting significant personal growth.",
     created_at: "2025-02-04T18:00:00Z",
     updated_at: "2025-02-04T19:00:00Z"
   },
@@ -1248,7 +1124,6 @@ export const mockNotes = [
     content: "Kahneman's System 1 vs System 2 thinking is reshaping how I make decisions. I catch myself defaulting to fast thinking when I should slow down.",
     tags: ["reading"],
     sentiment_score: 0.78,
-    summary: "Applied Kahneman's dual-process theory to improve decision-making awareness.",
     created_at: "2025-02-06T08:00:00Z",
     updated_at: "2025-02-06T09:00:00Z"
   },
@@ -1258,7 +1133,6 @@ export const mockNotes = [
     content: "Re-reading The Pragmatic Programmer. The orthogonality principle is something I've been violating. Components should be independent and have a single responsibility.",
     tags: ["reading","learning"],
     sentiment_score: 0.68,
-    summary: "Revisited orthogonality principle from The Pragmatic Programmer.",
     created_at: "2025-02-08T11:00:00Z",
     updated_at: "2025-02-08T12:00:00Z"
   },
@@ -1268,7 +1142,6 @@ export const mockNotes = [
     content: "Essentialism is about doing less but better. The key question: what is the most important thing I can do right now? Learning to say no more deliberately.",
     tags: ["reading"],
     sentiment_score: 0.57,
-    summary: "Essentialism taught the importance of selective focus and deliberate 'no'.",
     created_at: "2025-02-09T12:00:00Z",
     updated_at: "2025-02-09T13:00:00Z"
   },
@@ -1278,7 +1151,6 @@ export const mockNotes = [
     content: "Cal Newport's Deep Work is exactly what I needed. Scheduling deep work blocks in the morning before checking email. Already seeing a difference.",
     tags: ["reading","productivity"],
     sentiment_score: 0.87,
-    summary: "Implementing deep work blocks in the morning based on Cal Newport's principles.",
     created_at: "2025-02-12T19:00:00Z",
     updated_at: "2025-02-12T20:00:00Z"
   },
@@ -1288,7 +1160,6 @@ export const mockNotes = [
     content: "Read several articles on distributed systems consistency models. CAP theorem is less a theorem and more a design trade-off. Choosing between availability and consistency.",
     tags: ["reading"],
     sentiment_score: 0.42,
-    summary: "Researched distributed systems consistency models and CAP theorem implications.",
     created_at: "2025-02-14T18:00:00Z",
     updated_at: "2025-02-14T19:00:00Z"
   },
@@ -1298,7 +1169,6 @@ export const mockNotes = [
     content: "Migrating from Vuex to Pinia. Pinia is so much simpler — no mutations, just actions. The DevTools integration is also better.",
     tags: ["vue","engineering"],
     sentiment_score: 0.79,
-    summary: "Migrated state management from Vuex to Pinia, finding it significantly simpler.",
     created_at: "2025-02-16T08:00:00Z",
     updated_at: "2025-02-16T09:00:00Z"
   },
@@ -1308,7 +1178,6 @@ export const mockNotes = [
     content: "Implementing auth guards in Vue Router. The beforeEach hook is powerful but easy to mess up. Need to handle async checks correctly to avoid race conditions.",
     tags: ["vue"],
     sentiment_score: 0.39,
-    summary: "Researched Vue Router navigation guards for authentication flow.",
     created_at: "2025-02-18T14:00:00Z",
     updated_at: "2025-02-18T15:00:00Z"
   },
@@ -1318,7 +1187,6 @@ export const mockNotes = [
     content: "Planning our internal component library. Deciding between building from scratch vs extending Shadcn/Vue. Building is slower but gives more control.",
     tags: ["vue","design"],
     sentiment_score: 0.58,
-    summary: "Evaluated component library approach: custom build vs extending existing library.",
     created_at: "2025-02-19T15:00:00Z",
     updated_at: "2025-02-19T16:00:00Z"
   },
@@ -1328,7 +1196,6 @@ export const mockNotes = [
     content: "Started a structured 10K training program. First week is easy — just building the habit. Running 3x per week feels manageable alongside everything else.",
     tags: ["fitness"],
     sentiment_score: 0.73,
-    summary: "Began structured 10K training program with 3x weekly runs.",
     created_at: "2025-02-22T11:00:00Z",
     updated_at: "2025-02-22T12:00:00Z"
   },
@@ -1338,7 +1205,6 @@ export const mockNotes = [
     content: "Learning that rest days are as important as training days. Overtraining is a real risk. My body needs time to adapt and recover.",
     tags: ["fitness","wellbeing"],
     sentiment_score: 0.54,
-    summary: "Recognized importance of rest days in training cycle to prevent overtraining.",
     created_at: "2025-02-23T16:00:00Z",
     updated_at: "2025-02-23T17:00:00Z"
   },
@@ -1348,7 +1214,6 @@ export const mockNotes = [
     content: "Trying different pre-workout meals. Banana + peanut butter 1 hour before is working well. Energy is consistent without the crash.",
     tags: ["fitness","nutrition"],
     sentiment_score: 0.59,
-    summary: "Found banana and peanut butter optimal for pre-workout energy.",
     created_at: "2025-03-02T10:00:00Z",
     updated_at: "2025-03-02T11:00:00Z"
   },
@@ -1358,7 +1223,6 @@ export const mockNotes = [
     content: "New 5K personal best today! 24:32. Months of consistent training paying off. The key was building base mileage slowly before adding speed work.",
     tags: ["fitness"],
     sentiment_score: 0.9,
-    summary: "Achieved new 5K personal best of 24:32 through consistent base training.",
     created_at: "2025-03-03T11:00:00Z",
     updated_at: "2025-03-03T12:00:00Z"
   },
@@ -1368,7 +1232,6 @@ export const mockNotes = [
     content: "Tried trail running for the first time. Much harder than road running but infinitely more enjoyable. The connection to nature makes it feel less like exercise.",
     tags: ["fitness","hiking"],
     sentiment_score: 0.73,
-    summary: "Discovered trail running as more enjoyable and connected to nature.",
     created_at: "2025-03-05T11:00:00Z",
     updated_at: "2025-03-05T12:00:00Z"
   },
@@ -1378,7 +1241,6 @@ export const mockNotes = [
     content: "Implemented a design tokens system for our app. Colors, spacing, and typography are all tokenized now. Theme switching is trivial.",
     tags: ["design"],
     sentiment_score: 0.78,
-    summary: "Implemented design tokens system enabling easy theme switching.",
     created_at: "2025-03-07T10:00:00Z",
     updated_at: "2025-03-07T11:00:00Z"
   },
@@ -1388,7 +1250,6 @@ export const mockNotes = [
     content: "Revisiting responsive design patterns. CSS Grid with named areas is so clean. The old float-based layouts feel prehistoric now.",
     tags: ["design","vue"],
     sentiment_score: 0.66,
-    summary: "Modernized responsive layout approach using CSS Grid named areas.",
     created_at: "2025-03-09T14:00:00Z",
     updated_at: "2025-03-09T15:00:00Z"
   },
@@ -1398,7 +1259,6 @@ export const mockNotes = [
     content: "Ran user testing on our onboarding flow. Three out of five users struggled with step 3. The copy is confusing. Need to redesign.",
     tags: ["design"],
     sentiment_score: -0.23,
-    summary: "User testing revealed step 3 of onboarding confuses 60% of users.",
     created_at: "2025-03-11T12:00:00Z",
     updated_at: "2025-03-11T13:00:00Z"
   },
@@ -1408,7 +1268,6 @@ export const mockNotes = [
     content: "Deep dive into typography. Line height, letter spacing, and font pairing make such a huge difference. Going through Practical Typography by Matthew Butterick.",
     tags: ["design","learning"],
     sentiment_score: 0.6,
-    summary: "Studied typography fundamentals including line height, spacing, and font pairing.",
     created_at: "2025-03-13T18:00:00Z",
     updated_at: "2025-03-13T19:00:00Z"
   },
@@ -1418,7 +1277,6 @@ export const mockNotes = [
     content: "Three weeks of morning pages. The mental clarity it brings is incredible. I process a lot of background anxiety by just writing it out.",
     tags: ["journaling"],
     sentiment_score: 0.71,
-    summary: "Three weeks of morning pages delivering mental clarity and anxiety processing.",
     created_at: "2025-03-16T08:00:00Z",
     updated_at: "2025-03-16T09:00:00Z"
   },
@@ -1428,7 +1286,6 @@ export const mockNotes = [
     content: "Q2 review done. Hit most goals, missed two. The fitness goal slipped because I wasn't tracking consistently. Q3 needs a better tracking system.",
     tags: ["journaling","reflection"],
     sentiment_score: 0.3,
-    summary: "Q2 review: achieved most goals, fitness goal missed due to inconsistent tracking.",
     created_at: "2025-03-17T11:00:00Z",
     updated_at: "2025-03-17T12:00:00Z"
   },
@@ -1438,7 +1295,6 @@ export const mockNotes = [
     content: "Honest journaling question today: what am I avoiding? Turns out — a difficult code review feedback I haven't fully processed and a conversation I keep putting off.",
     tags: ["journaling"],
     sentiment_score: -0.45,
-    summary: "Identified avoided tasks: unprocessed code review feedback and delayed conversation.",
     created_at: "2025-03-19T15:00:00Z",
     updated_at: "2025-03-19T16:00:00Z"
   },
@@ -1448,7 +1304,6 @@ export const mockNotes = [
     content: "Trying to be better at celebrating small wins. Shipped a feature today, got positive feedback, and immediately moved to the next thing. Paused to acknowledge it.",
     tags: ["journaling","wellbeing"],
     sentiment_score: 0.76,
-    summary: "Practiced acknowledging small wins rather than immediately moving to next tasks.",
     created_at: "2025-03-21T12:00:00Z",
     updated_at: "2025-03-21T13:00:00Z"
   },
@@ -1458,7 +1313,6 @@ export const mockNotes = [
     content: "Understanding the Express middleware stack better. Error handling middleware must have 4 parameters. Request lifecycle is clearer now.",
     tags: ["nodejs"],
     sentiment_score: 0.44,
-    summary: "Deepened understanding of Express middleware stack and error handling patterns.",
     created_at: "2025-03-23T09:00:00Z",
     updated_at: "2025-03-23T10:00:00Z"
   },
@@ -1468,7 +1322,6 @@ export const mockNotes = [
     content: "Implemented connection pooling for PostgreSQL. Was creating a new connection per request — rookie mistake. Pool of 10 connections handles our load fine.",
     tags: ["nodejs","engineering"],
     sentiment_score: 0.6,
-    summary: "Fixed connection pooling implementation reducing database connection overhead.",
     created_at: "2025-04-01T15:00:00Z",
     updated_at: "2025-04-01T16:00:00Z"
   },
@@ -1478,7 +1331,6 @@ export const mockNotes = [
     content: "First time using WebSockets in Node. The real-time updates feel like magic after years of polling. Socket.io abstracts away the complexity nicely.",
     tags: ["nodejs"],
     sentiment_score: 0.87,
-    summary: "Implemented real-time WebSocket communication using Socket.io.",
     created_at: "2025-04-04T11:00:00Z",
     updated_at: "2025-04-04T12:00:00Z"
   },
@@ -1488,7 +1340,6 @@ export const mockNotes = [
     content: "Getting more comfortable with D3 scales. Linear, log, and ordinal scales each have their place. Axes are built from scales — that was the mental model I was missing.",
     tags: ["d3"],
     sentiment_score: 0.51,
-    summary: "Developed clearer mental model of D3 scales and their relationship to axes.",
     created_at: "2025-04-06T15:00:00Z",
     updated_at: "2025-04-06T16:00:00Z"
   },
@@ -1498,7 +1349,6 @@ export const mockNotes = [
     content: "Implemented D3 brushing for range selection. The event system is low level but gives total control. Users can now select date ranges directly on the chart.",
     tags: ["d3","engineering"],
     sentiment_score: 0.79,
-    summary: "Implemented D3 brush interaction for interactive date range selection.",
     created_at: "2025-04-07T13:00:00Z",
     updated_at: "2025-04-07T14:00:00Z"
   },
@@ -1508,7 +1358,6 @@ export const mockNotes = [
     content: "Research on SVG vs Canvas rendering. SVG is DOM-based and interactive but slow at scale. Canvas is fast but requires manual hit testing. Going with SVG for now.",
     tags: ["d3"],
     sentiment_score: 0.47,
-    summary: "Evaluated SVG vs Canvas trade-offs, choosing SVG for interactive graph visualization.",
     created_at: "2025-04-09T12:00:00Z",
     updated_at: "2025-04-09T13:00:00Z"
   },
@@ -1518,7 +1367,6 @@ export const mockNotes = [
     content: "Starting to plan a trip to Portugal. Lisbon and Porto both look incredible. Late September seems like the ideal time — crowds thin out but weather is still great.",
     tags: ["travel"],
     sentiment_score: 0.69,
-    summary: "Began planning Portugal trip targeting late September for Lisbon and Porto.",
     created_at: "2025-04-12T12:00:00Z",
     updated_at: "2025-04-12T13:00:00Z"
   },
@@ -1528,7 +1376,6 @@ export const mockNotes = [
     content: "Researching food in Lisbon. Pastéis de nata, bacalhau, and bifanas are non-negotiable. Found a food tour that hits all the traditional spots.",
     tags: ["travel","cooking"],
     sentiment_score: 0.83,
-    summary: "Researched Lisbon food scene and booked a traditional food tour.",
     created_at: "2025-04-13T19:00:00Z",
     updated_at: "2025-04-13T20:00:00Z"
   },
@@ -1538,7 +1385,6 @@ export const mockNotes = [
     content: "Thinking about why solo travel appeals to me. Full control of the itinerary, no compromises. The unexpected conversations with strangers are often the highlight.",
     tags: ["travel"],
     sentiment_score: 0.79,
-    summary: "Reflected on appeal of solo travel: autonomy and unexpected human connections.",
     created_at: "2025-04-16T12:00:00Z",
     updated_at: "2025-04-16T13:00:00Z"
   },
@@ -1548,7 +1394,6 @@ export const mockNotes = [
     content: "Sourdough starter finally active after a week. It's bubbling and has that sour smell. First bake tomorrow. Expecting a dense disaster but excited to try.",
     tags: ["cooking"],
     sentiment_score: 0.62,
-    summary: "Sourdough starter became active after 7 days, ready for first bake.",
     created_at: "2025-04-18T15:00:00Z",
     updated_at: "2025-04-18T16:00:00Z"
   },
@@ -1558,7 +1403,6 @@ export const mockNotes = [
     content: "Perfected my Sunday meal prep routine. 2 hours, 5 meals for the week. Grains, proteins, and vegetables prepped separately for flexibility.",
     tags: ["cooking","nutrition"],
     sentiment_score: 0.75,
-    summary: "Established efficient 2-hour Sunday meal prep system for the week.",
     created_at: "2025-04-19T08:00:00Z",
     updated_at: "2025-04-19T09:00:00Z"
   },
@@ -1568,7 +1412,6 @@ export const mockNotes = [
     content: "Watching knife skills videos and actually practicing. The difference between a sharp and dull knife is enormous. Julienne cuts are coming along.",
     tags: ["cooking"],
     sentiment_score: 0.64,
-    summary: "Actively practicing knife skills, noting major difference with properly sharpened knife.",
     created_at: "2025-04-22T16:00:00Z",
     updated_at: "2025-04-22T17:00:00Z"
   },
@@ -1578,7 +1421,6 @@ export const mockNotes = [
     content: "Made pasta from scratch today. Just flour and eggs. The kneading is meditative. Fresh pasta taste is incomparable to dried — worth the effort.",
     tags: ["cooking"],
     sentiment_score: 0.89,
-    summary: "Made fresh pasta from scratch, finding kneading meditative and result superior.",
     created_at: "2025-04-24T10:00:00Z",
     updated_at: "2025-04-24T11:00:00Z"
   },
@@ -1588,7 +1430,6 @@ export const mockNotes = [
     content: "Reviewing this year's budget against actual spending. Biggest overspend: eating out (2x budget). Biggest underspend: entertainment. Need better food habit tracking.",
     tags: ["finance"],
     sentiment_score: -0.24,
-    summary: "Annual budget review revealed 2x overspend on eating out vs entertainment savings.",
     created_at: "2025-05-01T19:00:00Z",
     updated_at: "2025-05-01T20:00:00Z"
   },
@@ -1598,7 +1439,6 @@ export const mockNotes = [
     content: "Hit my 6-month emergency fund target today. Took 18 months of consistent saving. The peace of mind it brings is worth every sacrifice.",
     tags: ["finance","budgeting"],
     sentiment_score: 0.82,
-    summary: "Achieved 6-month emergency fund goal after 18 months of consistent saving.",
     created_at: "2025-05-04T10:00:00Z",
     updated_at: "2025-05-04T11:00:00Z"
   },
@@ -1608,7 +1448,6 @@ export const mockNotes = [
     content: "Quarterly portfolio check. Index funds are performing as expected — boring but consistent. Resisting the urge to tinker. Staying the course.",
     tags: ["finance"],
     sentiment_score: 0.48,
-    summary: "Quarterly portfolio review confirmed index fund strategy on track, avoiding tinkering.",
     created_at: "2025-05-06T19:00:00Z",
     updated_at: "2025-05-06T20:00:00Z"
   },
@@ -1618,7 +1457,6 @@ export const mockNotes = [
     content: "Finished the first draft of the technical article I've been working on for two weeks. It's rough but it exists. Editing is easier than creating from nothing.",
     tags: ["writing"],
     sentiment_score: 0.73,
-    summary: "Completed first draft of technical article, ready for revision phase.",
     created_at: "2025-05-08T11:00:00Z",
     updated_at: "2025-05-08T12:00:00Z"
   },
@@ -1628,7 +1466,6 @@ export const mockNotes = [
     content: "Thinking about my writing process. I write best in the morning before other tasks fill my head. Need to protect that time more jealously.",
     tags: ["writing","learning"],
     sentiment_score: 0.51,
-    summary: "Identified morning as optimal writing time and need to protect it.",
     created_at: "2025-05-10T16:00:00Z",
     updated_at: "2025-05-10T17:00:00Z"
   },
@@ -1638,7 +1475,6 @@ export const mockNotes = [
     content: "Published the technical article. Posted on dev.to and LinkedIn. Better reception than expected — 200 views on day one. The feedback is encouraging.",
     tags: ["writing"],
     sentiment_score: 0.99,
-    summary: "Published first technical article, received 200 views and positive feedback on day one.",
     created_at: "2025-05-11T16:00:00Z",
     updated_at: "2025-05-11T17:00:00Z"
   },
@@ -1648,7 +1484,6 @@ export const mockNotes = [
     content: "Led my first full sprint as unofficial team lead. Keeping everyone unblocked is a different skill than writing code. Enjoyed it more than expected.",
     tags: ["leadership"],
     sentiment_score: 0.69,
-    summary: "Led first sprint as team lead, discovering enjoyment of the facilitation role.",
     created_at: "2025-05-13T15:00:00Z",
     updated_at: "2025-05-13T16:00:00Z"
   },
@@ -1658,7 +1493,6 @@ export const mockNotes = [
     content: "Had to give difficult feedback to a colleague today. Used the SBI model (Situation-Behavior-Impact). It was uncomfortable but the conversation was productive.",
     tags: ["leadership","wellbeing"],
     sentiment_score: 0.35,
-    summary: "Delivered constructive feedback using SBI model, resulting in productive dialogue.",
     created_at: "2025-05-15T18:00:00Z",
     updated_at: "2025-05-15T19:00:00Z"
   },
@@ -1668,7 +1502,6 @@ export const mockNotes = [
     content: "Set up Anki for spaced repetition. Adding cards for programming concepts, vocabulary, and ideas from books. The forgetting curve is real.",
     tags: ["learning"],
     sentiment_score: 0.53,
-    summary: "Configured Anki spaced repetition system for programming concepts and book insights.",
     created_at: "2025-05-18T11:00:00Z",
     updated_at: "2025-05-18T12:00:00Z"
   },
@@ -1678,7 +1511,6 @@ export const mockNotes = [
     content: "Practicing system design. Designing a URL shortener end-to-end. Database choices, caching strategies, and scaling decisions feel more natural with practice.",
     tags: ["learning","engineering"],
     sentiment_score: 0.55,
-    summary: "Practiced system design with URL shortener exercise, improving scaling intuition.",
     created_at: "2025-05-19T10:00:00Z",
     updated_at: "2025-05-19T11:00:00Z"
   },
@@ -1688,7 +1520,6 @@ export const mockNotes = [
     content: "Reflecting on the benefits of learning in public. Writing about what I learn forces me to understand it deeply. The audience is almost secondary.",
     tags: ["learning"],
     sentiment_score: 0.77,
-    summary: "Recognized that writing publicly about learning deepens personal understanding.",
     created_at: "2025-05-22T08:00:00Z",
     updated_at: "2025-05-22T09:00:00Z"
   },
@@ -1698,7 +1529,6 @@ export const mockNotes = [
     content: "First week of strict time blocking. More got done but felt rigid. Needs refinement — some blocks should be protected, others flexible.",
     tags: ["productivity"],
     sentiment_score: 0.41,
-    summary: "Time blocking increased output but needs adjustment for flexibility vs focus balance.",
     created_at: "2025-05-24T16:00:00Z",
     updated_at: "2025-05-24T17:00:00Z"
   },
@@ -1708,7 +1538,6 @@ export const mockNotes = [
     content: "Revisiting Getting Things Done methodology. The capture and process steps are the most valuable. Inbox zero isn't the goal — decision clarity is.",
     tags: ["productivity","reading"],
     sentiment_score: 0.43,
-    summary: "Revisited GTD methodology, identifying capture and decision clarity as core values.",
     created_at: "2025-06-01T16:00:00Z",
     updated_at: "2025-06-01T17:00:00Z"
   },
@@ -1718,7 +1547,6 @@ export const mockNotes = [
     content: "Tried single-tasking for a full week. Phone in another room, one browser tab, no Slack. Deepest focus I've had in years. Will continue.",
     tags: ["productivity"],
     sentiment_score: 0.89,
-    summary: "Single-tasking experiment produced deepest focus in years, committing to continue.",
     created_at: "2025-06-03T12:00:00Z",
     updated_at: "2025-06-03T13:00:00Z"
   },
@@ -1728,7 +1556,6 @@ export const mockNotes = [
     content: "30 consecutive days of meditation. The biggest change is noticing when I'm reactive. I create a small gap between stimulus and response now.",
     tags: ["meditation"],
     sentiment_score: 0.83,
-    summary: "30-day meditation streak developed improved stimulus-response awareness.",
     created_at: "2025-06-05T10:00:00Z",
     updated_at: "2025-06-05T11:00:00Z"
   },
@@ -1738,7 +1565,6 @@ export const mockNotes = [
     content: "Meditation has noticeably reduced my baseline anxiety. Not dramatic but consistent. Like the volume on background noise has been turned down.",
     tags: ["meditation","wellbeing"],
     sentiment_score: 0.59,
-    summary: "Regular meditation noticeably reduced baseline anxiety levels over time.",
     created_at: "2025-06-07T11:00:00Z",
     updated_at: "2025-06-07T12:00:00Z"
   },
@@ -1748,7 +1574,6 @@ export const mockNotes = [
     content: "Finally committed to shooting in manual mode only. Frustrating at first but understanding the exposure triangle is changing how I see light.",
     tags: ["photography"],
     sentiment_score: 0.45,
-    summary: "Committed to manual mode photography, developing new awareness of light and exposure.",
     created_at: "2025-06-10T14:00:00Z",
     updated_at: "2025-06-10T15:00:00Z"
   },
@@ -1758,7 +1583,6 @@ export const mockNotes = [
     content: "Morning street photography in the old town. Got 3 shots I'm genuinely happy with out of 200. That ratio is apparently normal. Patience is the skill.",
     tags: ["photography"],
     sentiment_score: 0.56,
-    summary: "Street photography session yielded 3 strong shots, learning patience is key.",
     created_at: "2025-06-11T12:00:00Z",
     updated_at: "2025-06-11T13:00:00Z"
   },
@@ -1768,7 +1592,6 @@ export const mockNotes = [
     content: "Guitar practice is finally clicking. Chord transitions between G and C are smooth now. Muscle memory is forming. Two months in and I can play a real song.",
     tags: ["music"],
     sentiment_score: 0.73,
-    summary: "Guitar chord transitions becoming smooth after two months of consistent practice.",
     created_at: "2025-06-14T11:00:00Z",
     updated_at: "2025-06-14T12:00:00Z"
   },
@@ -1778,7 +1601,6 @@ export const mockNotes = [
     content: "Learning music theory basics. Understanding scales and intervals makes the fretboard make sense. Everything connects — it's like learning the grammar of music.",
     tags: ["music"],
     sentiment_score: 0.72,
-    summary: "Music theory knowledge making fretboard patterns finally logical and connected.",
     created_at: "2025-06-16T09:00:00Z",
     updated_at: "2025-06-16T10:00:00Z"
   },
@@ -1788,7 +1610,6 @@ export const mockNotes = [
     content: "Overhauling sleep habits. No screens 1 hour before bed, consistent wake time, room temperature at 18°C. First week results are promising.",
     tags: ["sleep","wellbeing"],
     sentiment_score: 0.46,
-    summary: "Implemented comprehensive sleep hygiene changes with promising first-week results.",
     created_at: "2025-06-17T08:00:00Z",
     updated_at: "2025-06-17T09:00:00Z"
   },
@@ -1798,7 +1619,6 @@ export const mockNotes = [
     content: "30 days of sleep tracking complete. Average 7.2 hours. Deep sleep percentage is low — need more exercise and less evening alcohol.",
     tags: ["sleep"],
     sentiment_score: 0.27,
-    summary: "30-day sleep tracking revealed 7.2 hour average with low deep sleep percentage.",
     created_at: "2025-06-20T15:00:00Z",
     updated_at: "2025-06-20T16:00:00Z"
   },
@@ -1808,7 +1628,6 @@ export const mockNotes = [
     content: "Trying a plant-based month. Day 10 — energy is surprisingly good. Missing cheese more than meat. Need to learn more plant protein sources.",
     tags: ["nutrition"],
     sentiment_score: 0.42,
-    summary: "Ten days into plant-based experiment with good energy, focusing on protein sources.",
     created_at: "2025-06-21T19:00:00Z",
     updated_at: "2025-06-21T20:00:00Z"
   },
@@ -1818,7 +1637,6 @@ export const mockNotes = [
     content: "First proper mountain summit today. 6 hours round trip, 900m elevation gain. The view at the top erased all the suffering. Will absolutely do again.",
     tags: ["hiking"],
     sentiment_score: 0.97,
-    summary: "Completed first mountain summit (900m gain), found the view worth every step.",
     created_at: "2025-06-23T12:00:00Z",
     updated_at: "2025-06-23T13:00:00Z"
   },
@@ -1828,7 +1646,6 @@ export const mockNotes = [
     content: "Researching proper trail preparation. Blister prevention, layering system, emergency kit. The ten essentials are non-negotiable for longer hikes.",
     tags: ["hiking","fitness"],
     sentiment_score: 0.5,
-    summary: "Researched trail preparation essentials including first aid and layering systems.",
     created_at: "2025-07-01T19:00:00Z",
     updated_at: "2025-07-01T20:00:00Z"
   },
@@ -1838,7 +1655,6 @@ export const mockNotes = [
     content: "One year at the company today. Technically much stronger. The team culture is better than I expected. The work is meaningful. A year well spent.",
     tags: ["reflection"],
     sentiment_score: 0.75,
-    summary: "One-year company anniversary reflection: strong technical growth and positive culture.",
     created_at: "2025-07-04T10:00:00Z",
     updated_at: "2025-07-04T11:00:00Z"
   },
@@ -1848,7 +1664,6 @@ export const mockNotes = [
     content: "Did a values clarification exercise. Top three: autonomy, mastery, connection. Interesting that security didn't make the top three. Need to think about that.",
     tags: ["reflection","journaling"],
     sentiment_score: 0.52,
-    summary: "Values clarification revealed top three: autonomy, mastery, connection.",
     created_at: "2025-07-05T17:00:00Z",
     updated_at: "2025-07-05T18:00:00Z"
   },
@@ -1858,7 +1673,6 @@ export const mockNotes = [
     content: "Halfway through the year. More growth than expected in technical skills, less than expected in health. The imbalance is something to correct in H2.",
     tags: ["reflection"],
     sentiment_score: 0.29,
-    summary: "Mid-year review revealed technical over-achievement and health under-achievement.",
     created_at: "2025-07-08T15:00:00Z",
     updated_at: "2025-07-08T16:00:00Z"
   },
@@ -1868,7 +1682,6 @@ export const mockNotes = [
     content: "Started learning Kubernetes basics. The mental model of pods, services, and deployments took a while to click. Kind is great for local development.",
     tags: ["engineering","docker"],
     sentiment_score: 0.56,
-    summary: "Began Kubernetes learning with local Kind cluster for pod and service concepts.",
     created_at: "2025-07-10T11:00:00Z",
     updated_at: "2025-07-10T12:00:00Z"
   },
@@ -1878,7 +1691,6 @@ export const mockNotes = [
     content: "Applied the Feynman Technique to truly understand OAuth 2.0. Explaining it like I would to someone with no background exposed all the gaps in my understanding.",
     tags: ["learning","reading"],
     sentiment_score: 0.56,
-    summary: "Used Feynman Technique on OAuth 2.0, identifying and filling knowledge gaps.",
     created_at: "2025-07-12T11:00:00Z",
     updated_at: "2025-07-12T12:00:00Z"
   },
@@ -1888,7 +1700,6 @@ export const mockNotes = [
     content: "Shifted my code review mindset from 'finding mistakes' to 'knowledge sharing'. Reviews are now faster, less defensive, and more educational.",
     tags: ["engineering"],
     sentiment_score: 0.76,
-    summary: "Reframed code review as knowledge sharing, making process more productive.",
     created_at: "2025-07-13T14:00:00Z",
     updated_at: "2025-07-13T15:00:00Z"
   },
@@ -1898,7 +1709,6 @@ export const mockNotes = [
     content: "Caught myself comparing my progress to colleagues. Comparison is a trap — everyone's journey is different. Refocused on my own metrics.",
     tags: ["wellbeing","reflection"],
     sentiment_score: -0.3,
-    summary: "Recognized comparison trap with colleagues, refocused on personal growth metrics.",
     created_at: "2025-07-15T11:00:00Z",
     updated_at: "2025-07-15T12:00:00Z"
   },
@@ -1908,7 +1718,6 @@ export const mockNotes = [
     content: "Updated my weekly review system. Added a 'What drained me?' section alongside 'What went well?'. Identifying energy drains is as important as celebrating wins.",
     tags: ["productivity","journaling"],
     sentiment_score: 0.59,
-    summary: "Updated weekly review to include energy drain identification alongside wins.",
     created_at: "2025-07-17T12:00:00Z",
     updated_at: "2025-07-17T13:00:00Z"
   },
@@ -1918,7 +1727,6 @@ export const mockNotes = [
     content: "Deep dive into caching strategies. Redis for session data, CDN for static assets, and in-memory for frequently computed values. Each layer serves a different purpose.",
     tags: ["engineering","nodejs"],
     sentiment_score: 0.58,
-    summary: "Researched multi-layer caching strategy using Redis, CDN, and in-memory cache.",
     created_at: "2025-07-20T08:00:00Z",
     updated_at: "2025-07-20T09:00:00Z"
   },
@@ -1928,7 +1736,6 @@ export const mockNotes = [
     content: "Started to see cooking as a mindfulness practice. Chopping vegetables, watching a reduction happen — present moment stuff. The food is just the outcome.",
     tags: ["cooking","reflection"],
     sentiment_score: 0.71,
-    summary: "Discovered cooking as a present-moment mindfulness practice beyond just making food.",
     created_at: "2025-07-21T08:00:00Z",
     updated_at: "2025-07-21T09:00:00Z"
   },
@@ -1938,7 +1745,6 @@ export const mockNotes = [
     content: "Read about money and happiness research. Beyond $75k baseline, more money has diminishing returns on happiness. Experiences beat things consistently.",
     tags: ["finance","reflection"],
     sentiment_score: 0.43,
-    summary: "Research confirmed diminishing happiness returns above income baseline; experiences beat possessions.",
     created_at: "2025-07-23T15:00:00Z",
     updated_at: "2025-07-23T16:00:00Z"
   },
@@ -1948,7 +1754,6 @@ export const mockNotes = [
     content: "Spent time improving our project docs. Future me and colleagues will thank present me. Good documentation is a force multiplier for the whole team.",
     tags: ["writing","engineering"],
     sentiment_score: 0.78,
-    summary: "Improved project documentation recognizing it as force multiplier for team productivity.",
     created_at: "2025-07-25T11:00:00Z",
     updated_at: "2025-07-25T12:00:00Z"
   },
@@ -1958,7 +1763,6 @@ export const mockNotes = [
     content: "Found the right pattern for integrating D3 with Vue. D3 handles SVG manipulation, Vue handles reactivity and data. Don't fight the frameworks.",
     tags: ["vue","d3"],
     sentiment_score: 0.6,
-    summary: "Established clear Vue+D3 integration pattern: D3 for SVG, Vue for reactivity.",
     created_at: "2025-08-02T12:00:00Z",
     updated_at: "2025-08-02T13:00:00Z"
   },
@@ -1968,7 +1772,6 @@ export const mockNotes = [
     content: "Recognizing I'm an introvert who can act extroverted. Social events are energising in the moment but I need recovery time after. Planning accordingly.",
     tags: ["wellbeing"],
     sentiment_score: 0.46,
-    summary: "Recognized ambivert tendencies and started planning social recovery time.",
     created_at: "2025-08-04T11:00:00Z",
     updated_at: "2025-08-04T12:00:00Z"
   },
@@ -1978,7 +1781,6 @@ export const mockNotes = [
     content: "Shifting from input-heavy (reading, watching) to output-heavy (building, writing) learning. The knowledge sticks better. The projects don't have to be polished.",
     tags: ["learning","productivity"],
     sentiment_score: 0.57,
-    summary: "Shifted learning strategy from input-heavy to output-heavy for better retention.",
     created_at: "2025-08-05T12:00:00Z",
     updated_at: "2025-08-05T13:00:00Z"
   },
@@ -1988,7 +1790,6 @@ export const mockNotes = [
     content: "Reviewing authentication best practices. JWTs for stateless auth, refresh tokens with rotation, httpOnly cookies to prevent XSS. Security in layers.",
     tags: ["nodejs","engineering"],
     sentiment_score: 0.57,
-    summary: "Reviewed auth security: JWTs, refresh token rotation, and httpOnly cookie defense.",
     created_at: "2025-08-08T18:00:00Z",
     updated_at: "2025-08-08T19:00:00Z"
   },
@@ -1998,7 +1799,6 @@ export const mockNotes = [
     content: "Reframing fitness from 'something I do' to 'who I am'. Identity-based habits are stickier. I'm not trying to get fit — I'm a person who takes care of their body.",
     tags: ["fitness","reflection"],
     sentiment_score: 0.76,
-    summary: "Adopted identity-based fitness mindset: being someone who takes care of their body.",
     created_at: "2025-08-09T17:00:00Z",
     updated_at: "2025-08-09T18:00:00Z"
   },
@@ -2008,7 +1808,6 @@ export const mockNotes = [
     content: "Did Tim Ferriss's fear setting exercise for a big decision. Defining the worst case made the risk seem manageable. Deciding not to decide is also a decision.",
     tags: ["reflection","journaling"],
     sentiment_score: 0.45,
-    summary: "Fear setting exercise made big decision's worst case manageable and clarified choice.",
     created_at: "2025-08-12T13:00:00Z",
     updated_at: "2025-08-12T14:00:00Z"
   },
@@ -2018,7 +1817,6 @@ export const mockNotes = [
     content: "Deep dive into dark mode design. Not just inverting colors — shadows become highlights, saturation drops, and elevation uses lighter surfaces.",
     tags: ["design"],
     sentiment_score: 0.55,
-    summary: "Learned dark mode requires rethinking shadows, elevation, and color saturation.",
     created_at: "2025-08-13T12:00:00Z",
     updated_at: "2025-08-13T13:00:00Z"
   },
@@ -2028,7 +1826,6 @@ export const mockNotes = [
     content: "Two weeks of strict TDD. Tests first, code second. Initial friction was high but the code quality improvement is undeniable. Debugging time dropped significantly.",
     tags: ["engineering","testing"],
     sentiment_score: 0.79,
-    summary: "Two-week TDD experiment showed significant code quality and debugging improvements.",
     created_at: "2025-08-15T13:00:00Z",
     updated_at: "2025-08-15T14:00:00Z"
   },
@@ -2038,7 +1835,6 @@ export const mockNotes = [
     content: "Deep dive into microservices today. The separation of concerns is powerful but adds complexity. Need to understand service discovery and load balancing better.",
     tags: ["engineering","learning"],
     sentiment_score: 0.48,
-    summary: "Researched microservices benefits and challenges including service discovery.",
     created_at: "2025-08-18T14:00:00Z",
     updated_at: "2025-08-18T15:00:00Z"
   },
@@ -2048,7 +1844,6 @@ export const mockNotes = [
     content: "Finally understood the Node.js event loop properly. The libuv thread pool is separate from the main event loop. This changes how I think about async operations.",
     tags: ["engineering","nodejs"],
     sentiment_score: 0.75,
-    summary: "Gained clarity on Node.js event loop and libuv thread pool mechanics.",
     created_at: "2025-08-20T10:00:00Z",
     updated_at: "2025-08-20T11:00:00Z"
   },
@@ -2058,7 +1853,6 @@ export const mockNotes = [
     content: "Spent time practicing TypeScript generics. They're complex but make code much more reusable. Conditional types are particularly mind-bending.",
     tags: ["engineering","typescript"],
     sentiment_score: 0.54,
-    summary: "Practiced TypeScript generics and conditional types for reusable code.",
     created_at: "2025-08-21T08:00:00Z",
     updated_at: "2025-08-21T09:00:00Z"
   },
@@ -2068,7 +1862,6 @@ export const mockNotes = [
     content: "Revisiting our unit testing approach. We have too many integration tests and not enough unit tests. Need to shift the testing pyramid.",
     tags: ["engineering","testing"],
     sentiment_score: 0.35,
-    summary: "Evaluated testing strategy, identified need to increase unit test coverage.",
     created_at: "2025-08-24T08:00:00Z",
     updated_at: "2025-08-24T09:00:00Z"
   },
@@ -2078,7 +1871,6 @@ export const mockNotes = [
     content: "Learned about multi-stage Docker builds today. Production images are now 60% smaller. The build cache optimization is a game changer.",
     tags: ["engineering","docker"],
     sentiment_score: 0.81,
-    summary: "Implemented multi-stage Docker builds reducing image size by 60%.",
     created_at: "2025-08-25T15:00:00Z",
     updated_at: "2025-08-25T16:00:00Z"
   },
@@ -2088,7 +1880,6 @@ export const mockNotes = [
     content: "Implemented rate limiting on our API endpoints. Used a token bucket algorithm. Testing edge cases with concurrent requests was tricky.",
     tags: ["engineering"],
     sentiment_score: 0.5,
-    summary: "Implemented token bucket rate limiting for API endpoints.",
     created_at: "2025-09-02T09:00:00Z",
     updated_at: "2025-09-02T10:00:00Z"
   },
@@ -2098,7 +1889,6 @@ export const mockNotes = [
     content: "Team discussion about switching parts of our API to GraphQL. REST is simpler but GraphQL solves our over-fetching problem. Still undecided.",
     tags: ["engineering","design"],
     sentiment_score: 0.24,
-    summary: "Team debated REST vs GraphQL trade-offs for API architecture.",
     created_at: "2025-09-04T14:00:00Z",
     updated_at: "2025-09-04T15:00:00Z"
   },
@@ -2108,7 +1898,6 @@ export const mockNotes = [
     content: "Refactoring old Options API code to Composition API. The code is much cleaner. Composables are like React hooks but feel more natural to me.",
     tags: ["engineering","vue"],
     sentiment_score: 0.61,
-    summary: "Refactored Vue components from Options to Composition API using composables.",
     created_at: "2025-09-06T19:00:00Z",
     updated_at: "2025-09-06T20:00:00Z"
   },
@@ -2118,7 +1907,6 @@ export const mockNotes = [
     content: "Noticing early burnout signs. Irritable, tired, losing interest in things I usually enjoy. Need to slow down and recover before it gets worse.",
     tags: ["wellbeing"],
     sentiment_score: -0.53,
-    summary: "Identified early burnout signs and need to prioritize recovery.",
     created_at: "2025-09-08T16:00:00Z",
     updated_at: "2025-09-08T17:00:00Z"
   },
@@ -2128,7 +1916,6 @@ export const mockNotes = [
     content: "Took stock of my work-life balance this week. I've been putting in too many late nights. Making a rule to stop working at 7pm.",
     tags: ["wellbeing","reflection"],
     sentiment_score: -0.16,
-    summary: "Assessed work-life balance and set boundaries around evening work hours.",
     created_at: "2025-09-10T18:00:00Z",
     updated_at: "2025-09-10T19:00:00Z"
   },
@@ -2138,7 +1925,6 @@ export const mockNotes = [
     content: "Day 5 of daily meditation. Noticing a real difference in how I respond to stressful situations. 10 minutes in the morning is all it takes.",
     tags: ["wellbeing","meditation"],
     sentiment_score: 0.66,
-    summary: "Five days into meditation practice, noticing improved stress responses.",
     created_at: "2025-09-12T10:00:00Z",
     updated_at: "2025-09-12T11:00:00Z"
   },
@@ -2148,7 +1934,6 @@ export const mockNotes = [
     content: "The research is clear - exercise directly improves mental health. Had a bad day, went for a run, felt completely different after. Need to make this a non-negotiable.",
     tags: ["wellbeing","fitness"],
     sentiment_score: 0.42,
-    summary: "Experienced firsthand how exercise transformed a difficult mental health day.",
     created_at: "2025-09-14T19:00:00Z",
     updated_at: "2025-09-14T20:00:00Z"
   },
@@ -2158,7 +1943,6 @@ export const mockNotes = [
     content: "Had a hard conversation with my manager about workload. It went better than expected. Being direct was the right call. Feeling lighter now.",
     tags: ["wellbeing"],
     sentiment_score: 0.31,
-    summary: "Had productive direct conversation with manager about workload concerns.",
     created_at: "2025-09-16T14:00:00Z",
     updated_at: "2025-09-16T15:00:00Z"
   },
@@ -2168,7 +1952,6 @@ export const mockNotes = [
     content: "Looking back at everything this year. Despite the hard patches, there's so much to be grateful for. Growth, friendships, skills learned. A good year overall.",
     tags: ["wellbeing","journaling"],
     sentiment_score: 0.71,
-    summary: "Reflected on the year with gratitude, noting significant personal growth.",
     created_at: "2025-09-17T16:00:00Z",
     updated_at: "2025-09-17T17:00:00Z"
   },
@@ -2178,7 +1961,6 @@ export const mockNotes = [
     content: "Kahneman's System 1 vs System 2 thinking is reshaping how I make decisions. I catch myself defaulting to fast thinking when I should slow down.",
     tags: ["reading"],
     sentiment_score: 0.78,
-    summary: "Applied Kahneman's dual-process theory to improve decision-making awareness.",
     created_at: "2025-09-19T09:00:00Z",
     updated_at: "2025-09-19T10:00:00Z"
   },
@@ -2188,7 +1970,6 @@ export const mockNotes = [
     content: "Re-reading The Pragmatic Programmer. The orthogonality principle is something I've been violating. Components should be independent and have a single responsibility.",
     tags: ["reading","learning"],
     sentiment_score: 0.67,
-    summary: "Revisited orthogonality principle from The Pragmatic Programmer.",
     created_at: "2025-09-22T15:00:00Z",
     updated_at: "2025-09-22T16:00:00Z"
   },
@@ -2198,7 +1979,6 @@ export const mockNotes = [
     content: "Essentialism is about doing less but better. The key question: what is the most important thing I can do right now? Learning to say no more deliberately.",
     tags: ["reading"],
     sentiment_score: 0.68,
-    summary: "Essentialism taught the importance of selective focus and deliberate 'no'.",
     created_at: "2025-09-24T15:00:00Z",
     updated_at: "2025-09-24T16:00:00Z"
   },
@@ -2208,7 +1988,6 @@ export const mockNotes = [
     content: "Cal Newport's Deep Work is exactly what I needed. Scheduling deep work blocks in the morning before checking email. Already seeing a difference.",
     tags: ["reading","productivity"],
     sentiment_score: 0.89,
-    summary: "Implementing deep work blocks in the morning based on Cal Newport's principles.",
     created_at: "2025-09-25T18:00:00Z",
     updated_at: "2025-09-25T19:00:00Z"
   },
@@ -2218,7 +1997,6 @@ export const mockNotes = [
     content: "Read several articles on distributed systems consistency models. CAP theorem is less a theorem and more a design trade-off. Choosing between availability and consistency.",
     tags: ["reading"],
     sentiment_score: 0.52,
-    summary: "Researched distributed systems consistency models and CAP theorem implications.",
     created_at: "2025-10-02T13:00:00Z",
     updated_at: "2025-10-02T14:00:00Z"
   },
@@ -2228,7 +2006,6 @@ export const mockNotes = [
     content: "Migrating from Vuex to Pinia. Pinia is so much simpler — no mutations, just actions. The DevTools integration is also better.",
     tags: ["vue","engineering"],
     sentiment_score: 0.73,
-    summary: "Migrated state management from Vuex to Pinia, finding it significantly simpler.",
     created_at: "2025-10-04T18:00:00Z",
     updated_at: "2025-10-04T19:00:00Z"
   },
@@ -2238,7 +2015,6 @@ export const mockNotes = [
     content: "Implementing auth guards in Vue Router. The beforeEach hook is powerful but easy to mess up. Need to handle async checks correctly to avoid race conditions.",
     tags: ["vue"],
     sentiment_score: 0.4,
-    summary: "Researched Vue Router navigation guards for authentication flow.",
     created_at: "2025-10-06T18:00:00Z",
     updated_at: "2025-10-06T19:00:00Z"
   },
@@ -2248,7 +2024,6 @@ export const mockNotes = [
     content: "Planning our internal component library. Deciding between building from scratch vs extending Shadcn/Vue. Building is slower but gives more control.",
     tags: ["vue","design"],
     sentiment_score: 0.55,
-    summary: "Evaluated component library approach: custom build vs extending existing library.",
     created_at: "2025-10-07T19:00:00Z",
     updated_at: "2025-10-07T20:00:00Z"
   },
@@ -2258,7 +2033,6 @@ export const mockNotes = [
     content: "Started a structured 10K training program. First week is easy — just building the habit. Running 3x per week feels manageable alongside everything else.",
     tags: ["fitness"],
     sentiment_score: 0.62,
-    summary: "Began structured 10K training program with 3x weekly runs.",
     created_at: "2025-10-10T11:00:00Z",
     updated_at: "2025-10-10T12:00:00Z"
   },
@@ -2268,7 +2042,6 @@ export const mockNotes = [
     content: "Learning that rest days are as important as training days. Overtraining is a real risk. My body needs time to adapt and recover.",
     tags: ["fitness","wellbeing"],
     sentiment_score: 0.45,
-    summary: "Recognized importance of rest days in training cycle to prevent overtraining.",
     created_at: "2025-10-12T12:00:00Z",
     updated_at: "2025-10-12T13:00:00Z"
   },
@@ -2278,7 +2051,6 @@ export const mockNotes = [
     content: "Trying different pre-workout meals. Banana + peanut butter 1 hour before is working well. Energy is consistent without the crash.",
     tags: ["fitness","nutrition"],
     sentiment_score: 0.68,
-    summary: "Found banana and peanut butter optimal for pre-workout energy.",
     created_at: "2025-10-13T08:00:00Z",
     updated_at: "2025-10-13T09:00:00Z"
   },
@@ -2288,7 +2060,6 @@ export const mockNotes = [
     content: "New 5K personal best today! 24:32. Months of consistent training paying off. The key was building base mileage slowly before adding speed work.",
     tags: ["fitness"],
     sentiment_score: 0.87,
-    summary: "Achieved new 5K personal best of 24:32 through consistent base training.",
     created_at: "2025-10-15T10:00:00Z",
     updated_at: "2025-10-15T11:00:00Z"
   },
@@ -2298,7 +2069,6 @@ export const mockNotes = [
     content: "Tried trail running for the first time. Much harder than road running but infinitely more enjoyable. The connection to nature makes it feel less like exercise.",
     tags: ["fitness","hiking"],
     sentiment_score: 0.83,
-    summary: "Discovered trail running as more enjoyable and connected to nature.",
     created_at: "2025-10-18T14:00:00Z",
     updated_at: "2025-10-18T15:00:00Z"
   },
@@ -2308,7 +2078,6 @@ export const mockNotes = [
     content: "Implemented a design tokens system for our app. Colors, spacing, and typography are all tokenized now. Theme switching is trivial.",
     tags: ["design"],
     sentiment_score: 0.69,
-    summary: "Implemented design tokens system enabling easy theme switching.",
     created_at: "2025-10-19T17:00:00Z",
     updated_at: "2025-10-19T18:00:00Z"
   },
@@ -2318,7 +2087,6 @@ export const mockNotes = [
     content: "Revisiting responsive design patterns. CSS Grid with named areas is so clean. The old float-based layouts feel prehistoric now.",
     tags: ["design","vue"],
     sentiment_score: 0.51,
-    summary: "Modernized responsive layout approach using CSS Grid named areas.",
     created_at: "2025-10-21T16:00:00Z",
     updated_at: "2025-10-21T17:00:00Z"
   },
@@ -2328,7 +2096,6 @@ export const mockNotes = [
     content: "Ran user testing on our onboarding flow. Three out of five users struggled with step 3. The copy is confusing. Need to redesign.",
     tags: ["design"],
     sentiment_score: -0.31,
-    summary: "User testing revealed step 3 of onboarding confuses 60% of users.",
     created_at: "2025-10-24T12:00:00Z",
     updated_at: "2025-10-24T13:00:00Z"
   },
@@ -2338,7 +2105,6 @@ export const mockNotes = [
     content: "Deep dive into typography. Line height, letter spacing, and font pairing make such a huge difference. Going through Practical Typography by Matthew Butterick.",
     tags: ["design","learning"],
     sentiment_score: 0.63,
-    summary: "Studied typography fundamentals including line height, spacing, and font pairing.",
     created_at: "2025-10-26T10:00:00Z",
     updated_at: "2025-10-26T11:00:00Z"
   },
@@ -2348,7 +2114,6 @@ export const mockNotes = [
     content: "Three weeks of morning pages. The mental clarity it brings is incredible. I process a lot of background anxiety by just writing it out.",
     tags: ["journaling"],
     sentiment_score: 0.72,
-    summary: "Three weeks of morning pages delivering mental clarity and anxiety processing.",
     created_at: "2025-11-01T16:00:00Z",
     updated_at: "2025-11-01T17:00:00Z"
   },
@@ -2358,7 +2123,6 @@ export const mockNotes = [
     content: "Q2 review done. Hit most goals, missed two. The fitness goal slipped because I wasn't tracking consistently. Q3 needs a better tracking system.",
     tags: ["journaling","reflection"],
     sentiment_score: 0.37,
-    summary: "Q2 review: achieved most goals, fitness goal missed due to inconsistent tracking.",
     created_at: "2025-11-04T19:00:00Z",
     updated_at: "2025-11-04T20:00:00Z"
   },
@@ -2368,7 +2132,6 @@ export const mockNotes = [
     content: "Honest journaling question today: what am I avoiding? Turns out — a difficult code review feedback I haven't fully processed and a conversation I keep putting off.",
     tags: ["journaling"],
     sentiment_score: -0.4,
-    summary: "Identified avoided tasks: unprocessed code review feedback and delayed conversation.",
     created_at: "2025-11-06T15:00:00Z",
     updated_at: "2025-11-06T16:00:00Z"
   },
@@ -2378,7 +2141,6 @@ export const mockNotes = [
     content: "Trying to be better at celebrating small wins. Shipped a feature today, got positive feedback, and immediately moved to the next thing. Paused to acknowledge it.",
     tags: ["journaling","wellbeing"],
     sentiment_score: 0.75,
-    summary: "Practiced acknowledging small wins rather than immediately moving to next tasks.",
     created_at: "2025-11-07T15:00:00Z",
     updated_at: "2025-11-07T16:00:00Z"
   },
@@ -2388,7 +2150,6 @@ export const mockNotes = [
     content: "Understanding the Express middleware stack better. Error handling middleware must have 4 parameters. Request lifecycle is clearer now.",
     tags: ["nodejs"],
     sentiment_score: 0.46,
-    summary: "Deepened understanding of Express middleware stack and error handling patterns.",
     created_at: "2025-11-09T10:00:00Z",
     updated_at: "2025-11-09T11:00:00Z"
   },
@@ -2398,7 +2159,6 @@ export const mockNotes = [
     content: "Implemented connection pooling for PostgreSQL. Was creating a new connection per request — rookie mistake. Pool of 10 connections handles our load fine.",
     tags: ["nodejs","engineering"],
     sentiment_score: 0.56,
-    summary: "Fixed connection pooling implementation reducing database connection overhead.",
     created_at: "2025-11-11T11:00:00Z",
     updated_at: "2025-11-11T12:00:00Z"
   },
@@ -2408,7 +2168,6 @@ export const mockNotes = [
     content: "First time using WebSockets in Node. The real-time updates feel like magic after years of polling. Socket.io abstracts away the complexity nicely.",
     tags: ["nodejs"],
     sentiment_score: 0.82,
-    summary: "Implemented real-time WebSocket communication using Socket.io.",
     created_at: "2025-11-13T15:00:00Z",
     updated_at: "2025-11-13T16:00:00Z"
   },
@@ -2418,7 +2177,6 @@ export const mockNotes = [
     content: "Getting more comfortable with D3 scales. Linear, log, and ordinal scales each have their place. Axes are built from scales — that was the mental model I was missing.",
     tags: ["d3"],
     sentiment_score: 0.62,
-    summary: "Developed clearer mental model of D3 scales and their relationship to axes.",
     created_at: "2025-11-16T12:00:00Z",
     updated_at: "2025-11-16T13:00:00Z"
   },
@@ -2428,7 +2186,6 @@ export const mockNotes = [
     content: "Implemented D3 brushing for range selection. The event system is low level but gives total control. Users can now select date ranges directly on the chart.",
     tags: ["d3","engineering"],
     sentiment_score: 0.6,
-    summary: "Implemented D3 brush interaction for interactive date range selection.",
     created_at: "2025-11-18T13:00:00Z",
     updated_at: "2025-11-18T14:00:00Z"
   },
@@ -2438,7 +2195,6 @@ export const mockNotes = [
     content: "Research on SVG vs Canvas rendering. SVG is DOM-based and interactive but slow at scale. Canvas is fast but requires manual hit testing. Going with SVG for now.",
     tags: ["d3"],
     sentiment_score: 0.5,
-    summary: "Evaluated SVG vs Canvas trade-offs, choosing SVG for interactive graph visualization.",
     created_at: "2025-11-20T10:00:00Z",
     updated_at: "2025-11-20T11:00:00Z"
   },
@@ -2448,7 +2204,6 @@ export const mockNotes = [
     content: "Starting to plan a trip to Portugal. Lisbon and Porto both look incredible. Late September seems like the ideal time — crowds thin out but weather is still great.",
     tags: ["travel"],
     sentiment_score: 0.79,
-    summary: "Began planning Portugal trip targeting late September for Lisbon and Porto.",
     created_at: "2025-11-21T18:00:00Z",
     updated_at: "2025-11-21T19:00:00Z"
   },
@@ -2458,7 +2213,6 @@ export const mockNotes = [
     content: "Researching food in Lisbon. Pastéis de nata, bacalhau, and bifanas are non-negotiable. Found a food tour that hits all the traditional spots.",
     tags: ["travel","cooking"],
     sentiment_score: 0.71,
-    summary: "Researched Lisbon food scene and booked a traditional food tour.",
     created_at: "2025-11-23T08:00:00Z",
     updated_at: "2025-11-23T09:00:00Z"
   },
@@ -2468,7 +2222,6 @@ export const mockNotes = [
     content: "Thinking about why solo travel appeals to me. Full control of the itinerary, no compromises. The unexpected conversations with strangers are often the highlight.",
     tags: ["travel"],
     sentiment_score: 0.66,
-    summary: "Reflected on appeal of solo travel: autonomy and unexpected human connections.",
     created_at: "2025-11-25T08:00:00Z",
     updated_at: "2025-11-25T09:00:00Z"
   },
@@ -2478,7 +2231,6 @@ export const mockNotes = [
     content: "Sourdough starter finally active after a week. It's bubbling and has that sour smell. First bake tomorrow. Expecting a dense disaster but excited to try.",
     tags: ["cooking"],
     sentiment_score: 0.67,
-    summary: "Sourdough starter became active after 7 days, ready for first bake.",
     created_at: "2025-12-02T14:00:00Z",
     updated_at: "2025-12-02T15:00:00Z"
   },
@@ -2488,7 +2240,6 @@ export const mockNotes = [
     content: "Perfected my Sunday meal prep routine. 2 hours, 5 meals for the week. Grains, proteins, and vegetables prepped separately for flexibility.",
     tags: ["cooking","nutrition"],
     sentiment_score: 0.81,
-    summary: "Established efficient 2-hour Sunday meal prep system for the week.",
     created_at: "2025-12-04T14:00:00Z",
     updated_at: "2025-12-04T15:00:00Z"
   },
@@ -2498,7 +2249,6 @@ export const mockNotes = [
     content: "Watching knife skills videos and actually practicing. The difference between a sharp and dull knife is enormous. Julienne cuts are coming along.",
     tags: ["cooking"],
     sentiment_score: 0.56,
-    summary: "Actively practicing knife skills, noting major difference with properly sharpened knife.",
     created_at: "2025-12-05T12:00:00Z",
     updated_at: "2025-12-05T13:00:00Z"
   },
@@ -2508,7 +2258,6 @@ export const mockNotes = [
     content: "Made pasta from scratch today. Just flour and eggs. The kneading is meditative. Fresh pasta taste is incomparable to dried — worth the effort.",
     tags: ["cooking"],
     sentiment_score: 0.84,
-    summary: "Made fresh pasta from scratch, finding kneading meditative and result superior.",
     created_at: "2025-12-07T08:00:00Z",
     updated_at: "2025-12-07T09:00:00Z"
   },
@@ -2518,7 +2267,6 @@ export const mockNotes = [
     content: "Reviewing this year's budget against actual spending. Biggest overspend: eating out (2x budget). Biggest underspend: entertainment. Need better food habit tracking.",
     tags: ["finance"],
     sentiment_score: -0.29,
-    summary: "Annual budget review revealed 2x overspend on eating out vs entertainment savings.",
     created_at: "2025-12-10T14:00:00Z",
     updated_at: "2025-12-10T15:00:00Z"
   },
@@ -2528,7 +2276,6 @@ export const mockNotes = [
     content: "Hit my 6-month emergency fund target today. Took 18 months of consistent saving. The peace of mind it brings is worth every sacrifice.",
     tags: ["finance","budgeting"],
     sentiment_score: 0.84,
-    summary: "Achieved 6-month emergency fund goal after 18 months of consistent saving.",
     created_at: "2025-12-12T17:00:00Z",
     updated_at: "2025-12-12T18:00:00Z"
   },
@@ -2538,7 +2285,6 @@ export const mockNotes = [
     content: "Quarterly portfolio check. Index funds are performing as expected — boring but consistent. Resisting the urge to tinker. Staying the course.",
     tags: ["finance"],
     sentiment_score: 0.52,
-    summary: "Quarterly portfolio review confirmed index fund strategy on track, avoiding tinkering.",
     created_at: "2025-12-14T17:00:00Z",
     updated_at: "2025-12-14T18:00:00Z"
   },
@@ -2548,7 +2294,6 @@ export const mockNotes = [
     content: "Finished the first draft of the technical article I've been working on for two weeks. It's rough but it exists. Editing is easier than creating from nothing.",
     tags: ["writing"],
     sentiment_score: 0.7,
-    summary: "Completed first draft of technical article, ready for revision phase.",
     created_at: "2025-12-15T19:00:00Z",
     updated_at: "2025-12-15T20:00:00Z"
   },
@@ -2558,7 +2303,6 @@ export const mockNotes = [
     content: "Thinking about my writing process. I write best in the morning before other tasks fill my head. Need to protect that time more jealously.",
     tags: ["writing","learning"],
     sentiment_score: 0.47,
-    summary: "Identified morning as optimal writing time and need to protect it.",
     created_at: "2025-12-18T15:00:00Z",
     updated_at: "2025-12-18T16:00:00Z"
   },
@@ -2568,7 +2312,6 @@ export const mockNotes = [
     content: "Published the technical article. Posted on dev.to and LinkedIn. Better reception than expected — 200 views on day one. The feedback is encouraging.",
     tags: ["writing"],
     sentiment_score: 0.99,
-    summary: "Published first technical article, received 200 views and positive feedback on day one.",
     created_at: "2025-12-20T14:00:00Z",
     updated_at: "2025-12-20T15:00:00Z"
   },
@@ -2578,7 +2321,6 @@ export const mockNotes = [
     content: "Led my first full sprint as unofficial team lead. Keeping everyone unblocked is a different skill than writing code. Enjoyed it more than expected.",
     tags: ["leadership"],
     sentiment_score: 0.74,
-    summary: "Led first sprint as team lead, discovering enjoyment of the facilitation role.",
     created_at: "2025-12-22T13:00:00Z",
     updated_at: "2025-12-22T14:00:00Z"
   },
@@ -2588,7 +2330,6 @@ export const mockNotes = [
     content: "Had to give difficult feedback to a colleague today. Used the SBI model (Situation-Behavior-Impact). It was uncomfortable but the conversation was productive.",
     tags: ["leadership","wellbeing"],
     sentiment_score: 0.49,
-    summary: "Delivered constructive feedback using SBI model, resulting in productive dialogue.",
     created_at: "2025-12-24T14:00:00Z",
     updated_at: "2025-12-24T15:00:00Z"
   },
@@ -2598,7 +2339,6 @@ export const mockNotes = [
     content: "Set up Anki for spaced repetition. Adding cards for programming concepts, vocabulary, and ideas from books. The forgetting curve is real.",
     tags: ["learning"],
     sentiment_score: 0.58,
-    summary: "Configured Anki spaced repetition system for programming concepts and book insights.",
     created_at: "2025-12-25T11:00:00Z",
     updated_at: "2025-12-25T12:00:00Z"
   }
@@ -2609,7 +2349,6 @@ export const mockNotes = [
     content: "Longest run yet — 28km. Felt strong the whole way. Marathon is within reach.",
     tags: ["fitness"],
     sentiment_score: 0.97,
-    summary: "Achieved 28km long run PB, marathon goal now feels realistic.",
     created_at: "2025-01-01T12:00:00Z",
     updated_at: "2025-01-01T13:00:00Z"
   },
@@ -2619,7 +2358,6 @@ export const mockNotes = [
     content: "Big feature finally in production. Zero issues. The testing paid off.",
     tags: ["engineering"],
     sentiment_score: 0.84,
-    summary: "Major feature shipped cleanly to production after thorough testing.",
     created_at: "2025-01-04T13:00:00Z",
     updated_at: "2025-01-04T14:00:00Z"
   },
@@ -2629,7 +2367,6 @@ export const mockNotes = [
     content: "The technical article crossed 1000 views. Community feedback is overwhelmingly positive.",
     tags: ["writing"],
     sentiment_score: 0.91,
-    summary: "Technical article reached 1000 views with strong community reception.",
     created_at: "2025-01-04T17:00:00Z",
     updated_at: "2025-01-04T18:00:00Z"
   },
@@ -2639,7 +2376,6 @@ export const mockNotes = [
     content: "After 12 attempts, the sourdough is perfect. Open crumb, crispy crust. Worth every failure.",
     tags: ["cooking"],
     sentiment_score: 0.89,
-    summary: "Achieved perfect sourdough after 12 iterations — open crumb and crispy crust.",
     created_at: "2025-01-09T14:00:00Z",
     updated_at: "2025-01-09T15:00:00Z"
   },
@@ -2649,7 +2385,6 @@ export const mockNotes = [
     content: "Passed the AWS Solutions Architect exam on first attempt. Months of studying paid off.",
     tags: ["learning"],
     sentiment_score: 0.92,
-    summary: "Passed AWS Solutions Architect certification on first attempt.",
     created_at: "2025-01-18T16:00:00Z",
     updated_at: "2025-01-18T17:00:00Z"
   },
@@ -2659,7 +2394,6 @@ export const mockNotes = [
     content: "Everything clicked this week. Work, health, relationships. Rare alignment.",
     tags: ["journaling"],
     sentiment_score: 0.97,
-    summary: "Exceptional week with work, health, and relationships all aligned positively.",
     created_at: "2025-01-20T13:00:00Z",
     updated_at: "2025-01-20T14:00:00Z"
   },
@@ -2669,7 +2403,6 @@ export const mockNotes = [
     content: "Performed at an open mic for the first time. Nervous but pulled it off. People clapped.",
     tags: ["music"],
     sentiment_score: 0.83,
-    summary: "Successfully completed first open mic performance despite nerves.",
     created_at: "2025-01-24T13:00:00Z",
     updated_at: "2025-01-24T14:00:00Z"
   },
@@ -2679,7 +2412,6 @@ export const mockNotes = [
     content: "Officially promoted to senior. A year of hard work recognized. Feeling proud.",
     tags: ["reflection"],
     sentiment_score: 0.93,
-    summary: "Received senior promotion after a year of consistent effort and results.",
     created_at: "2025-01-25T18:00:00Z",
     updated_at: "2025-01-25T19:00:00Z"
   },
@@ -2689,7 +2421,6 @@ export const mockNotes = [
     content: "Finished the component refactor. Test coverage went from 40% to 78%. Feels much better.",
     tags: ["engineering","vue"],
     sentiment_score: 0.62,
-    summary: "Component refactor improved test coverage from 40% to 78%.",
     created_at: "2025-01-25T19:00:00Z",
     updated_at: "2025-01-25T20:00:00Z"
   },
@@ -2699,7 +2430,6 @@ export const mockNotes = [
     content: "Completed Atomic Habits. The 1% better every day concept is deceptively simple but powerful.",
     tags: ["reading"],
     sentiment_score: 0.64,
-    summary: "Atomic Habits reinforced compound improvement through 1% daily gains.",
     created_at: "2025-01-26T15:00:00Z",
     updated_at: "2025-01-26T16:00:00Z"
   },
@@ -2709,7 +2439,6 @@ export const mockNotes = [
     content: "Woke at 4am for a sunrise hike. The view at the top in golden light was surreal.",
     tags: ["fitness","hiking"],
     sentiment_score: 0.74,
-    summary: "Early morning sunrise hike delivered breathtaking light views.",
     created_at: "2025-01-26T17:00:00Z",
     updated_at: "2025-01-26T18:00:00Z"
   },
@@ -2719,7 +2448,6 @@ export const mockNotes = [
     content: "Cleared my inbox for the first time in 8 months. Took 3 hours. Feels like a fresh start.",
     tags: ["productivity"],
     sentiment_score: 0.56,
-    summary: "Achieved inbox zero after 8 months, creating mental clarity.",
     created_at: "2025-01-28T19:00:00Z",
     updated_at: "2025-01-28T20:00:00Z"
   },
@@ -2729,7 +2457,6 @@ export const mockNotes = [
     content: "Query optimization and caching cut API response from 800ms to 320ms. Significant win.",
     tags: ["nodejs"],
     sentiment_score: 0.74,
-    summary: "API optimization reduced response time by 60% through caching and query tuning.",
     created_at: "2025-01-28T19:00:00Z",
     updated_at: "2025-01-28T20:00:00Z"
   },
@@ -2739,7 +2466,6 @@ export const mockNotes = [
     content: "Hit 60 days consecutive meditation. The practice is now automatic — like brushing teeth.",
     tags: ["meditation"],
     sentiment_score: 0.77,
-    summary: "60-day meditation streak reached, practice now deeply habitual.",
     created_at: "2025-01-29T15:00:00Z",
     updated_at: "2025-01-29T16:00:00Z"
   },
@@ -2749,7 +2475,6 @@ export const mockNotes = [
     content: "New design system adopted by all three product teams. Consistency across products finally.",
     tags: ["design"],
     sentiment_score: 0.7,
-    summary: "Design system v2 successfully adopted across all three product teams.",
     created_at: "2025-02-01T23:00:00Z",
     updated_at: "2025-02-02T00:00:00Z"
   },
@@ -2759,7 +2484,6 @@ export const mockNotes = [
     content: "Portfolio review: 18% year-to-date return. Index funds boring but effective.",
     tags: ["finance"],
     sentiment_score: 0.75,
-    summary: "Portfolio achieved 18% YTD return through consistent index fund strategy.",
     created_at: "2025-02-04T19:00:00Z",
     updated_at: "2025-02-04T20:00:00Z"
   },
@@ -2769,7 +2493,6 @@ export const mockNotes = [
     content: "Spent 6 hours on a bug that turned out to be a timezone issue. Frustrating but resolved.",
     tags: ["engineering"],
     sentiment_score: 0.04,
-    summary: "6-hour debugging session resolved timezone-related bug.",
     created_at: "2025-02-05T12:00:00Z",
     updated_at: "2025-02-05T13:00:00Z"
   },
@@ -2779,7 +2502,6 @@ export const mockNotes = [
     content: "Not sure where to go next in my career. Multiple paths, none feel clearly right.",
     tags: ["reflection"],
     sentiment_score: -0.15,
-    summary: "Experiencing career direction uncertainty with multiple viable but unclear paths.",
     created_at: "2025-02-05T17:00:00Z",
     updated_at: "2025-02-05T18:00:00Z"
   },
@@ -2789,7 +2511,6 @@ export const mockNotes = [
     content: "Low energy day. Not productive but not terrible either. Sometimes rest looks like this.",
     tags: ["journaling"],
     sentiment_score: 0.07,
-    summary: "Low energy rest day — unproductive but necessary recovery.",
     created_at: "2025-02-06T18:00:00Z",
     updated_at: "2025-02-06T19:00:00Z"
   },
@@ -2799,7 +2520,6 @@ export const mockNotes = [
     content: "Bad sleep for the third night. Affecting mood and focus. Need to fix the root cause.",
     tags: ["wellbeing"],
     sentiment_score: -0.18,
-    summary: "Three nights of poor sleep beginning to impact mood and concentration.",
     created_at: "2025-02-11T23:00:00Z",
     updated_at: "2025-02-12T00:00:00Z"
   },
@@ -2809,7 +2529,6 @@ export const mockNotes = [
     content: "Trying to understand distributed consensus algorithms. Progress is slow. It clicks, then un-clicks.",
     tags: ["learning"],
     sentiment_score: 0.16,
-    summary: "Struggling with distributed consensus algorithms, progress inconsistent.",
     created_at: "2025-02-14T12:00:00Z",
     updated_at: "2025-02-14T13:00:00Z"
   },
@@ -2819,7 +2538,6 @@ export const mockNotes = [
     content: "Travel broke the training routine. Back to basics. The first run back is always the hardest.",
     tags: ["fitness"],
     sentiment_score: 0.06,
-    summary: "Resumed training after travel break — restarting base-building phase.",
     created_at: "2025-02-14T14:00:00Z",
     updated_at: "2025-02-14T15:00:00Z"
   },
@@ -2829,7 +2547,6 @@ export const mockNotes = [
     content: "Constant interruptions today. Context switching destroyed focus. Need to protect deep work time.",
     tags: ["productivity"],
     sentiment_score: -0.17,
-    summary: "Interruption-heavy day with context switching preventing meaningful progress.",
     created_at: "2025-02-17T14:00:00Z",
     updated_at: "2025-02-17T15:00:00Z"
   },
@@ -2839,7 +2556,6 @@ export const mockNotes = [
     content: "Had a panic attack during a presentation. Embarrassing and scary. Need to address this properly.",
     tags: ["wellbeing"],
     sentiment_score: -0.82,
-    summary: "Experienced panic attack during work presentation — needs professional support.",
     created_at: "2025-02-17T20:00:00Z",
     updated_at: "2025-02-17T21:00:00Z"
   },
@@ -2849,7 +2565,6 @@ export const mockNotes = [
     content: "The project I've been working on for 3 months was cancelled. Feels like wasted effort.",
     tags: ["reflection"],
     sentiment_score: -0.76,
-    summary: "Major project cancelled after 3 months, leaving work feeling purposeless.",
     created_at: "2025-02-17T23:00:00Z",
     updated_at: "2025-02-18T00:00:00Z"
   },
@@ -2859,7 +2574,6 @@ export const mockNotes = [
     content: "Fell into a comparison spiral on social media. Everyone looks more successful. I know it's not real but it stings.",
     tags: ["journaling"],
     sentiment_score: -0.82,
-    summary: "Social media comparison spiral triggering feelings of inadequacy.",
     created_at: "2025-02-22T16:00:00Z",
     updated_at: "2025-02-22T17:00:00Z"
   },
@@ -2869,7 +2583,6 @@ export const mockNotes = [
     content: "Too many things at once. Work, health, relationships, side projects. Can't prioritize. Paralyzed.",
     tags: ["wellbeing"],
     sentiment_score: -0.84,
-    summary: "Overwhelmed by competing demands across work, health, and personal life.",
     created_at: "2025-02-23T00:00:00Z",
     updated_at: "2025-02-23T01:00:00Z"
   },
@@ -2879,7 +2592,6 @@ export const mockNotes = [
     content: "I caused a production outage. 45 minutes of downtime. Worst feeling. Need better deployment checks.",
     tags: ["engineering"],
     sentiment_score: -0.86,
-    summary: "Caused 45-minute production outage, triggering deployment process review.",
     created_at: "2025-02-25T16:00:00Z",
     updated_at: "2025-02-25T17:00:00Z"
   },
@@ -2889,7 +2601,6 @@ export const mockNotes = [
     content: "Got harsh feedback on my work in front of the team. Some valid, delivery was brutal. Need to process this.",
     tags: ["reflection"],
     sentiment_score: -0.77,
-    summary: "Received harsh public criticism — processing validity vs delivery style.",
     created_at: "2025-03-05T18:00:00Z",
     updated_at: "2025-03-05T19:00:00Z"
   },
@@ -2899,7 +2610,6 @@ export const mockNotes = [
     content: "Six months in the new city. Work is good but haven't built real friendships yet. Quietly lonely.",
     tags: ["wellbeing"],
     sentiment_score: -0.61,
-    summary: "Experiencing quiet loneliness six months after relocating to new city.",
     created_at: "2025-03-07T14:00:00Z",
     updated_at: "2025-03-07T15:00:00Z"
   },
@@ -2909,7 +2619,6 @@ export const mockNotes = [
     content: "Didn't get the job I really wanted. Made it to final round then no. Hard to accept.",
     tags: ["journaling"],
     sentiment_score: -0.92,
-    summary: "Final round rejection from dream job opportunity, processing disappointment.",
     created_at: "2025-03-07T17:00:00Z",
     updated_at: "2025-03-07T18:00:00Z"
   },
@@ -2919,7 +2628,6 @@ export const mockNotes = [
     content: "Knee injury means no running for 6 weeks. Devastating after building momentum for months.",
     tags: ["fitness"],
     sentiment_score: -0.69,
-    summary: "Knee injury forcing 6-week running break at height of training momentum.",
     created_at: "2025-03-09T00:00:00Z",
     updated_at: "2025-03-09T01:00:00Z"
   },
@@ -2929,7 +2637,6 @@ export const mockNotes = [
     content: "Car repair wiped out the savings buffer. Back to square one on the emergency fund.",
     tags: ["finance"],
     sentiment_score: -0.6,
-    summary: "Unexpected car repair expenses depleted savings buffer completely.",
     created_at: "2025-03-09T20:00:00Z",
     updated_at: "2025-03-09T21:00:00Z"
   },
@@ -2939,7 +2646,6 @@ export const mockNotes = [
     content: "Physically and mentally exhausted. Can't remember the last time I felt truly rested.",
     tags: ["wellbeing"],
     sentiment_score: -0.87,
-    summary: "Deep exhaustion with no memory of feeling genuinely rested.",
     created_at: "2025-03-09T23:00:00Z",
     updated_at: "2025-03-10T00:00:00Z"
   },
@@ -2949,7 +2655,6 @@ export const mockNotes = [
     content: "Inheriting this legacy codebase is demoralising. No tests, no docs, spaghetti everywhere.",
     tags: ["engineering"],
     sentiment_score: -0.68,
-    summary: "Inheriting undocumented, untested legacy codebase causing significant morale drop.",
     created_at: "2025-03-09T23:00:00Z",
     updated_at: "2025-03-10T00:00:00Z"
   },
@@ -2959,7 +2664,6 @@ export const mockNotes = [
     content: "First day in Lisbon. Warm, beautiful, pastéis de nata for breakfast. Already love it.",
     tags: ["travel"],
     sentiment_score: 0.95,
-    summary: "Arrived in Lisbon to perfect weather and iconic pastéis de nata.",
     created_at: "2025-03-09T23:00:00Z",
     updated_at: "2025-03-10T00:00:00Z"
   },
@@ -2969,7 +2673,6 @@ export const mockNotes = [
     content: "Hosted a dinner party for 8. The risotto was the highlight. Happy guests, great conversations.",
     tags: ["cooking"],
     sentiment_score: 0.9,
-    summary: "Successful dinner party of 8 with standout risotto and great conversation.",
     created_at: "2025-03-16T23:00:00Z",
     updated_at: "2025-03-17T00:00:00Z"
   },
@@ -2979,7 +2682,6 @@ export const mockNotes = [
     content: "A photo I submitted got accepted for publication. First time being published. Incredible feeling.",
     tags: ["photography"],
     sentiment_score: 0.87,
-    summary: "First photography publication acceptance — photo selected for magazine.",
     created_at: "2025-03-17T17:00:00Z",
     updated_at: "2025-03-17T18:00:00Z"
   },
@@ -2989,7 +2691,6 @@ export const mockNotes = [
     content: "Monads. Three months of confusion and today it just clicked. That moment is addictive.",
     tags: ["learning"],
     sentiment_score: 0.84,
-    summary: "Monadic programming concept finally clicked after three months of confusion.",
     created_at: "2025-03-18T23:00:00Z",
     updated_at: "2025-03-19T00:00:00Z"
   },
@@ -2999,7 +2700,6 @@ export const mockNotes = [
     content: "Posted the D3 graph visualization on HN. Made the front page for 2 hours. 500 upvotes.",
     tags: ["d3"],
     sentiment_score: 0.81,
-    summary: "D3 visualization reached Hacker News front page with 500 upvotes.",
     created_at: "2025-03-19T16:00:00Z",
     updated_at: "2025-03-19T17:00:00Z"
   },
@@ -3009,7 +2709,6 @@ export const mockNotes = [
     content: "Noticing real changes from therapy. Catching negative thought patterns before they spiral.",
     tags: ["wellbeing"],
     sentiment_score: 0.63,
-    summary: "Therapy producing measurable results in negative thought pattern recognition.",
     created_at: "2025-03-25T11:00:00Z",
     updated_at: "2025-03-25T12:00:00Z"
   },
@@ -3019,7 +2718,6 @@ export const mockNotes = [
     content: "First open source contribution merged into a popular library. Small fix but meaningful.",
     tags: ["engineering"],
     sentiment_score: 0.87,
-    summary: "First open source contribution merged into widely-used library.",
     created_at: "2025-03-25T13:00:00Z",
     updated_at: "2025-03-25T14:00:00Z"
   },
@@ -3029,7 +2727,6 @@ export const mockNotes = [
     content: "Three weeks of better nutrition and my energy levels are unrecognisable. No afternoon crash.",
     tags: ["nutrition"],
     sentiment_score: 0.79,
-    summary: "Three weeks of improved nutrition eliminated afternoon energy crashes.",
     created_at: "2025-03-25T17:00:00Z",
     updated_at: "2025-03-25T18:00:00Z"
   },
@@ -3039,7 +2736,6 @@ export const mockNotes = [
     content: "90 days of daily gratitude journaling. Genuine shift in how I default-interpret events.",
     tags: ["reflection"],
     sentiment_score: 0.8,
-    summary: "90-day gratitude practice has shifted default interpretations to positive.",
     created_at: "2025-03-25T18:00:00Z",
     updated_at: "2025-03-25T19:00:00Z"
   },
@@ -3049,7 +2745,6 @@ export const mockNotes = [
     content: "Lazy loading, code splitting, and virtual scrolling. App feels completely different now.",
     tags: ["vue"],
     sentiment_score: 0.79,
-    summary: "Three performance optimizations delivered 3x app speed improvement.",
     created_at: "2025-03-25T22:00:00Z",
     updated_at: "2025-03-25T23:00:00Z"
   },
@@ -3059,7 +2754,6 @@ export const mockNotes = [
     content: "Blue-green deployment configured and tested. Deployments are now invisible to users.",
     tags: ["docker"],
     sentiment_score: 0.73,
-    summary: "Blue-green deployment enables zero-downtime releases invisible to users.",
     created_at: "2025-03-27T18:00:00Z",
     updated_at: "2025-03-27T19:00:00Z"
   },
@@ -3069,7 +2763,6 @@ export const mockNotes = [
     content: "Seven consecutive nights of quality sleep. Mood, focus, and patience are dramatically better.",
     tags: ["sleep"],
     sentiment_score: 0.69,
-    summary: "First week of consistent quality sleep producing dramatic mood and focus improvements.",
     created_at: "2025-03-30T20:00:00Z",
     updated_at: "2025-03-30T21:00:00Z"
   },
@@ -3079,7 +2772,6 @@ export const mockNotes = [
     content: "Longest run yet — 28km. Felt strong the whole way. Marathon is within reach.",
     tags: ["fitness"],
     sentiment_score: 0.93,
-    summary: "Achieved 28km long run PB, marathon goal now feels realistic.",
     created_at: "2025-04-02T13:00:00Z",
     updated_at: "2025-04-02T14:00:00Z"
   },
@@ -3089,7 +2781,6 @@ export const mockNotes = [
     content: "Big feature finally in production. Zero issues. The testing paid off.",
     tags: ["engineering"],
     sentiment_score: 0.88,
-    summary: "Major feature shipped cleanly to production after thorough testing.",
     created_at: "2025-04-03T18:00:00Z",
     updated_at: "2025-04-03T19:00:00Z"
   },
@@ -3099,7 +2790,6 @@ export const mockNotes = [
     content: "The technical article crossed 1000 views. Community feedback is overwhelmingly positive.",
     tags: ["writing"],
     sentiment_score: 0.98,
-    summary: "Technical article reached 1000 views with strong community reception.",
     created_at: "2025-04-03T18:00:00Z",
     updated_at: "2025-04-03T19:00:00Z"
   },
@@ -3109,7 +2799,6 @@ export const mockNotes = [
     content: "After 12 attempts, the sourdough is perfect. Open crumb, crispy crust. Worth every failure.",
     tags: ["cooking"],
     sentiment_score: 0.93,
-    summary: "Achieved perfect sourdough after 12 iterations — open crumb and crispy crust.",
     created_at: "2025-04-05T14:00:00Z",
     updated_at: "2025-04-05T15:00:00Z"
   },
@@ -3119,7 +2808,6 @@ export const mockNotes = [
     content: "Passed the AWS Solutions Architect exam on first attempt. Months of studying paid off.",
     tags: ["learning"],
     sentiment_score: 0.86,
-    summary: "Passed AWS Solutions Architect certification on first attempt.",
     created_at: "2025-04-05T16:00:00Z",
     updated_at: "2025-04-05T17:00:00Z"
   },
@@ -3129,7 +2817,6 @@ export const mockNotes = [
     content: "Everything clicked this week. Work, health, relationships. Rare alignment.",
     tags: ["journaling"],
     sentiment_score: 0.91,
-    summary: "Exceptional week with work, health, and relationships all aligned positively.",
     created_at: "2025-04-05T23:00:00Z",
     updated_at: "2025-04-06T00:00:00Z"
   },
@@ -3139,7 +2826,6 @@ export const mockNotes = [
     content: "Performed at an open mic for the first time. Nervous but pulled it off. People clapped.",
     tags: ["music"],
     sentiment_score: 0.95,
-    summary: "Successfully completed first open mic performance despite nerves.",
     created_at: "2025-04-07T22:00:00Z",
     updated_at: "2025-04-07T23:00:00Z"
   },
@@ -3149,7 +2835,6 @@ export const mockNotes = [
     content: "Officially promoted to senior. A year of hard work recognized. Feeling proud.",
     tags: ["reflection"],
     sentiment_score: 0.93,
-    summary: "Received senior promotion after a year of consistent effort and results.",
     created_at: "2025-04-07T22:00:00Z",
     updated_at: "2025-04-07T23:00:00Z"
   },
@@ -3159,7 +2844,6 @@ export const mockNotes = [
     content: "Finished the component refactor. Test coverage went from 40% to 78%. Feels much better.",
     tags: ["engineering","vue"],
     sentiment_score: 0.63,
-    summary: "Component refactor improved test coverage from 40% to 78%.",
     created_at: "2025-04-13T12:00:00Z",
     updated_at: "2025-04-13T13:00:00Z"
   },
@@ -3169,7 +2853,6 @@ export const mockNotes = [
     content: "Completed Atomic Habits. The 1% better every day concept is deceptively simple but powerful.",
     tags: ["reading"],
     sentiment_score: 0.7,
-    summary: "Atomic Habits reinforced compound improvement through 1% daily gains.",
     created_at: "2025-04-13T15:00:00Z",
     updated_at: "2025-04-13T16:00:00Z"
   },
@@ -3179,7 +2862,6 @@ export const mockNotes = [
     content: "Woke at 4am for a sunrise hike. The view at the top in golden light was surreal.",
     tags: ["fitness","hiking"],
     sentiment_score: 0.71,
-    summary: "Early morning sunrise hike delivered breathtaking light views.",
     created_at: "2025-04-15T12:00:00Z",
     updated_at: "2025-04-15T13:00:00Z"
   },
@@ -3189,7 +2871,6 @@ export const mockNotes = [
     content: "Cleared my inbox for the first time in 8 months. Took 3 hours. Feels like a fresh start.",
     tags: ["productivity"],
     sentiment_score: 0.66,
-    summary: "Achieved inbox zero after 8 months, creating mental clarity.",
     created_at: "2025-04-15T20:00:00Z",
     updated_at: "2025-04-15T21:00:00Z"
   },
@@ -3199,7 +2880,6 @@ export const mockNotes = [
     content: "Query optimization and caching cut API response from 800ms to 320ms. Significant win.",
     tags: ["nodejs"],
     sentiment_score: 0.63,
-    summary: "API optimization reduced response time by 60% through caching and query tuning.",
     created_at: "2025-04-15T23:00:00Z",
     updated_at: "2025-04-16T00:00:00Z"
   },
@@ -3209,7 +2889,6 @@ export const mockNotes = [
     content: "Hit 60 days consecutive meditation. The practice is now automatic — like brushing teeth.",
     tags: ["meditation"],
     sentiment_score: 0.76,
-    summary: "60-day meditation streak reached, practice now deeply habitual.",
     created_at: "2025-04-23T14:00:00Z",
     updated_at: "2025-04-23T15:00:00Z"
   },
@@ -3219,7 +2898,6 @@ export const mockNotes = [
     content: "New design system adopted by all three product teams. Consistency across products finally.",
     tags: ["design"],
     sentiment_score: 0.64,
-    summary: "Design system v2 successfully adopted across all three product teams.",
     created_at: "2025-04-23T22:00:00Z",
     updated_at: "2025-04-23T23:00:00Z"
   },
@@ -3229,7 +2907,6 @@ export const mockNotes = [
     content: "Portfolio review: 18% year-to-date return. Index funds boring but effective.",
     tags: ["finance"],
     sentiment_score: 0.67,
-    summary: "Portfolio achieved 18% YTD return through consistent index fund strategy.",
     created_at: "2025-04-24T13:00:00Z",
     updated_at: "2025-04-24T14:00:00Z"
   },
@@ -3239,7 +2916,6 @@ export const mockNotes = [
     content: "Spent 6 hours on a bug that turned out to be a timezone issue. Frustrating but resolved.",
     tags: ["engineering"],
     sentiment_score: 0.03,
-    summary: "6-hour debugging session resolved timezone-related bug.",
     created_at: "2025-04-24T13:00:00Z",
     updated_at: "2025-04-24T14:00:00Z"
   },
@@ -3249,7 +2925,6 @@ export const mockNotes = [
     content: "Not sure where to go next in my career. Multiple paths, none feel clearly right.",
     tags: ["reflection"],
     sentiment_score: -0.17,
-    summary: "Experiencing career direction uncertainty with multiple viable but unclear paths.",
     created_at: "2025-04-24T19:00:00Z",
     updated_at: "2025-04-24T20:00:00Z"
   },
@@ -3259,7 +2934,6 @@ export const mockNotes = [
     content: "Low energy day. Not productive but not terrible either. Sometimes rest looks like this.",
     tags: ["journaling"],
     sentiment_score: 0.11,
-    summary: "Low energy rest day — unproductive but necessary recovery.",
     created_at: "2025-04-26T11:00:00Z",
     updated_at: "2025-04-26T12:00:00Z"
   },
@@ -3269,7 +2943,6 @@ export const mockNotes = [
     content: "Bad sleep for the third night. Affecting mood and focus. Need to fix the root cause.",
     tags: ["wellbeing"],
     sentiment_score: -0.2,
-    summary: "Three nights of poor sleep beginning to impact mood and concentration.",
     created_at: "2025-04-27T13:00:00Z",
     updated_at: "2025-04-27T14:00:00Z"
   },
@@ -3279,7 +2952,6 @@ export const mockNotes = [
     content: "Trying to understand distributed consensus algorithms. Progress is slow. It clicks, then un-clicks.",
     tags: ["learning"],
     sentiment_score: 0.15,
-    summary: "Struggling with distributed consensus algorithms, progress inconsistent.",
     created_at: "2025-04-28T19:00:00Z",
     updated_at: "2025-04-28T20:00:00Z"
   },
@@ -3289,7 +2961,6 @@ export const mockNotes = [
     content: "Travel broke the training routine. Back to basics. The first run back is always the hardest.",
     tags: ["fitness"],
     sentiment_score: 0.06,
-    summary: "Resumed training after travel break — restarting base-building phase.",
     created_at: "2025-05-03T20:00:00Z",
     updated_at: "2025-05-03T21:00:00Z"
   },
@@ -3299,7 +2970,6 @@ export const mockNotes = [
     content: "Constant interruptions today. Context switching destroyed focus. Need to protect deep work time.",
     tags: ["productivity"],
     sentiment_score: -0.26,
-    summary: "Interruption-heavy day with context switching preventing meaningful progress.",
     created_at: "2025-05-03T23:00:00Z",
     updated_at: "2025-05-04T00:00:00Z"
   },
@@ -3309,7 +2979,6 @@ export const mockNotes = [
     content: "Had a panic attack during a presentation. Embarrassing and scary. Need to address this properly.",
     tags: ["wellbeing"],
     sentiment_score: -0.8,
-    summary: "Experienced panic attack during work presentation — needs professional support.",
     created_at: "2025-05-07T18:00:00Z",
     updated_at: "2025-05-07T19:00:00Z"
   },
@@ -3319,7 +2988,6 @@ export const mockNotes = [
     content: "The project I've been working on for 3 months was cancelled. Feels like wasted effort.",
     tags: ["reflection"],
     sentiment_score: -0.83,
-    summary: "Major project cancelled after 3 months, leaving work feeling purposeless.",
     created_at: "2025-05-10T17:00:00Z",
     updated_at: "2025-05-10T18:00:00Z"
   },
@@ -3329,7 +2997,6 @@ export const mockNotes = [
     content: "Fell into a comparison spiral on social media. Everyone looks more successful. I know it's not real but it stings.",
     tags: ["journaling"],
     sentiment_score: -0.81,
-    summary: "Social media comparison spiral triggering feelings of inadequacy.",
     created_at: "2025-05-10T18:00:00Z",
     updated_at: "2025-05-10T19:00:00Z"
   },
@@ -3339,7 +3006,6 @@ export const mockNotes = [
     content: "Too many things at once. Work, health, relationships, side projects. Can't prioritize. Paralyzed.",
     tags: ["wellbeing"],
     sentiment_score: -0.81,
-    summary: "Overwhelmed by competing demands across work, health, and personal life.",
     created_at: "2025-05-10T20:00:00Z",
     updated_at: "2025-05-10T21:00:00Z"
   },
@@ -3349,7 +3015,6 @@ export const mockNotes = [
     content: "I caused a production outage. 45 minutes of downtime. Worst feeling. Need better deployment checks.",
     tags: ["engineering"],
     sentiment_score: -0.89,
-    summary: "Caused 45-minute production outage, triggering deployment process review.",
     created_at: "2025-05-10T21:00:00Z",
     updated_at: "2025-05-10T22:00:00Z"
   },
@@ -3359,7 +3024,6 @@ export const mockNotes = [
     content: "Got harsh feedback on my work in front of the team. Some valid, delivery was brutal. Need to process this.",
     tags: ["reflection"],
     sentiment_score: -0.76,
-    summary: "Received harsh public criticism — processing validity vs delivery style.",
     created_at: "2025-05-13T23:00:00Z",
     updated_at: "2025-05-14T00:00:00Z"
   },
@@ -3369,7 +3033,6 @@ export const mockNotes = [
     content: "Six months in the new city. Work is good but haven't built real friendships yet. Quietly lonely.",
     tags: ["wellbeing"],
     sentiment_score: -0.66,
-    summary: "Experiencing quiet loneliness six months after relocating to new city.",
     created_at: "2025-05-14T13:00:00Z",
     updated_at: "2025-05-14T14:00:00Z"
   },
@@ -3379,7 +3042,6 @@ export const mockNotes = [
     content: "Didn't get the job I really wanted. Made it to final round then no. Hard to accept.",
     tags: ["journaling"],
     sentiment_score: -0.85,
-    summary: "Final round rejection from dream job opportunity, processing disappointment.",
     created_at: "2025-05-16T11:00:00Z",
     updated_at: "2025-05-16T12:00:00Z"
   },
@@ -3389,7 +3051,6 @@ export const mockNotes = [
     content: "Knee injury means no running for 6 weeks. Devastating after building momentum for months.",
     tags: ["fitness"],
     sentiment_score: -0.75,
-    summary: "Knee injury forcing 6-week running break at height of training momentum.",
     created_at: "2025-05-16T19:00:00Z",
     updated_at: "2025-05-16T20:00:00Z"
   },
@@ -3399,7 +3060,6 @@ export const mockNotes = [
     content: "Car repair wiped out the savings buffer. Back to square one on the emergency fund.",
     tags: ["finance"],
     sentiment_score: -0.56,
-    summary: "Unexpected car repair expenses depleted savings buffer completely.",
     created_at: "2025-05-16T23:00:00Z",
     updated_at: "2025-05-17T00:00:00Z"
   },
@@ -3409,7 +3069,6 @@ export const mockNotes = [
     content: "Physically and mentally exhausted. Can't remember the last time I felt truly rested.",
     tags: ["wellbeing"],
     sentiment_score: -0.87,
-    summary: "Deep exhaustion with no memory of feeling genuinely rested.",
     created_at: "2025-05-21T18:00:00Z",
     updated_at: "2025-05-21T19:00:00Z"
   },
@@ -3419,7 +3078,6 @@ export const mockNotes = [
     content: "Inheriting this legacy codebase is demoralising. No tests, no docs, spaghetti everywhere.",
     tags: ["engineering"],
     sentiment_score: -0.67,
-    summary: "Inheriting undocumented, untested legacy codebase causing significant morale drop.",
     created_at: "2025-05-23T19:00:00Z",
     updated_at: "2025-05-23T20:00:00Z"
   },
@@ -3429,7 +3087,6 @@ export const mockNotes = [
     content: "First day in Lisbon. Warm, beautiful, pastéis de nata for breakfast. Already love it.",
     tags: ["travel"],
     sentiment_score: 0.86,
-    summary: "Arrived in Lisbon to perfect weather and iconic pastéis de nata.",
     created_at: "2025-05-25T14:00:00Z",
     updated_at: "2025-05-25T15:00:00Z"
   },
@@ -3439,7 +3096,6 @@ export const mockNotes = [
     content: "Hosted a dinner party for 8. The risotto was the highlight. Happy guests, great conversations.",
     tags: ["cooking"],
     sentiment_score: 0.92,
-    summary: "Successful dinner party of 8 with standout risotto and great conversation.",
     created_at: "2025-05-27T16:00:00Z",
     updated_at: "2025-05-27T17:00:00Z"
   },
@@ -3449,7 +3105,6 @@ export const mockNotes = [
     content: "A photo I submitted got accepted for publication. First time being published. Incredible feeling.",
     tags: ["photography"],
     sentiment_score: 0.97,
-    summary: "First photography publication acceptance — photo selected for magazine.",
     created_at: "2025-05-28T16:00:00Z",
     updated_at: "2025-05-28T17:00:00Z"
   },
@@ -3459,7 +3114,6 @@ export const mockNotes = [
     content: "Monads. Three months of confusion and today it just clicked. That moment is addictive.",
     tags: ["learning"],
     sentiment_score: 0.87,
-    summary: "Monadic programming concept finally clicked after three months of confusion.",
     created_at: "2025-05-28T18:00:00Z",
     updated_at: "2025-05-28T19:00:00Z"
   },
@@ -3469,7 +3123,6 @@ export const mockNotes = [
     content: "Posted the D3 graph visualization on HN. Made the front page for 2 hours. 500 upvotes.",
     tags: ["d3"],
     sentiment_score: 0.83,
-    summary: "D3 visualization reached Hacker News front page with 500 upvotes.",
     created_at: "2025-05-28T18:00:00Z",
     updated_at: "2025-05-28T19:00:00Z"
   },
@@ -3479,7 +3132,6 @@ export const mockNotes = [
     content: "Noticing real changes from therapy. Catching negative thought patterns before they spiral.",
     tags: ["wellbeing"],
     sentiment_score: 0.65,
-    summary: "Therapy producing measurable results in negative thought pattern recognition.",
     created_at: "2025-05-28T20:00:00Z",
     updated_at: "2025-05-28T21:00:00Z"
   },
@@ -3489,7 +3141,6 @@ export const mockNotes = [
     content: "First open source contribution merged into a popular library. Small fix but meaningful.",
     tags: ["engineering"],
     sentiment_score: 0.87,
-    summary: "First open source contribution merged into widely-used library.",
     created_at: "2025-05-28T23:00:00Z",
     updated_at: "2025-05-29T00:00:00Z"
   },
@@ -3499,7 +3150,6 @@ export const mockNotes = [
     content: "Three weeks of better nutrition and my energy levels are unrecognisable. No afternoon crash.",
     tags: ["nutrition"],
     sentiment_score: 0.8,
-    summary: "Three weeks of improved nutrition eliminated afternoon energy crashes.",
     created_at: "2025-06-01T17:00:00Z",
     updated_at: "2025-06-01T18:00:00Z"
   },
@@ -3509,7 +3159,6 @@ export const mockNotes = [
     content: "90 days of daily gratitude journaling. Genuine shift in how I default-interpret events.",
     tags: ["reflection"],
     sentiment_score: 0.82,
-    summary: "90-day gratitude practice has shifted default interpretations to positive.",
     created_at: "2025-06-01T23:00:00Z",
     updated_at: "2025-06-02T00:00:00Z"
   },
@@ -3519,7 +3168,6 @@ export const mockNotes = [
     content: "Lazy loading, code splitting, and virtual scrolling. App feels completely different now.",
     tags: ["vue"],
     sentiment_score: 0.77,
-    summary: "Three performance optimizations delivered 3x app speed improvement.",
     created_at: "2025-06-06T11:00:00Z",
     updated_at: "2025-06-06T12:00:00Z"
   },
@@ -3529,7 +3177,6 @@ export const mockNotes = [
     content: "Blue-green deployment configured and tested. Deployments are now invisible to users.",
     tags: ["docker"],
     sentiment_score: 0.66,
-    summary: "Blue-green deployment enables zero-downtime releases invisible to users.",
     created_at: "2025-06-06T12:00:00Z",
     updated_at: "2025-06-06T13:00:00Z"
   },
@@ -3539,7 +3186,6 @@ export const mockNotes = [
     content: "Seven consecutive nights of quality sleep. Mood, focus, and patience are dramatically better.",
     tags: ["sleep"],
     sentiment_score: 0.72,
-    summary: "First week of consistent quality sleep producing dramatic mood and focus improvements.",
     created_at: "2025-06-06T15:00:00Z",
     updated_at: "2025-06-06T16:00:00Z"
   },
@@ -3549,7 +3195,6 @@ export const mockNotes = [
     content: "Longest run yet — 28km. Felt strong the whole way. Marathon is within reach.",
     tags: ["fitness"],
     sentiment_score: 1,
-    summary: "Achieved 28km long run PB, marathon goal now feels realistic.",
     created_at: "2025-06-06T20:00:00Z",
     updated_at: "2025-06-06T21:00:00Z"
   },
@@ -3559,7 +3204,6 @@ export const mockNotes = [
     content: "Big feature finally in production. Zero issues. The testing paid off.",
     tags: ["engineering"],
     sentiment_score: 0.93,
-    summary: "Major feature shipped cleanly to production after thorough testing.",
     created_at: "2025-06-13T11:00:00Z",
     updated_at: "2025-06-13T12:00:00Z"
   },
@@ -3569,7 +3213,6 @@ export const mockNotes = [
     content: "The technical article crossed 1000 views. Community feedback is overwhelmingly positive.",
     tags: ["writing"],
     sentiment_score: 0.97,
-    summary: "Technical article reached 1000 views with strong community reception.",
     created_at: "2025-06-13T13:00:00Z",
     updated_at: "2025-06-13T14:00:00Z"
   },
@@ -3579,7 +3222,6 @@ export const mockNotes = [
     content: "After 12 attempts, the sourdough is perfect. Open crumb, crispy crust. Worth every failure.",
     tags: ["cooking"],
     sentiment_score: 0.99,
-    summary: "Achieved perfect sourdough after 12 iterations — open crumb and crispy crust.",
     created_at: "2025-06-13T15:00:00Z",
     updated_at: "2025-06-13T16:00:00Z"
   },
@@ -3589,7 +3231,6 @@ export const mockNotes = [
     content: "Passed the AWS Solutions Architect exam on first attempt. Months of studying paid off.",
     tags: ["learning"],
     sentiment_score: 0.86,
-    summary: "Passed AWS Solutions Architect certification on first attempt.",
     created_at: "2025-06-13T22:00:00Z",
     updated_at: "2025-06-13T23:00:00Z"
   },
@@ -3599,7 +3240,6 @@ export const mockNotes = [
     content: "Everything clicked this week. Work, health, relationships. Rare alignment.",
     tags: ["journaling"],
     sentiment_score: 0.96,
-    summary: "Exceptional week with work, health, and relationships all aligned positively.",
     created_at: "2025-06-13T23:00:00Z",
     updated_at: "2025-06-14T00:00:00Z"
   },
@@ -3609,7 +3249,6 @@ export const mockNotes = [
     content: "Performed at an open mic for the first time. Nervous but pulled it off. People clapped.",
     tags: ["music"],
     sentiment_score: 0.95,
-    summary: "Successfully completed first open mic performance despite nerves.",
     created_at: "2025-06-16T14:00:00Z",
     updated_at: "2025-06-16T15:00:00Z"
   },
@@ -3619,7 +3258,6 @@ export const mockNotes = [
     content: "Officially promoted to senior. A year of hard work recognized. Feeling proud.",
     tags: ["reflection"],
     sentiment_score: 0.91,
-    summary: "Received senior promotion after a year of consistent effort and results.",
     created_at: "2025-06-16T19:00:00Z",
     updated_at: "2025-06-16T20:00:00Z"
   },
@@ -3629,7 +3267,6 @@ export const mockNotes = [
     content: "Finished the component refactor. Test coverage went from 40% to 78%. Feels much better.",
     tags: ["engineering","vue"],
     sentiment_score: 0.6,
-    summary: "Component refactor improved test coverage from 40% to 78%.",
     created_at: "2025-06-16T19:00:00Z",
     updated_at: "2025-06-16T20:00:00Z"
   },
@@ -3639,7 +3276,6 @@ export const mockNotes = [
     content: "Completed Atomic Habits. The 1% better every day concept is deceptively simple but powerful.",
     tags: ["reading"],
     sentiment_score: 0.66,
-    summary: "Atomic Habits reinforced compound improvement through 1% daily gains.",
     created_at: "2025-06-18T18:00:00Z",
     updated_at: "2025-06-18T19:00:00Z"
   },
@@ -3649,7 +3285,6 @@ export const mockNotes = [
     content: "Woke at 4am for a sunrise hike. The view at the top in golden light was surreal.",
     tags: ["fitness","hiking"],
     sentiment_score: 0.72,
-    summary: "Early morning sunrise hike delivered breathtaking light views.",
     created_at: "2025-06-19T15:00:00Z",
     updated_at: "2025-06-19T16:00:00Z"
   },
@@ -3659,7 +3294,6 @@ export const mockNotes = [
     content: "Cleared my inbox for the first time in 8 months. Took 3 hours. Feels like a fresh start.",
     tags: ["productivity"],
     sentiment_score: 0.55,
-    summary: "Achieved inbox zero after 8 months, creating mental clarity.",
     created_at: "2025-06-19T17:00:00Z",
     updated_at: "2025-06-19T18:00:00Z"
   },
@@ -3669,7 +3303,6 @@ export const mockNotes = [
     content: "Query optimization and caching cut API response from 800ms to 320ms. Significant win.",
     tags: ["nodejs"],
     sentiment_score: 0.65,
-    summary: "API optimization reduced response time by 60% through caching and query tuning.",
     created_at: "2025-06-23T13:00:00Z",
     updated_at: "2025-06-23T14:00:00Z"
   },
@@ -3679,7 +3312,6 @@ export const mockNotes = [
     content: "Hit 60 days consecutive meditation. The practice is now automatic — like brushing teeth.",
     tags: ["meditation"],
     sentiment_score: 0.68,
-    summary: "60-day meditation streak reached, practice now deeply habitual.",
     created_at: "2025-06-23T20:00:00Z",
     updated_at: "2025-06-23T21:00:00Z"
   },
@@ -3689,7 +3321,6 @@ export const mockNotes = [
     content: "New design system adopted by all three product teams. Consistency across products finally.",
     tags: ["design"],
     sentiment_score: 0.63,
-    summary: "Design system v2 successfully adopted across all three product teams.",
     created_at: "2025-06-26T17:00:00Z",
     updated_at: "2025-06-26T18:00:00Z"
   },
@@ -3699,7 +3330,6 @@ export const mockNotes = [
     content: "Portfolio review: 18% year-to-date return. Index funds boring but effective.",
     tags: ["finance"],
     sentiment_score: 0.66,
-    summary: "Portfolio achieved 18% YTD return through consistent index fund strategy.",
     created_at: "2025-07-02T11:00:00Z",
     updated_at: "2025-07-02T12:00:00Z"
   },
@@ -3709,7 +3339,6 @@ export const mockNotes = [
     content: "Spent 6 hours on a bug that turned out to be a timezone issue. Frustrating but resolved.",
     tags: ["engineering"],
     sentiment_score: 0.17,
-    summary: "6-hour debugging session resolved timezone-related bug.",
     created_at: "2025-07-02T11:00:00Z",
     updated_at: "2025-07-02T12:00:00Z"
   },
@@ -3719,7 +3348,6 @@ export const mockNotes = [
     content: "Not sure where to go next in my career. Multiple paths, none feel clearly right.",
     tags: ["reflection"],
     sentiment_score: -0.13,
-    summary: "Experiencing career direction uncertainty with multiple viable but unclear paths.",
     created_at: "2025-07-02T12:00:00Z",
     updated_at: "2025-07-02T13:00:00Z"
   },
@@ -3729,7 +3357,6 @@ export const mockNotes = [
     content: "Low energy day. Not productive but not terrible either. Sometimes rest looks like this.",
     tags: ["journaling"],
     sentiment_score: 0.03,
-    summary: "Low energy rest day — unproductive but necessary recovery.",
     created_at: "2025-07-02T18:00:00Z",
     updated_at: "2025-07-02T19:00:00Z"
   },
@@ -3739,7 +3366,6 @@ export const mockNotes = [
     content: "Bad sleep for the third night. Affecting mood and focus. Need to fix the root cause.",
     tags: ["wellbeing"],
     sentiment_score: -0.08,
-    summary: "Three nights of poor sleep beginning to impact mood and concentration.",
     created_at: "2025-07-02T19:00:00Z",
     updated_at: "2025-07-02T20:00:00Z"
   },
@@ -3749,7 +3375,6 @@ export const mockNotes = [
     content: "Trying to understand distributed consensus algorithms. Progress is slow. It clicks, then un-clicks.",
     tags: ["learning"],
     sentiment_score: 0.06,
-    summary: "Struggling with distributed consensus algorithms, progress inconsistent.",
     created_at: "2025-07-03T16:00:00Z",
     updated_at: "2025-07-03T17:00:00Z"
   },
@@ -3759,7 +3384,6 @@ export const mockNotes = [
     content: "Travel broke the training routine. Back to basics. The first run back is always the hardest.",
     tags: ["fitness"],
     sentiment_score: 0.07,
-    summary: "Resumed training after travel break — restarting base-building phase.",
     created_at: "2025-07-04T13:00:00Z",
     updated_at: "2025-07-04T14:00:00Z"
   },
@@ -3769,7 +3393,6 @@ export const mockNotes = [
     content: "Constant interruptions today. Context switching destroyed focus. Need to protect deep work time.",
     tags: ["productivity"],
     sentiment_score: -0.27,
-    summary: "Interruption-heavy day with context switching preventing meaningful progress.",
     created_at: "2025-07-04T14:00:00Z",
     updated_at: "2025-07-04T15:00:00Z"
   },
@@ -3779,7 +3402,6 @@ export const mockNotes = [
     content: "Had a panic attack during a presentation. Embarrassing and scary. Need to address this properly.",
     tags: ["wellbeing"],
     sentiment_score: -0.78,
-    summary: "Experienced panic attack during work presentation — needs professional support.",
     created_at: "2025-07-06T12:00:00Z",
     updated_at: "2025-07-06T13:00:00Z"
   },
@@ -3789,7 +3411,6 @@ export const mockNotes = [
     content: "The project I've been working on for 3 months was cancelled. Feels like wasted effort.",
     tags: ["reflection"],
     sentiment_score: -0.79,
-    summary: "Major project cancelled after 3 months, leaving work feeling purposeless.",
     created_at: "2025-07-06T13:00:00Z",
     updated_at: "2025-07-06T14:00:00Z"
   },
@@ -3799,7 +3420,6 @@ export const mockNotes = [
     content: "Fell into a comparison spiral on social media. Everyone looks more successful. I know it's not real but it stings.",
     tags: ["journaling"],
     sentiment_score: -0.68,
-    summary: "Social media comparison spiral triggering feelings of inadequacy.",
     created_at: "2025-07-09T15:00:00Z",
     updated_at: "2025-07-09T16:00:00Z"
   },
@@ -3809,7 +3429,6 @@ export const mockNotes = [
     content: "Too many things at once. Work, health, relationships, side projects. Can't prioritize. Paralyzed.",
     tags: ["wellbeing"],
     sentiment_score: -0.86,
-    summary: "Overwhelmed by competing demands across work, health, and personal life.",
     created_at: "2025-07-13T18:00:00Z",
     updated_at: "2025-07-13T19:00:00Z"
   },
@@ -3819,7 +3438,6 @@ export const mockNotes = [
     content: "I caused a production outage. 45 minutes of downtime. Worst feeling. Need better deployment checks.",
     tags: ["engineering"],
     sentiment_score: -0.93,
-    summary: "Caused 45-minute production outage, triggering deployment process review.",
     created_at: "2025-07-13T19:00:00Z",
     updated_at: "2025-07-13T20:00:00Z"
   },
@@ -3829,7 +3447,6 @@ export const mockNotes = [
     content: "Got harsh feedback on my work in front of the team. Some valid, delivery was brutal. Need to process this.",
     tags: ["reflection"],
     sentiment_score: -0.72,
-    summary: "Received harsh public criticism — processing validity vs delivery style.",
     created_at: "2025-07-13T20:00:00Z",
     updated_at: "2025-07-13T21:00:00Z"
   },
@@ -3839,7 +3456,6 @@ export const mockNotes = [
     content: "Six months in the new city. Work is good but haven't built real friendships yet. Quietly lonely.",
     tags: ["wellbeing"],
     sentiment_score: -0.64,
-    summary: "Experiencing quiet loneliness six months after relocating to new city.",
     created_at: "2025-07-18T13:00:00Z",
     updated_at: "2025-07-18T14:00:00Z"
   },
@@ -3849,7 +3465,6 @@ export const mockNotes = [
     content: "Didn't get the job I really wanted. Made it to final round then no. Hard to accept.",
     tags: ["journaling"],
     sentiment_score: -0.92,
-    summary: "Final round rejection from dream job opportunity, processing disappointment.",
     created_at: "2025-07-18T20:00:00Z",
     updated_at: "2025-07-18T21:00:00Z"
   },
@@ -3859,7 +3474,6 @@ export const mockNotes = [
     content: "Knee injury means no running for 6 weeks. Devastating after building momentum for months.",
     tags: ["fitness"],
     sentiment_score: -0.8,
-    summary: "Knee injury forcing 6-week running break at height of training momentum.",
     created_at: "2025-07-18T22:00:00Z",
     updated_at: "2025-07-18T23:00:00Z"
   },
@@ -3869,7 +3483,6 @@ export const mockNotes = [
     content: "Car repair wiped out the savings buffer. Back to square one on the emergency fund.",
     tags: ["finance"],
     sentiment_score: -0.61,
-    summary: "Unexpected car repair expenses depleted savings buffer completely.",
     created_at: "2025-07-20T11:00:00Z",
     updated_at: "2025-07-20T12:00:00Z"
   },
@@ -3879,7 +3492,6 @@ export const mockNotes = [
     content: "Physically and mentally exhausted. Can't remember the last time I felt truly rested.",
     tags: ["wellbeing"],
     sentiment_score: -0.78,
-    summary: "Deep exhaustion with no memory of feeling genuinely rested.",
     created_at: "2025-07-24T16:00:00Z",
     updated_at: "2025-07-24T17:00:00Z"
   },
@@ -3889,7 +3501,6 @@ export const mockNotes = [
     content: "Inheriting this legacy codebase is demoralising. No tests, no docs, spaghetti everywhere.",
     tags: ["engineering"],
     sentiment_score: -0.76,
-    summary: "Inheriting undocumented, untested legacy codebase causing significant morale drop.",
     created_at: "2025-07-24T16:00:00Z",
     updated_at: "2025-07-24T17:00:00Z"
   },
@@ -3899,7 +3510,6 @@ export const mockNotes = [
     content: "First day in Lisbon. Warm, beautiful, pastéis de nata for breakfast. Already love it.",
     tags: ["travel"],
     sentiment_score: 0.88,
-    summary: "Arrived in Lisbon to perfect weather and iconic pastéis de nata.",
     created_at: "2025-07-26T17:00:00Z",
     updated_at: "2025-07-26T18:00:00Z"
   },
@@ -3909,7 +3519,6 @@ export const mockNotes = [
     content: "Hosted a dinner party for 8. The risotto was the highlight. Happy guests, great conversations.",
     tags: ["cooking"],
     sentiment_score: 0.91,
-    summary: "Successful dinner party of 8 with standout risotto and great conversation.",
     created_at: "2025-07-26T22:00:00Z",
     updated_at: "2025-07-26T23:00:00Z"
   },
@@ -3919,7 +3528,6 @@ export const mockNotes = [
     content: "A photo I submitted got accepted for publication. First time being published. Incredible feeling.",
     tags: ["photography"],
     sentiment_score: 0.89,
-    summary: "First photography publication acceptance — photo selected for magazine.",
     created_at: "2025-07-27T19:00:00Z",
     updated_at: "2025-07-27T20:00:00Z"
   },
@@ -3929,7 +3537,6 @@ export const mockNotes = [
     content: "Monads. Three months of confusion and today it just clicked. That moment is addictive.",
     tags: ["learning"],
     sentiment_score: 0.85,
-    summary: "Monadic programming concept finally clicked after three months of confusion.",
     created_at: "2025-07-27T22:00:00Z",
     updated_at: "2025-07-27T23:00:00Z"
   },
@@ -3939,7 +3546,6 @@ export const mockNotes = [
     content: "Posted the D3 graph visualization on HN. Made the front page for 2 hours. 500 upvotes.",
     tags: ["d3"],
     sentiment_score: 0.84,
-    summary: "D3 visualization reached Hacker News front page with 500 upvotes.",
     created_at: "2025-07-27T23:00:00Z",
     updated_at: "2025-07-28T00:00:00Z"
   },
@@ -3949,7 +3555,6 @@ export const mockNotes = [
     content: "Noticing real changes from therapy. Catching negative thought patterns before they spiral.",
     tags: ["wellbeing"],
     sentiment_score: 0.74,
-    summary: "Therapy producing measurable results in negative thought pattern recognition.",
     created_at: "2025-07-31T12:00:00Z",
     updated_at: "2025-07-31T13:00:00Z"
   },
@@ -3959,7 +3564,6 @@ export const mockNotes = [
     content: "First open source contribution merged into a popular library. Small fix but meaningful.",
     tags: ["engineering"],
     sentiment_score: 0.8,
-    summary: "First open source contribution merged into widely-used library.",
     created_at: "2025-07-31T15:00:00Z",
     updated_at: "2025-07-31T16:00:00Z"
   },
@@ -3969,7 +3573,6 @@ export const mockNotes = [
     content: "Three weeks of better nutrition and my energy levels are unrecognisable. No afternoon crash.",
     tags: ["nutrition"],
     sentiment_score: 0.77,
-    summary: "Three weeks of improved nutrition eliminated afternoon energy crashes.",
     created_at: "2025-07-31T17:00:00Z",
     updated_at: "2025-07-31T18:00:00Z"
   },
@@ -3979,7 +3582,6 @@ export const mockNotes = [
     content: "90 days of daily gratitude journaling. Genuine shift in how I default-interpret events.",
     tags: ["reflection"],
     sentiment_score: 0.84,
-    summary: "90-day gratitude practice has shifted default interpretations to positive.",
     created_at: "2025-07-31T19:00:00Z",
     updated_at: "2025-07-31T20:00:00Z"
   },
@@ -3989,7 +3591,6 @@ export const mockNotes = [
     content: "Lazy loading, code splitting, and virtual scrolling. App feels completely different now.",
     tags: ["vue"],
     sentiment_score: 0.81,
-    summary: "Three performance optimizations delivered 3x app speed improvement.",
     created_at: "2025-07-31T20:00:00Z",
     updated_at: "2025-07-31T21:00:00Z"
   },
@@ -3999,7 +3600,6 @@ export const mockNotes = [
     content: "Blue-green deployment configured and tested. Deployments are now invisible to users.",
     tags: ["docker"],
     sentiment_score: 0.65,
-    summary: "Blue-green deployment enables zero-downtime releases invisible to users.",
     created_at: "2025-08-02T12:00:00Z",
     updated_at: "2025-08-02T13:00:00Z"
   },
@@ -4009,7 +3609,6 @@ export const mockNotes = [
     content: "Seven consecutive nights of quality sleep. Mood, focus, and patience are dramatically better.",
     tags: ["sleep"],
     sentiment_score: 0.72,
-    summary: "First week of consistent quality sleep producing dramatic mood and focus improvements.",
     created_at: "2025-08-02T13:00:00Z",
     updated_at: "2025-08-02T14:00:00Z"
   },
@@ -4019,7 +3618,6 @@ export const mockNotes = [
     content: "Longest run yet — 28km. Felt strong the whole way. Marathon is within reach.",
     tags: ["fitness"],
     sentiment_score: 0.88,
-    summary: "Achieved 28km long run PB, marathon goal now feels realistic.",
     created_at: "2025-08-02T18:00:00Z",
     updated_at: "2025-08-02T19:00:00Z"
   },
@@ -4029,7 +3627,6 @@ export const mockNotes = [
     content: "Big feature finally in production. Zero issues. The testing paid off.",
     tags: ["engineering"],
     sentiment_score: 0.83,
-    summary: "Major feature shipped cleanly to production after thorough testing.",
     created_at: "2025-08-04T12:00:00Z",
     updated_at: "2025-08-04T13:00:00Z"
   },
@@ -4039,7 +3636,6 @@ export const mockNotes = [
     content: "The technical article crossed 1000 views. Community feedback is overwhelmingly positive.",
     tags: ["writing"],
     sentiment_score: 0.91,
-    summary: "Technical article reached 1000 views with strong community reception.",
     created_at: "2025-08-04T15:00:00Z",
     updated_at: "2025-08-04T16:00:00Z"
   },
@@ -4049,7 +3645,6 @@ export const mockNotes = [
     content: "After 12 attempts, the sourdough is perfect. Open crumb, crispy crust. Worth every failure.",
     tags: ["cooking"],
     sentiment_score: 0.98,
-    summary: "Achieved perfect sourdough after 12 iterations — open crumb and crispy crust.",
     created_at: "2025-08-04T17:00:00Z",
     updated_at: "2025-08-04T18:00:00Z"
   },
@@ -4059,7 +3654,6 @@ export const mockNotes = [
     content: "Passed the AWS Solutions Architect exam on first attempt. Months of studying paid off.",
     tags: ["learning"],
     sentiment_score: 0.96,
-    summary: "Passed AWS Solutions Architect certification on first attempt.",
     created_at: "2025-08-04T17:00:00Z",
     updated_at: "2025-08-04T18:00:00Z"
   },
@@ -4069,7 +3663,6 @@ export const mockNotes = [
     content: "Everything clicked this week. Work, health, relationships. Rare alignment.",
     tags: ["journaling"],
     sentiment_score: 0.89,
-    summary: "Exceptional week with work, health, and relationships all aligned positively.",
     created_at: "2025-08-04T23:00:00Z",
     updated_at: "2025-08-05T00:00:00Z"
   },
@@ -4079,7 +3672,6 @@ export const mockNotes = [
     content: "Performed at an open mic for the first time. Nervous but pulled it off. People clapped.",
     tags: ["music"],
     sentiment_score: 0.82,
-    summary: "Successfully completed first open mic performance despite nerves.",
     created_at: "2025-08-09T19:00:00Z",
     updated_at: "2025-08-09T20:00:00Z"
   },
@@ -4089,7 +3681,6 @@ export const mockNotes = [
     content: "Officially promoted to senior. A year of hard work recognized. Feeling proud.",
     tags: ["reflection"],
     sentiment_score: 0.96,
-    summary: "Received senior promotion after a year of consistent effort and results.",
     created_at: "2025-08-09T19:00:00Z",
     updated_at: "2025-08-09T20:00:00Z"
   },
@@ -4099,7 +3690,6 @@ export const mockNotes = [
     content: "Finished the component refactor. Test coverage went from 40% to 78%. Feels much better.",
     tags: ["engineering","vue"],
     sentiment_score: 0.63,
-    summary: "Component refactor improved test coverage from 40% to 78%.",
     created_at: "2025-08-10T23:00:00Z",
     updated_at: "2025-08-11T00:00:00Z"
   },
@@ -4109,7 +3699,6 @@ export const mockNotes = [
     content: "Completed Atomic Habits. The 1% better every day concept is deceptively simple but powerful.",
     tags: ["reading"],
     sentiment_score: 0.72,
-    summary: "Atomic Habits reinforced compound improvement through 1% daily gains.",
     created_at: "2025-08-11T18:00:00Z",
     updated_at: "2025-08-11T19:00:00Z"
   },
@@ -4119,7 +3708,6 @@ export const mockNotes = [
     content: "Woke at 4am for a sunrise hike. The view at the top in golden light was surreal.",
     tags: ["fitness","hiking"],
     sentiment_score: 0.79,
-    summary: "Early morning sunrise hike delivered breathtaking light views.",
     created_at: "2025-08-13T21:00:00Z",
     updated_at: "2025-08-13T22:00:00Z"
   },
@@ -4129,7 +3717,6 @@ export const mockNotes = [
     content: "Cleared my inbox for the first time in 8 months. Took 3 hours. Feels like a fresh start.",
     tags: ["productivity"],
     sentiment_score: 0.63,
-    summary: "Achieved inbox zero after 8 months, creating mental clarity.",
     created_at: "2025-08-15T19:00:00Z",
     updated_at: "2025-08-15T20:00:00Z"
   },
@@ -4139,7 +3726,6 @@ export const mockNotes = [
     content: "Query optimization and caching cut API response from 800ms to 320ms. Significant win.",
     tags: ["nodejs"],
     sentiment_score: 0.65,
-    summary: "API optimization reduced response time by 60% through caching and query tuning.",
     created_at: "2025-08-16T11:00:00Z",
     updated_at: "2025-08-16T12:00:00Z"
   },
@@ -4149,7 +3735,6 @@ export const mockNotes = [
     content: "Hit 60 days consecutive meditation. The practice is now automatic — like brushing teeth.",
     tags: ["meditation"],
     sentiment_score: 0.74,
-    summary: "60-day meditation streak reached, practice now deeply habitual.",
     created_at: "2025-08-16T13:00:00Z",
     updated_at: "2025-08-16T14:00:00Z"
   },
@@ -4159,7 +3744,6 @@ export const mockNotes = [
     content: "New design system adopted by all three product teams. Consistency across products finally.",
     tags: ["design"],
     sentiment_score: 0.74,
-    summary: "Design system v2 successfully adopted across all three product teams.",
     created_at: "2025-08-16T14:00:00Z",
     updated_at: "2025-08-16T15:00:00Z"
   },
@@ -4169,7 +3753,6 @@ export const mockNotes = [
     content: "Portfolio review: 18% year-to-date return. Index funds boring but effective.",
     tags: ["finance"],
     sentiment_score: 0.63,
-    summary: "Portfolio achieved 18% YTD return through consistent index fund strategy.",
     created_at: "2025-08-16T17:00:00Z",
     updated_at: "2025-08-16T18:00:00Z"
   },
@@ -4179,7 +3762,6 @@ export const mockNotes = [
     content: "Spent 6 hours on a bug that turned out to be a timezone issue. Frustrating but resolved.",
     tags: ["engineering"],
     sentiment_score: 0.12,
-    summary: "6-hour debugging session resolved timezone-related bug.",
     created_at: "2025-08-16T18:00:00Z",
     updated_at: "2025-08-16T19:00:00Z"
   },
@@ -4189,7 +3771,6 @@ export const mockNotes = [
     content: "Not sure where to go next in my career. Multiple paths, none feel clearly right.",
     tags: ["reflection"],
     sentiment_score: -0.05,
-    summary: "Experiencing career direction uncertainty with multiple viable but unclear paths.",
     created_at: "2025-08-22T17:00:00Z",
     updated_at: "2025-08-22T18:00:00Z"
   },
@@ -4199,7 +3780,6 @@ export const mockNotes = [
     content: "Low energy day. Not productive but not terrible either. Sometimes rest looks like this.",
     tags: ["journaling"],
     sentiment_score: 0.1,
-    summary: "Low energy rest day — unproductive but necessary recovery.",
     created_at: "2025-08-23T17:00:00Z",
     updated_at: "2025-08-23T18:00:00Z"
   },
@@ -4209,7 +3789,6 @@ export const mockNotes = [
     content: "Bad sleep for the third night. Affecting mood and focus. Need to fix the root cause.",
     tags: ["wellbeing"],
     sentiment_score: -0.18,
-    summary: "Three nights of poor sleep beginning to impact mood and concentration.",
     created_at: "2025-08-29T15:00:00Z",
     updated_at: "2025-08-29T16:00:00Z"
   },
@@ -4219,7 +3798,6 @@ export const mockNotes = [
     content: "Trying to understand distributed consensus algorithms. Progress is slow. It clicks, then un-clicks.",
     tags: ["learning"],
     sentiment_score: 0.13,
-    summary: "Struggling with distributed consensus algorithms, progress inconsistent.",
     created_at: "2025-08-29T15:00:00Z",
     updated_at: "2025-08-29T16:00:00Z"
   },
@@ -4229,7 +3807,6 @@ export const mockNotes = [
     content: "Travel broke the training routine. Back to basics. The first run back is always the hardest.",
     tags: ["fitness"],
     sentiment_score: 0.02,
-    summary: "Resumed training after travel break — restarting base-building phase.",
     created_at: "2025-08-29T16:00:00Z",
     updated_at: "2025-08-29T17:00:00Z"
   },
@@ -4239,7 +3816,6 @@ export const mockNotes = [
     content: "Constant interruptions today. Context switching destroyed focus. Need to protect deep work time.",
     tags: ["productivity"],
     sentiment_score: -0.13,
-    summary: "Interruption-heavy day with context switching preventing meaningful progress.",
     created_at: "2025-08-29T21:00:00Z",
     updated_at: "2025-08-29T22:00:00Z"
   },
@@ -4249,7 +3825,6 @@ export const mockNotes = [
     content: "Had a panic attack during a presentation. Embarrassing and scary. Need to address this properly.",
     tags: ["wellbeing"],
     sentiment_score: -0.82,
-    summary: "Experienced panic attack during work presentation — needs professional support.",
     created_at: "2025-09-02T16:00:00Z",
     updated_at: "2025-09-02T17:00:00Z"
   },
@@ -4259,7 +3834,6 @@ export const mockNotes = [
     content: "The project I've been working on for 3 months was cancelled. Feels like wasted effort.",
     tags: ["reflection"],
     sentiment_score: -0.83,
-    summary: "Major project cancelled after 3 months, leaving work feeling purposeless.",
     created_at: "2025-09-02T20:00:00Z",
     updated_at: "2025-09-02T21:00:00Z"
   },
@@ -4269,7 +3843,6 @@ export const mockNotes = [
     content: "Fell into a comparison spiral on social media. Everyone looks more successful. I know it's not real but it stings.",
     tags: ["journaling"],
     sentiment_score: -0.75,
-    summary: "Social media comparison spiral triggering feelings of inadequacy.",
     created_at: "2025-09-02T20:00:00Z",
     updated_at: "2025-09-02T21:00:00Z"
   },
@@ -4279,7 +3852,6 @@ export const mockNotes = [
     content: "Too many things at once. Work, health, relationships, side projects. Can't prioritize. Paralyzed.",
     tags: ["wellbeing"],
     sentiment_score: -0.73,
-    summary: "Overwhelmed by competing demands across work, health, and personal life.",
     created_at: "2025-09-02T21:00:00Z",
     updated_at: "2025-09-02T22:00:00Z"
   },
@@ -4289,7 +3861,6 @@ export const mockNotes = [
     content: "I caused a production outage. 45 minutes of downtime. Worst feeling. Need better deployment checks.",
     tags: ["engineering"],
     sentiment_score: -0.97,
-    summary: "Caused 45-minute production outage, triggering deployment process review.",
     created_at: "2025-09-02T23:00:00Z",
     updated_at: "2025-09-03T00:00:00Z"
   },
@@ -4299,7 +3870,6 @@ export const mockNotes = [
     content: "Got harsh feedback on my work in front of the team. Some valid, delivery was brutal. Need to process this.",
     tags: ["reflection"],
     sentiment_score: -0.75,
-    summary: "Received harsh public criticism — processing validity vs delivery style.",
     created_at: "2025-09-03T11:00:00Z",
     updated_at: "2025-09-03T12:00:00Z"
   },
@@ -4309,7 +3879,6 @@ export const mockNotes = [
     content: "Six months in the new city. Work is good but haven't built real friendships yet. Quietly lonely.",
     tags: ["wellbeing"],
     sentiment_score: -0.72,
-    summary: "Experiencing quiet loneliness six months after relocating to new city.",
     created_at: "2025-09-03T12:00:00Z",
     updated_at: "2025-09-03T13:00:00Z"
   },
@@ -4319,7 +3888,6 @@ export const mockNotes = [
     content: "Didn't get the job I really wanted. Made it to final round then no. Hard to accept.",
     tags: ["journaling"],
     sentiment_score: -0.87,
-    summary: "Final round rejection from dream job opportunity, processing disappointment.",
     created_at: "2025-09-03T16:00:00Z",
     updated_at: "2025-09-03T17:00:00Z"
   },
@@ -4329,7 +3897,6 @@ export const mockNotes = [
     content: "Knee injury means no running for 6 weeks. Devastating after building momentum for months.",
     tags: ["fitness"],
     sentiment_score: -0.73,
-    summary: "Knee injury forcing 6-week running break at height of training momentum.",
     created_at: "2025-09-03T21:00:00Z",
     updated_at: "2025-09-03T22:00:00Z"
   },
@@ -4339,7 +3906,6 @@ export const mockNotes = [
     content: "Car repair wiped out the savings buffer. Back to square one on the emergency fund.",
     tags: ["finance"],
     sentiment_score: -0.56,
-    summary: "Unexpected car repair expenses depleted savings buffer completely.",
     created_at: "2025-09-03T23:00:00Z",
     updated_at: "2025-09-04T00:00:00Z"
   },
@@ -4349,7 +3915,6 @@ export const mockNotes = [
     content: "Physically and mentally exhausted. Can't remember the last time I felt truly rested.",
     tags: ["wellbeing"],
     sentiment_score: -0.73,
-    summary: "Deep exhaustion with no memory of feeling genuinely rested.",
     created_at: "2025-09-08T13:00:00Z",
     updated_at: "2025-09-08T14:00:00Z"
   },
@@ -4359,7 +3924,6 @@ export const mockNotes = [
     content: "Inheriting this legacy codebase is demoralising. No tests, no docs, spaghetti everywhere.",
     tags: ["engineering"],
     sentiment_score: -0.68,
-    summary: "Inheriting undocumented, untested legacy codebase causing significant morale drop.",
     created_at: "2025-09-08T15:00:00Z",
     updated_at: "2025-09-08T16:00:00Z"
   },
@@ -4369,7 +3933,6 @@ export const mockNotes = [
     content: "First day in Lisbon. Warm, beautiful, pastéis de nata for breakfast. Already love it.",
     tags: ["travel"],
     sentiment_score: 0.92,
-    summary: "Arrived in Lisbon to perfect weather and iconic pastéis de nata.",
     created_at: "2025-09-08T16:00:00Z",
     updated_at: "2025-09-08T17:00:00Z"
   },
@@ -4379,7 +3942,6 @@ export const mockNotes = [
     content: "Hosted a dinner party for 8. The risotto was the highlight. Happy guests, great conversations.",
     tags: ["cooking"],
     sentiment_score: 0.82,
-    summary: "Successful dinner party of 8 with standout risotto and great conversation.",
     created_at: "2025-09-08T18:00:00Z",
     updated_at: "2025-09-08T19:00:00Z"
   },
@@ -4389,7 +3951,6 @@ export const mockNotes = [
     content: "A photo I submitted got accepted for publication. First time being published. Incredible feeling.",
     tags: ["photography"],
     sentiment_score: 0.84,
-    summary: "First photography publication acceptance — photo selected for magazine.",
     created_at: "2025-09-08T19:00:00Z",
     updated_at: "2025-09-08T20:00:00Z"
   },
@@ -4399,7 +3960,6 @@ export const mockNotes = [
     content: "Monads. Three months of confusion and today it just clicked. That moment is addictive.",
     tags: ["learning"],
     sentiment_score: 0.86,
-    summary: "Monadic programming concept finally clicked after three months of confusion.",
     created_at: "2025-09-10T23:00:00Z",
     updated_at: "2025-09-11T00:00:00Z"
   },
@@ -4409,7 +3969,6 @@ export const mockNotes = [
     content: "Posted the D3 graph visualization on HN. Made the front page for 2 hours. 500 upvotes.",
     tags: ["d3"],
     sentiment_score: 0.9,
-    summary: "D3 visualization reached Hacker News front page with 500 upvotes.",
     created_at: "2025-09-18T14:00:00Z",
     updated_at: "2025-09-18T15:00:00Z"
   },
@@ -4419,7 +3978,6 @@ export const mockNotes = [
     content: "Noticing real changes from therapy. Catching negative thought patterns before they spiral.",
     tags: ["wellbeing"],
     sentiment_score: 0.64,
-    summary: "Therapy producing measurable results in negative thought pattern recognition.",
     created_at: "2025-09-20T20:00:00Z",
     updated_at: "2025-09-20T21:00:00Z"
   },
@@ -4429,7 +3987,6 @@ export const mockNotes = [
     content: "First open source contribution merged into a popular library. Small fix but meaningful.",
     tags: ["engineering"],
     sentiment_score: 0.81,
-    summary: "First open source contribution merged into widely-used library.",
     created_at: "2025-09-22T18:00:00Z",
     updated_at: "2025-09-22T19:00:00Z"
   },
@@ -4439,7 +3996,6 @@ export const mockNotes = [
     content: "Three weeks of better nutrition and my energy levels are unrecognisable. No afternoon crash.",
     tags: ["nutrition"],
     sentiment_score: 0.79,
-    summary: "Three weeks of improved nutrition eliminated afternoon energy crashes.",
     created_at: "2025-09-24T11:00:00Z",
     updated_at: "2025-09-24T12:00:00Z"
   },
@@ -4449,7 +4005,6 @@ export const mockNotes = [
     content: "90 days of daily gratitude journaling. Genuine shift in how I default-interpret events.",
     tags: ["reflection"],
     sentiment_score: 0.83,
-    summary: "90-day gratitude practice has shifted default interpretations to positive.",
     created_at: "2025-09-24T13:00:00Z",
     updated_at: "2025-09-24T14:00:00Z"
   },
@@ -4459,7 +4014,6 @@ export const mockNotes = [
     content: "Lazy loading, code splitting, and virtual scrolling. App feels completely different now.",
     tags: ["vue"],
     sentiment_score: 0.75,
-    summary: "Three performance optimizations delivered 3x app speed improvement.",
     created_at: "2025-09-24T18:00:00Z",
     updated_at: "2025-09-24T19:00:00Z"
   },
@@ -4469,7 +4023,6 @@ export const mockNotes = [
     content: "Blue-green deployment configured and tested. Deployments are now invisible to users.",
     tags: ["docker"],
     sentiment_score: 0.7,
-    summary: "Blue-green deployment enables zero-downtime releases invisible to users.",
     created_at: "2025-09-24T23:00:00Z",
     updated_at: "2025-09-25T00:00:00Z"
   },
@@ -4479,7 +4032,6 @@ export const mockNotes = [
     content: "Seven consecutive nights of quality sleep. Mood, focus, and patience are dramatically better.",
     tags: ["sleep"],
     sentiment_score: 0.81,
-    summary: "First week of consistent quality sleep producing dramatic mood and focus improvements.",
     created_at: "2025-09-27T15:00:00Z",
     updated_at: "2025-09-27T16:00:00Z"
   },
@@ -4489,7 +4041,6 @@ export const mockNotes = [
     content: "Longest run yet — 28km. Felt strong the whole way. Marathon is within reach.",
     tags: ["fitness"],
     sentiment_score: 0.88,
-    summary: "Achieved 28km long run PB, marathon goal now feels realistic.",
     created_at: "2025-09-27T18:00:00Z",
     updated_at: "2025-09-27T19:00:00Z"
   },
@@ -4499,7 +4050,6 @@ export const mockNotes = [
     content: "Big feature finally in production. Zero issues. The testing paid off.",
     tags: ["engineering"],
     sentiment_score: 0.86,
-    summary: "Major feature shipped cleanly to production after thorough testing.",
     created_at: "2025-09-29T12:00:00Z",
     updated_at: "2025-09-29T13:00:00Z"
   },
@@ -4509,7 +4059,6 @@ export const mockNotes = [
     content: "The technical article crossed 1000 views. Community feedback is overwhelmingly positive.",
     tags: ["writing"],
     sentiment_score: 0.89,
-    summary: "Technical article reached 1000 views with strong community reception.",
     created_at: "2025-09-29T23:00:00Z",
     updated_at: "2025-09-30T00:00:00Z"
   },
@@ -4519,7 +4068,6 @@ export const mockNotes = [
     content: "After 12 attempts, the sourdough is perfect. Open crumb, crispy crust. Worth every failure.",
     tags: ["cooking"],
     sentiment_score: 0.89,
-    summary: "Achieved perfect sourdough after 12 iterations — open crumb and crispy crust.",
     created_at: "2025-10-08T16:00:00Z",
     updated_at: "2025-10-08T17:00:00Z"
   },
@@ -4529,7 +4077,6 @@ export const mockNotes = [
     content: "Passed the AWS Solutions Architect exam on first attempt. Months of studying paid off.",
     tags: ["learning"],
     sentiment_score: 0.94,
-    summary: "Passed AWS Solutions Architect certification on first attempt.",
     created_at: "2025-10-09T18:00:00Z",
     updated_at: "2025-10-09T19:00:00Z"
   },
@@ -4539,7 +4086,6 @@ export const mockNotes = [
     content: "Everything clicked this week. Work, health, relationships. Rare alignment.",
     tags: ["journaling"],
     sentiment_score: 0.88,
-    summary: "Exceptional week with work, health, and relationships all aligned positively.",
     created_at: "2025-10-12T13:00:00Z",
     updated_at: "2025-10-12T14:00:00Z"
   },
@@ -4549,7 +4095,6 @@ export const mockNotes = [
     content: "Performed at an open mic for the first time. Nervous but pulled it off. People clapped.",
     tags: ["music"],
     sentiment_score: 0.85,
-    summary: "Successfully completed first open mic performance despite nerves.",
     created_at: "2025-10-12T14:00:00Z",
     updated_at: "2025-10-12T15:00:00Z"
   },
@@ -4559,7 +4104,6 @@ export const mockNotes = [
     content: "Officially promoted to senior. A year of hard work recognized. Feeling proud.",
     tags: ["reflection"],
     sentiment_score: 0.96,
-    summary: "Received senior promotion after a year of consistent effort and results.",
     created_at: "2025-10-12T16:00:00Z",
     updated_at: "2025-10-12T17:00:00Z"
   },
@@ -4569,7 +4113,6 @@ export const mockNotes = [
     content: "Finished the component refactor. Test coverage went from 40% to 78%. Feels much better.",
     tags: ["engineering","vue"],
     sentiment_score: 0.59,
-    summary: "Component refactor improved test coverage from 40% to 78%.",
     created_at: "2025-10-12T20:00:00Z",
     updated_at: "2025-10-12T21:00:00Z"
   },
@@ -4579,7 +4122,6 @@ export const mockNotes = [
     content: "Completed Atomic Habits. The 1% better every day concept is deceptively simple but powerful.",
     tags: ["reading"],
     sentiment_score: 0.65,
-    summary: "Atomic Habits reinforced compound improvement through 1% daily gains.",
     created_at: "2025-10-12T22:00:00Z",
     updated_at: "2025-10-12T23:00:00Z"
   },
@@ -4589,7 +4131,6 @@ export const mockNotes = [
     content: "Woke at 4am for a sunrise hike. The view at the top in golden light was surreal.",
     tags: ["fitness","hiking"],
     sentiment_score: 0.81,
-    summary: "Early morning sunrise hike delivered breathtaking light views.",
     created_at: "2025-10-13T11:00:00Z",
     updated_at: "2025-10-13T12:00:00Z"
   },
@@ -4599,7 +4140,6 @@ export const mockNotes = [
     content: "Cleared my inbox for the first time in 8 months. Took 3 hours. Feels like a fresh start.",
     tags: ["productivity"],
     sentiment_score: 0.65,
-    summary: "Achieved inbox zero after 8 months, creating mental clarity.",
     created_at: "2025-10-13T19:00:00Z",
     updated_at: "2025-10-13T20:00:00Z"
   },
@@ -4609,7 +4149,6 @@ export const mockNotes = [
     content: "Query optimization and caching cut API response from 800ms to 320ms. Significant win.",
     tags: ["nodejs"],
     sentiment_score: 0.77,
-    summary: "API optimization reduced response time by 60% through caching and query tuning.",
     created_at: "2025-10-15T12:00:00Z",
     updated_at: "2025-10-15T13:00:00Z"
   },
@@ -4619,7 +4158,6 @@ export const mockNotes = [
     content: "Hit 60 days consecutive meditation. The practice is now automatic — like brushing teeth.",
     tags: ["meditation"],
     sentiment_score: 0.66,
-    summary: "60-day meditation streak reached, practice now deeply habitual.",
     created_at: "2025-10-17T13:00:00Z",
     updated_at: "2025-10-17T14:00:00Z"
   },
@@ -4629,7 +4167,6 @@ export const mockNotes = [
     content: "New design system adopted by all three product teams. Consistency across products finally.",
     tags: ["design"],
     sentiment_score: 0.75,
-    summary: "Design system v2 successfully adopted across all three product teams.",
     created_at: "2025-10-21T22:00:00Z",
     updated_at: "2025-10-21T23:00:00Z"
   },
@@ -4639,7 +4176,6 @@ export const mockNotes = [
     content: "Portfolio review: 18% year-to-date return. Index funds boring but effective.",
     tags: ["finance"],
     sentiment_score: 0.65,
-    summary: "Portfolio achieved 18% YTD return through consistent index fund strategy.",
     created_at: "2025-10-25T11:00:00Z",
     updated_at: "2025-10-25T12:00:00Z"
   },
@@ -4649,7 +4185,6 @@ export const mockNotes = [
     content: "Spent 6 hours on a bug that turned out to be a timezone issue. Frustrating but resolved.",
     tags: ["engineering"],
     sentiment_score: 0.03,
-    summary: "6-hour debugging session resolved timezone-related bug.",
     created_at: "2025-10-26T16:00:00Z",
     updated_at: "2025-10-26T17:00:00Z"
   },
@@ -4659,7 +4194,6 @@ export const mockNotes = [
     content: "Not sure where to go next in my career. Multiple paths, none feel clearly right.",
     tags: ["reflection"],
     sentiment_score: -0.1,
-    summary: "Experiencing career direction uncertainty with multiple viable but unclear paths.",
     created_at: "2025-10-27T16:00:00Z",
     updated_at: "2025-10-27T17:00:00Z"
   },
@@ -4669,7 +4203,6 @@ export const mockNotes = [
     content: "Low energy day. Not productive but not terrible either. Sometimes rest looks like this.",
     tags: ["journaling"],
     sentiment_score: 0.03,
-    summary: "Low energy rest day — unproductive but necessary recovery.",
     created_at: "2025-10-27T19:00:00Z",
     updated_at: "2025-10-27T20:00:00Z"
   },
@@ -4679,7 +4212,6 @@ export const mockNotes = [
     content: "Bad sleep for the third night. Affecting mood and focus. Need to fix the root cause.",
     tags: ["wellbeing"],
     sentiment_score: -0.22,
-    summary: "Three nights of poor sleep beginning to impact mood and concentration.",
     created_at: "2025-10-29T17:00:00Z",
     updated_at: "2025-10-29T18:00:00Z"
   },
@@ -4689,7 +4221,6 @@ export const mockNotes = [
     content: "Trying to understand distributed consensus algorithms. Progress is slow. It clicks, then un-clicks.",
     tags: ["learning"],
     sentiment_score: 0.06,
-    summary: "Struggling with distributed consensus algorithms, progress inconsistent.",
     created_at: "2025-11-01T12:00:00Z",
     updated_at: "2025-11-01T13:00:00Z"
   },
@@ -4699,7 +4230,6 @@ export const mockNotes = [
     content: "Travel broke the training routine. Back to basics. The first run back is always the hardest.",
     tags: ["fitness"],
     sentiment_score: 0.06,
-    summary: "Resumed training after travel break — restarting base-building phase.",
     created_at: "2025-11-01T16:00:00Z",
     updated_at: "2025-11-01T17:00:00Z"
   },
@@ -4709,7 +4239,6 @@ export const mockNotes = [
     content: "Constant interruptions today. Context switching destroyed focus. Need to protect deep work time.",
     tags: ["productivity"],
     sentiment_score: -0.25,
-    summary: "Interruption-heavy day with context switching preventing meaningful progress.",
     created_at: "2025-11-04T13:00:00Z",
     updated_at: "2025-11-04T14:00:00Z"
   },
@@ -4719,7 +4248,6 @@ export const mockNotes = [
     content: "Had a panic attack during a presentation. Embarrassing and scary. Need to address this properly.",
     tags: ["wellbeing"],
     sentiment_score: -0.91,
-    summary: "Experienced panic attack during work presentation — needs professional support.",
     created_at: "2025-11-04T21:00:00Z",
     updated_at: "2025-11-04T22:00:00Z"
   },
@@ -4729,7 +4257,6 @@ export const mockNotes = [
     content: "The project I've been working on for 3 months was cancelled. Feels like wasted effort.",
     tags: ["reflection"],
     sentiment_score: -0.75,
-    summary: "Major project cancelled after 3 months, leaving work feeling purposeless.",
     created_at: "2025-11-05T20:00:00Z",
     updated_at: "2025-11-05T21:00:00Z"
   },
@@ -4739,7 +4266,6 @@ export const mockNotes = [
     content: "Fell into a comparison spiral on social media. Everyone looks more successful. I know it's not real but it stings.",
     tags: ["journaling"],
     sentiment_score: -0.68,
-    summary: "Social media comparison spiral triggering feelings of inadequacy.",
     created_at: "2025-11-06T00:00:00Z",
     updated_at: "2025-11-06T01:00:00Z"
   },
@@ -4749,7 +4275,6 @@ export const mockNotes = [
     content: "Too many things at once. Work, health, relationships, side projects. Can't prioritize. Paralyzed.",
     tags: ["wellbeing"],
     sentiment_score: -0.8,
-    summary: "Overwhelmed by competing demands across work, health, and personal life.",
     created_at: "2025-11-07T15:00:00Z",
     updated_at: "2025-11-07T16:00:00Z"
   },
@@ -4759,7 +4284,6 @@ export const mockNotes = [
     content: "I caused a production outage. 45 minutes of downtime. Worst feeling. Need better deployment checks.",
     tags: ["engineering"],
     sentiment_score: -0.86,
-    summary: "Caused 45-minute production outage, triggering deployment process review.",
     created_at: "2025-11-07T18:00:00Z",
     updated_at: "2025-11-07T19:00:00Z"
   },
@@ -4769,7 +4293,6 @@ export const mockNotes = [
     content: "Got harsh feedback on my work in front of the team. Some valid, delivery was brutal. Need to process this.",
     tags: ["reflection"],
     sentiment_score: -0.75,
-    summary: "Received harsh public criticism — processing validity vs delivery style.",
     created_at: "2025-11-07T22:00:00Z",
     updated_at: "2025-11-07T23:00:00Z"
   },
@@ -4779,7 +4302,6 @@ export const mockNotes = [
     content: "Six months in the new city. Work is good but haven't built real friendships yet. Quietly lonely.",
     tags: ["wellbeing"],
     sentiment_score: -0.7,
-    summary: "Experiencing quiet loneliness six months after relocating to new city.",
     created_at: "2025-11-07T22:00:00Z",
     updated_at: "2025-11-07T23:00:00Z"
   },
@@ -4789,7 +4311,6 @@ export const mockNotes = [
     content: "Didn't get the job I really wanted. Made it to final round then no. Hard to accept.",
     tags: ["journaling"],
     sentiment_score: -0.88,
-    summary: "Final round rejection from dream job opportunity, processing disappointment.",
     created_at: "2025-11-08T00:00:00Z",
     updated_at: "2025-11-08T01:00:00Z"
   },
@@ -4799,7 +4320,6 @@ export const mockNotes = [
     content: "Knee injury means no running for 6 weeks. Devastating after building momentum for months.",
     tags: ["fitness"],
     sentiment_score: -0.74,
-    summary: "Knee injury forcing 6-week running break at height of training momentum.",
     created_at: "2025-11-10T16:00:00Z",
     updated_at: "2025-11-10T17:00:00Z"
   },
@@ -4809,7 +4329,6 @@ export const mockNotes = [
     content: "Car repair wiped out the savings buffer. Back to square one on the emergency fund.",
     tags: ["finance"],
     sentiment_score: -0.57,
-    summary: "Unexpected car repair expenses depleted savings buffer completely.",
     created_at: "2025-11-10T16:00:00Z",
     updated_at: "2025-11-10T17:00:00Z"
   },
@@ -4819,7 +4338,6 @@ export const mockNotes = [
     content: "Physically and mentally exhausted. Can't remember the last time I felt truly rested.",
     tags: ["wellbeing"],
     sentiment_score: -0.83,
-    summary: "Deep exhaustion with no memory of feeling genuinely rested.",
     created_at: "2025-11-13T13:00:00Z",
     updated_at: "2025-11-13T14:00:00Z"
   },
@@ -4829,7 +4347,6 @@ export const mockNotes = [
     content: "Inheriting this legacy codebase is demoralising. No tests, no docs, spaghetti everywhere.",
     tags: ["engineering"],
     sentiment_score: -0.75,
-    summary: "Inheriting undocumented, untested legacy codebase causing significant morale drop.",
     created_at: "2025-11-15T14:00:00Z",
     updated_at: "2025-11-15T15:00:00Z"
   },
@@ -4839,7 +4356,6 @@ export const mockNotes = [
     content: "First day in Lisbon. Warm, beautiful, pastéis de nata for breakfast. Already love it.",
     tags: ["travel"],
     sentiment_score: 0.9,
-    summary: "Arrived in Lisbon to perfect weather and iconic pastéis de nata.",
     created_at: "2025-11-15T15:00:00Z",
     updated_at: "2025-11-15T16:00:00Z"
   },
@@ -4849,7 +4365,6 @@ export const mockNotes = [
     content: "Hosted a dinner party for 8. The risotto was the highlight. Happy guests, great conversations.",
     tags: ["cooking"],
     sentiment_score: 0.87,
-    summary: "Successful dinner party of 8 with standout risotto and great conversation.",
     created_at: "2025-11-15T16:00:00Z",
     updated_at: "2025-11-15T17:00:00Z"
   },
@@ -4859,7 +4374,6 @@ export const mockNotes = [
     content: "A photo I submitted got accepted for publication. First time being published. Incredible feeling.",
     tags: ["photography"],
     sentiment_score: 0.88,
-    summary: "First photography publication acceptance — photo selected for magazine.",
     created_at: "2025-11-16T00:00:00Z",
     updated_at: "2025-11-16T01:00:00Z"
   },
@@ -4869,7 +4383,6 @@ export const mockNotes = [
     content: "Monads. Three months of confusion and today it just clicked. That moment is addictive.",
     tags: ["learning"],
     sentiment_score: 0.85,
-    summary: "Monadic programming concept finally clicked after three months of confusion.",
     created_at: "2025-11-17T21:00:00Z",
     updated_at: "2025-11-17T22:00:00Z"
   },
@@ -4879,7 +4392,6 @@ export const mockNotes = [
     content: "Posted the D3 graph visualization on HN. Made the front page for 2 hours. 500 upvotes.",
     tags: ["d3"],
     sentiment_score: 0.84,
-    summary: "D3 visualization reached Hacker News front page with 500 upvotes.",
     created_at: "2025-11-20T21:00:00Z",
     updated_at: "2025-11-20T22:00:00Z"
   },
@@ -4889,7 +4401,6 @@ export const mockNotes = [
     content: "Noticing real changes from therapy. Catching negative thought patterns before they spiral.",
     tags: ["wellbeing"],
     sentiment_score: 0.72,
-    summary: "Therapy producing measurable results in negative thought pattern recognition.",
     created_at: "2025-12-01T23:00:00Z",
     updated_at: "2025-12-02T00:00:00Z"
   },
@@ -4899,7 +4410,6 @@ export const mockNotes = [
     content: "First open source contribution merged into a popular library. Small fix but meaningful.",
     tags: ["engineering"],
     sentiment_score: 0.85,
-    summary: "First open source contribution merged into widely-used library.",
     created_at: "2025-12-06T15:00:00Z",
     updated_at: "2025-12-06T16:00:00Z"
   },
@@ -4909,7 +4419,6 @@ export const mockNotes = [
     content: "Three weeks of better nutrition and my energy levels are unrecognisable. No afternoon crash.",
     tags: ["nutrition"],
     sentiment_score: 0.71,
-    summary: "Three weeks of improved nutrition eliminated afternoon energy crashes.",
     created_at: "2025-12-06T18:00:00Z",
     updated_at: "2025-12-06T19:00:00Z"
   },
@@ -4919,7 +4428,6 @@ export const mockNotes = [
     content: "90 days of daily gratitude journaling. Genuine shift in how I default-interpret events.",
     tags: ["reflection"],
     sentiment_score: 0.75,
-    summary: "90-day gratitude practice has shifted default interpretations to positive.",
     created_at: "2025-12-07T12:00:00Z",
     updated_at: "2025-12-07T13:00:00Z"
   },
@@ -4929,7 +4437,6 @@ export const mockNotes = [
     content: "Lazy loading, code splitting, and virtual scrolling. App feels completely different now.",
     tags: ["vue"],
     sentiment_score: 0.73,
-    summary: "Three performance optimizations delivered 3x app speed improvement.",
     created_at: "2025-12-11T21:00:00Z",
     updated_at: "2025-12-11T22:00:00Z"
   },
@@ -4939,7 +4446,6 @@ export const mockNotes = [
     content: "Blue-green deployment configured and tested. Deployments are now invisible to users.",
     tags: ["docker"],
     sentiment_score: 0.74,
-    summary: "Blue-green deployment enables zero-downtime releases invisible to users.",
     created_at: "2025-12-12T16:00:00Z",
     updated_at: "2025-12-12T17:00:00Z"
   },
@@ -4949,7 +4455,6 @@ export const mockNotes = [
     content: "Seven consecutive nights of quality sleep. Mood, focus, and patience are dramatically better.",
     tags: ["sleep"],
     sentiment_score: 0.76,
-    summary: "First week of consistent quality sleep producing dramatic mood and focus improvements.",
     created_at: "2025-12-12T22:00:00Z",
     updated_at: "2025-12-12T23:00:00Z"
   },
@@ -4959,7 +4464,6 @@ export const mockNotes = [
     content: "Longest run yet — 28km. Felt strong the whole way. Marathon is within reach.",
     tags: ["fitness"],
     sentiment_score: 0.9,
-    summary: "Achieved 28km long run PB, marathon goal now feels realistic.",
     created_at: "2025-12-15T17:00:00Z",
     updated_at: "2025-12-15T18:00:00Z"
   },
@@ -4969,7 +4473,6 @@ export const mockNotes = [
     content: "Big feature finally in production. Zero issues. The testing paid off.",
     tags: ["engineering"],
     sentiment_score: 0.94,
-    summary: "Major feature shipped cleanly to production after thorough testing.",
     created_at: "2025-12-16T00:00:00Z",
     updated_at: "2025-12-16T01:00:00Z"
   },
@@ -4979,7 +4482,6 @@ export const mockNotes = [
     content: "The technical article crossed 1000 views. Community feedback is overwhelmingly positive.",
     tags: ["writing"],
     sentiment_score: 0.88,
-    summary: "Technical article reached 1000 views with strong community reception.",
     created_at: "2025-12-19T14:00:00Z",
     updated_at: "2025-12-19T15:00:00Z"
   },
@@ -4989,7 +4491,6 @@ export const mockNotes = [
     content: "After 12 attempts, the sourdough is perfect. Open crumb, crispy crust. Worth every failure.",
     tags: ["cooking"],
     sentiment_score: 0.88,
-    summary: "Achieved perfect sourdough after 12 iterations — open crumb and crispy crust.",
     created_at: "2025-12-23T15:00:00Z",
     updated_at: "2025-12-23T16:00:00Z"
   },
@@ -4999,7 +4500,6 @@ export const mockNotes = [
     content: "Passed the AWS Solutions Architect exam on first attempt. Months of studying paid off.",
     tags: ["learning"],
     sentiment_score: 0.88,
-    summary: "Passed AWS Solutions Architect certification on first attempt.",
     created_at: "2025-12-23T22:00:00Z",
     updated_at: "2025-12-23T23:00:00Z"
   },
@@ -5009,7 +4509,6 @@ export const mockNotes = [
     content: "Everything clicked this week. Work, health, relationships. Rare alignment.",
     tags: ["journaling"],
     sentiment_score: 0.92,
-    summary: "Exceptional week with work, health, and relationships all aligned positively.",
     created_at: "2025-12-26T22:00:00Z",
     updated_at: "2025-12-26T23:00:00Z"
   },
@@ -5019,7 +4518,6 @@ export const mockNotes = [
     content: "Performed at an open mic for the first time. Nervous but pulled it off. People clapped.",
     tags: ["music"],
     sentiment_score: 0.9,
-    summary: "Successfully completed first open mic performance despite nerves.",
     created_at: "2025-12-28T15:00:00Z",
     updated_at: "2025-12-28T16:00:00Z"
   },
@@ -5029,7 +4527,6 @@ export const mockNotes = [
     content: "Officially promoted to senior. A year of hard work recognized. Feeling proud.",
     tags: ["reflection"],
     sentiment_score: 0.99,
-    summary: "Received senior promotion after a year of consistent effort and results.",
     created_at: "2025-12-29T16:00:00Z",
     updated_at: "2025-12-29T17:00:00Z"
   },
@@ -5039,7 +4536,6 @@ export const mockNotes = [
     content: "Finished the component refactor. Test coverage went from 40% to 78%. Feels much better.",
     tags: ["engineering","vue"],
     sentiment_score: 0.67,
-    summary: "Component refactor improved test coverage from 40% to 78%.",
     created_at: "2025-12-30T00:00:00Z",
     updated_at: "2025-12-30T01:00:00Z"
   },
@@ -5049,7 +4545,6 @@ export const mockNotes = [
     content: "Completed Atomic Habits. The 1% better every day concept is deceptively simple but powerful.",
     tags: ["reading"],
     sentiment_score: 0.71,
-    summary: "Atomic Habits reinforced compound improvement through 1% daily gains.",
     created_at: "2026-01-01T15:00:00Z",
     updated_at: "2026-01-01T16:00:00Z"
   },
@@ -5059,7 +4554,6 @@ export const mockNotes = [
     content: "Woke at 4am for a sunrise hike. The view at the top in golden light was surreal.",
     tags: ["fitness","hiking"],
     sentiment_score: 0.71,
-    summary: "Early morning sunrise hike delivered breathtaking light views.",
     created_at: "2026-01-05T19:00:00Z",
     updated_at: "2026-01-05T20:00:00Z"
   },
@@ -5069,7 +4563,6 @@ export const mockNotes = [
     content: "Cleared my inbox for the first time in 8 months. Took 3 hours. Feels like a fresh start.",
     tags: ["productivity"],
     sentiment_score: 0.56,
-    summary: "Achieved inbox zero after 8 months, creating mental clarity.",
     created_at: "2026-01-09T13:00:00Z",
     updated_at: "2026-01-09T14:00:00Z"
   },
@@ -5079,7 +4572,6 @@ export const mockNotes = [
     content: "Query optimization and caching cut API response from 800ms to 320ms. Significant win.",
     tags: ["nodejs"],
     sentiment_score: 0.73,
-    summary: "API optimization reduced response time by 60% through caching and query tuning.",
     created_at: "2026-01-09T15:00:00Z",
     updated_at: "2026-01-09T16:00:00Z"
   },
@@ -5089,7 +4581,6 @@ export const mockNotes = [
     content: "Hit 60 days consecutive meditation. The practice is now automatic — like brushing teeth.",
     tags: ["meditation"],
     sentiment_score: 0.66,
-    summary: "60-day meditation streak reached, practice now deeply habitual.",
     created_at: "2026-01-09T19:00:00Z",
     updated_at: "2026-01-09T20:00:00Z"
   },
@@ -5099,7 +4590,6 @@ export const mockNotes = [
     content: "New design system adopted by all three product teams. Consistency across products finally.",
     tags: ["design"],
     sentiment_score: 0.66,
-    summary: "Design system v2 successfully adopted across all three product teams.",
     created_at: "2026-01-10T00:00:00Z",
     updated_at: "2026-01-10T01:00:00Z"
   },
@@ -5109,7 +4599,6 @@ export const mockNotes = [
     content: "Portfolio review: 18% year-to-date return. Index funds boring but effective.",
     tags: ["finance"],
     sentiment_score: 0.75,
-    summary: "Portfolio achieved 18% YTD return through consistent index fund strategy.",
     created_at: "2026-01-16T19:00:00Z",
     updated_at: "2026-01-16T20:00:00Z"
   },
@@ -5119,7 +4608,6 @@ export const mockNotes = [
     content: "Spent 6 hours on a bug that turned out to be a timezone issue. Frustrating but resolved.",
     tags: ["engineering"],
     sentiment_score: 0.08,
-    summary: "6-hour debugging session resolved timezone-related bug.",
     created_at: "2026-01-18T21:00:00Z",
     updated_at: "2026-01-18T22:00:00Z"
   },
@@ -5129,7 +4617,6 @@ export const mockNotes = [
     content: "Not sure where to go next in my career. Multiple paths, none feel clearly right.",
     tags: ["reflection"],
     sentiment_score: -0.09,
-    summary: "Experiencing career direction uncertainty with multiple viable but unclear paths.",
     created_at: "2026-01-20T13:00:00Z",
     updated_at: "2026-01-20T14:00:00Z"
   },
@@ -5139,7 +4626,6 @@ export const mockNotes = [
     content: "Low energy day. Not productive but not terrible either. Sometimes rest looks like this.",
     tags: ["journaling"],
     sentiment_score: 0.06,
-    summary: "Low energy rest day — unproductive but necessary recovery.",
     created_at: "2026-01-26T13:00:00Z",
     updated_at: "2026-01-26T14:00:00Z"
   },
@@ -5149,7 +4635,6 @@ export const mockNotes = [
     content: "Bad sleep for the third night. Affecting mood and focus. Need to fix the root cause.",
     tags: ["wellbeing"],
     sentiment_score: -0.13,
-    summary: "Three nights of poor sleep beginning to impact mood and concentration.",
     created_at: "2026-01-26T17:00:00Z",
     updated_at: "2026-01-26T18:00:00Z"
   },
@@ -5159,7 +4644,6 @@ export const mockNotes = [
     content: "Trying to understand distributed consensus algorithms. Progress is slow. It clicks, then un-clicks.",
     tags: ["learning"],
     sentiment_score: 0.12,
-    summary: "Struggling with distributed consensus algorithms, progress inconsistent.",
     created_at: "2026-01-27T00:00:00Z",
     updated_at: "2026-01-27T01:00:00Z"
   },
@@ -5169,7 +4653,6 @@ export const mockNotes = [
     content: "Travel broke the training routine. Back to basics. The first run back is always the hardest.",
     tags: ["fitness"],
     sentiment_score: -0.03,
-    summary: "Resumed training after travel break — restarting base-building phase.",
     created_at: "2026-01-30T15:00:00Z",
     updated_at: "2026-01-30T16:00:00Z"
   },
@@ -5179,7 +4662,6 @@ export const mockNotes = [
     content: "Constant interruptions today. Context switching destroyed focus. Need to protect deep work time.",
     tags: ["productivity"],
     sentiment_score: -0.26,
-    summary: "Interruption-heavy day with context switching preventing meaningful progress.",
     created_at: "2026-02-02T12:00:00Z",
     updated_at: "2026-02-02T13:00:00Z"
   },
@@ -5189,7 +4671,6 @@ export const mockNotes = [
     content: "Had a panic attack during a presentation. Embarrassing and scary. Need to address this properly.",
     tags: ["wellbeing"],
     sentiment_score: -0.81,
-    summary: "Experienced panic attack during work presentation — needs professional support.",
     created_at: "2026-02-06T13:00:00Z",
     updated_at: "2026-02-06T14:00:00Z"
   },
@@ -5199,7 +4680,6 @@ export const mockNotes = [
     content: "The project I've been working on for 3 months was cancelled. Feels like wasted effort.",
     tags: ["reflection"],
     sentiment_score: -0.77,
-    summary: "Major project cancelled after 3 months, leaving work feeling purposeless.",
     created_at: "2026-02-06T16:00:00Z",
     updated_at: "2026-02-06T17:00:00Z"
   },
@@ -5209,7 +4689,6 @@ export const mockNotes = [
     content: "Fell into a comparison spiral on social media. Everyone looks more successful. I know it's not real but it stings.",
     tags: ["journaling"],
     sentiment_score: -0.69,
-    summary: "Social media comparison spiral triggering feelings of inadequacy.",
     created_at: "2026-02-10T22:00:00Z",
     updated_at: "2026-02-10T23:00:00Z"
   },
@@ -5219,7 +4698,6 @@ export const mockNotes = [
     content: "Too many things at once. Work, health, relationships, side projects. Can't prioritize. Paralyzed.",
     tags: ["wellbeing"],
     sentiment_score: -0.85,
-    summary: "Overwhelmed by competing demands across work, health, and personal life.",
     created_at: "2026-02-12T21:00:00Z",
     updated_at: "2026-02-12T22:00:00Z"
   },
@@ -5229,7 +4707,6 @@ export const mockNotes = [
     content: "I caused a production outage. 45 minutes of downtime. Worst feeling. Need better deployment checks.",
     tags: ["engineering"],
     sentiment_score: -0.91,
-    summary: "Caused 45-minute production outage, triggering deployment process review.",
     created_at: "2026-02-12T23:00:00Z",
     updated_at: "2026-02-13T00:00:00Z"
   },
@@ -5239,7 +4716,6 @@ export const mockNotes = [
     content: "Got harsh feedback on my work in front of the team. Some valid, delivery was brutal. Need to process this.",
     tags: ["reflection"],
     sentiment_score: -0.64,
-    summary: "Received harsh public criticism — processing validity vs delivery style.",
     created_at: "2026-02-13T13:00:00Z",
     updated_at: "2026-02-13T14:00:00Z"
   },
@@ -5249,7 +4725,6 @@ export const mockNotes = [
     content: "Six months in the new city. Work is good but haven't built real friendships yet. Quietly lonely.",
     tags: ["wellbeing"],
     sentiment_score: -0.61,
-    summary: "Experiencing quiet loneliness six months after relocating to new city.",
     created_at: "2026-02-13T14:00:00Z",
     updated_at: "2026-02-13T15:00:00Z"
   },
@@ -5259,7 +4734,6 @@ export const mockNotes = [
     content: "Didn't get the job I really wanted. Made it to final round then no. Hard to accept.",
     tags: ["journaling"],
     sentiment_score: -0.8,
-    summary: "Final round rejection from dream job opportunity, processing disappointment.",
     created_at: "2026-02-13T15:00:00Z",
     updated_at: "2026-02-13T16:00:00Z"
   },
@@ -5269,7 +4743,6 @@ export const mockNotes = [
     content: "Knee injury means no running for 6 weeks. Devastating after building momentum for months.",
     tags: ["fitness"],
     sentiment_score: -0.72,
-    summary: "Knee injury forcing 6-week running break at height of training momentum.",
     created_at: "2026-02-14T15:00:00Z",
     updated_at: "2026-02-14T16:00:00Z"
   },
@@ -5279,7 +4752,6 @@ export const mockNotes = [
     content: "Car repair wiped out the savings buffer. Back to square one on the emergency fund.",
     tags: ["finance"],
     sentiment_score: -0.54,
-    summary: "Unexpected car repair expenses depleted savings buffer completely.",
     created_at: "2026-02-14T22:00:00Z",
     updated_at: "2026-02-14T23:00:00Z"
   },
@@ -5289,7 +4761,6 @@ export const mockNotes = [
     content: "Physically and mentally exhausted. Can't remember the last time I felt truly rested.",
     tags: ["wellbeing"],
     sentiment_score: -0.83,
-    summary: "Deep exhaustion with no memory of feeling genuinely rested.",
     created_at: "2026-02-15T00:00:00Z",
     updated_at: "2026-02-15T01:00:00Z"
   },
@@ -5299,7 +4770,6 @@ export const mockNotes = [
     content: "Inheriting this legacy codebase is demoralising. No tests, no docs, spaghetti everywhere.",
     tags: ["engineering"],
     sentiment_score: -0.66,
-    summary: "Inheriting undocumented, untested legacy codebase causing significant morale drop.",
     created_at: "2026-02-17T00:00:00Z",
     updated_at: "2026-02-17T01:00:00Z"
   },
@@ -5309,7 +4779,6 @@ export const mockNotes = [
     content: "First day in Lisbon. Warm, beautiful, pastéis de nata for breakfast. Already love it.",
     tags: ["travel"],
     sentiment_score: 0.83,
-    summary: "Arrived in Lisbon to perfect weather and iconic pastéis de nata.",
     created_at: "2026-02-17T20:00:00Z",
     updated_at: "2026-02-17T21:00:00Z"
   },
@@ -5319,7 +4788,6 @@ export const mockNotes = [
     content: "Hosted a dinner party for 8. The risotto was the highlight. Happy guests, great conversations.",
     tags: ["cooking"],
     sentiment_score: 0.85,
-    summary: "Successful dinner party of 8 with standout risotto and great conversation.",
     created_at: "2026-02-18T15:00:00Z",
     updated_at: "2026-02-18T16:00:00Z"
   },
@@ -5329,7 +4797,6 @@ export const mockNotes = [
     content: "A photo I submitted got accepted for publication. First time being published. Incredible feeling.",
     tags: ["photography"],
     sentiment_score: 0.9,
-    summary: "First photography publication acceptance — photo selected for magazine.",
     created_at: "2026-02-18T18:00:00Z",
     updated_at: "2026-02-18T19:00:00Z"
   },
@@ -5339,7 +4806,6 @@ export const mockNotes = [
     content: "Monads. Three months of confusion and today it just clicked. That moment is addictive.",
     tags: ["learning"],
     sentiment_score: 0.89,
-    summary: "Monadic programming concept finally clicked after three months of confusion.",
     created_at: "2026-02-18T18:00:00Z",
     updated_at: "2026-02-18T19:00:00Z"
   },
@@ -5349,7 +4815,6 @@ export const mockNotes = [
     content: "Posted the D3 graph visualization on HN. Made the front page for 2 hours. 500 upvotes.",
     tags: ["d3"],
     sentiment_score: 0.84,
-    summary: "D3 visualization reached Hacker News front page with 500 upvotes.",
     created_at: "2026-02-18T19:00:00Z",
     updated_at: "2026-02-18T20:00:00Z"
   },
@@ -5359,7 +4824,6 @@ export const mockNotes = [
     content: "Noticing real changes from therapy. Catching negative thought patterns before they spiral.",
     tags: ["wellbeing"],
     sentiment_score: 0.74,
-    summary: "Therapy producing measurable results in negative thought pattern recognition.",
     created_at: "2026-02-18T21:00:00Z",
     updated_at: "2026-02-18T22:00:00Z"
   },
@@ -5369,7 +4833,6 @@ export const mockNotes = [
     content: "First open source contribution merged into a popular library. Small fix but meaningful.",
     tags: ["engineering"],
     sentiment_score: 0.85,
-    summary: "First open source contribution merged into widely-used library.",
     created_at: "2026-02-20T23:00:00Z",
     updated_at: "2026-02-21T00:00:00Z"
   },
@@ -5379,7 +4842,6 @@ export const mockNotes = [
     content: "Three weeks of better nutrition and my energy levels are unrecognisable. No afternoon crash.",
     tags: ["nutrition"],
     sentiment_score: 0.74,
-    summary: "Three weeks of improved nutrition eliminated afternoon energy crashes.",
     created_at: "2026-03-03T13:00:00Z",
     updated_at: "2026-03-03T14:00:00Z"
   },
@@ -5389,7 +4851,6 @@ export const mockNotes = [
     content: "90 days of daily gratitude journaling. Genuine shift in how I default-interpret events.",
     tags: ["reflection"],
     sentiment_score: 0.82,
-    summary: "90-day gratitude practice has shifted default interpretations to positive.",
     created_at: "2026-03-03T13:00:00Z",
     updated_at: "2026-03-03T14:00:00Z"
   },
@@ -5399,7 +4860,6 @@ export const mockNotes = [
     content: "Lazy loading, code splitting, and virtual scrolling. App feels completely different now.",
     tags: ["vue"],
     sentiment_score: 0.77,
-    summary: "Three performance optimizations delivered 3x app speed improvement.",
     created_at: "2026-03-03T19:00:00Z",
     updated_at: "2026-03-03T20:00:00Z"
   },
@@ -5409,7 +4869,6 @@ export const mockNotes = [
     content: "Blue-green deployment configured and tested. Deployments are now invisible to users.",
     tags: ["docker"],
     sentiment_score: 0.68,
-    summary: "Blue-green deployment enables zero-downtime releases invisible to users.",
     created_at: "2026-03-05T23:00:00Z",
     updated_at: "2026-03-06T00:00:00Z"
   },
@@ -5419,7 +4878,6 @@ export const mockNotes = [
     content: "Seven consecutive nights of quality sleep. Mood, focus, and patience are dramatically better.",
     tags: ["sleep"],
     sentiment_score: 0.8,
-    summary: "First week of consistent quality sleep producing dramatic mood and focus improvements.",
     created_at: "2026-03-09T15:00:00Z",
     updated_at: "2026-03-09T16:00:00Z"
   },
@@ -5429,7 +4887,6 @@ export const mockNotes = [
     content: "Longest run yet — 28km. Felt strong the whole way. Marathon is within reach.",
     tags: ["fitness"],
     sentiment_score: 0.9,
-    summary: "Achieved 28km long run PB, marathon goal now feels realistic.",
     created_at: "2026-03-09T16:00:00Z",
     updated_at: "2026-03-09T17:00:00Z"
   },
@@ -5439,7 +4896,6 @@ export const mockNotes = [
     content: "Big feature finally in production. Zero issues. The testing paid off.",
     tags: ["engineering"],
     sentiment_score: 0.9,
-    summary: "Major feature shipped cleanly to production after thorough testing.",
     created_at: "2026-03-09T18:00:00Z",
     updated_at: "2026-03-09T19:00:00Z"
   },
@@ -5449,7 +4905,6 @@ export const mockNotes = [
     content: "The technical article crossed 1000 views. Community feedback is overwhelmingly positive.",
     tags: ["writing"],
     sentiment_score: 0.99,
-    summary: "Technical article reached 1000 views with strong community reception.",
     created_at: "2026-03-09T18:00:00Z",
     updated_at: "2026-03-09T19:00:00Z"
   },
@@ -5459,7 +4914,6 @@ export const mockNotes = [
     content: "After 12 attempts, the sourdough is perfect. Open crumb, crispy crust. Worth every failure.",
     tags: ["cooking"],
     sentiment_score: 0.97,
-    summary: "Achieved perfect sourdough after 12 iterations — open crumb and crispy crust.",
     created_at: "2026-03-09T23:00:00Z",
     updated_at: "2026-03-10T00:00:00Z"
   },
@@ -5469,7 +4923,6 @@ export const mockNotes = [
     content: "Passed the AWS Solutions Architect exam on first attempt. Months of studying paid off.",
     tags: ["learning"],
     sentiment_score: 0.9,
-    summary: "Passed AWS Solutions Architect certification on first attempt.",
     created_at: "2026-03-13T15:00:00Z",
     updated_at: "2026-03-13T16:00:00Z"
   },
@@ -5479,7 +4932,6 @@ export const mockNotes = [
     content: "Everything clicked this week. Work, health, relationships. Rare alignment.",
     tags: ["journaling"],
     sentiment_score: 0.83,
-    summary: "Exceptional week with work, health, and relationships all aligned positively.",
     created_at: "2026-03-13T16:00:00Z",
     updated_at: "2026-03-13T17:00:00Z"
   },
@@ -5489,7 +4941,6 @@ export const mockNotes = [
     content: "Performed at an open mic for the first time. Nervous but pulled it off. People clapped.",
     tags: ["music"],
     sentiment_score: 0.94,
-    summary: "Successfully completed first open mic performance despite nerves.",
     created_at: "2026-03-13T18:00:00Z",
     updated_at: "2026-03-13T19:00:00Z"
   },
@@ -5499,7 +4950,6 @@ export const mockNotes = [
     content: "Officially promoted to senior. A year of hard work recognized. Feeling proud.",
     tags: ["reflection"],
     sentiment_score: 0.9,
-    summary: "Received senior promotion after a year of consistent effort and results.",
     created_at: "2026-03-18T11:00:00Z",
     updated_at: "2026-03-18T12:00:00Z"
   },
@@ -5509,7 +4959,6 @@ export const mockNotes = [
     content: "Finished the component refactor. Test coverage went from 40% to 78%. Feels much better.",
     tags: ["engineering","vue"],
     sentiment_score: 0.58,
-    summary: "Component refactor improved test coverage from 40% to 78%.",
     created_at: "2026-03-18T14:00:00Z",
     updated_at: "2026-03-18T15:00:00Z"
   },
@@ -5519,7 +4968,6 @@ export const mockNotes = [
     content: "Completed Atomic Habits. The 1% better every day concept is deceptively simple but powerful.",
     tags: ["reading"],
     sentiment_score: 0.67,
-    summary: "Atomic Habits reinforced compound improvement through 1% daily gains.",
     created_at: "2026-03-19T16:00:00Z",
     updated_at: "2026-03-19T17:00:00Z"
   },
@@ -5529,7 +4977,6 @@ export const mockNotes = [
     content: "Woke at 4am for a sunrise hike. The view at the top in golden light was surreal.",
     tags: ["fitness","hiking"],
     sentiment_score: 0.7,
-    summary: "Early morning sunrise hike delivered breathtaking light views.",
     created_at: "2026-03-25T18:00:00Z",
     updated_at: "2026-03-25T19:00:00Z"
   },
@@ -5539,7 +4986,6 @@ export const mockNotes = [
     content: "Had a long meeting today about the future of our backend infrastructure. Started with a review of our current Node.js monolith. Jake brought up some concerns about memory usage under load — we've been seeing spikes up to 4GB on the production servers during peak hours.\n\nSarah suggested we look into migrating the image processing pipeline to Rust. She showed benchmarks where a Rust implementation of our thumbnail generator ran 40x faster and used a tenth of the memory. The team was skeptical at first but the numbers were hard to argue with.\n\nWe also discussed breaking out the notification service into a separate microservice. Currently it's tightly coupled with the user auth module which makes it hard to scale independently. Ahmed proposed using RabbitMQ for the message queue — he's used it before and said it handles millions of messages per day reliably.\n\nSide note: the office coffee machine is broken again. Third time this month. Everyone is cranky. This might actually be affecting our productivity more than the architecture issues.\n\nAction items:\n- Sarah to write a proof of concept for the Rust thumbnail service by Friday\n- Ahmed to benchmark RabbitMQ vs Kafka for our use case\n- Jake to profile the memory leak in the auth module\n- Someone fix the coffee machine (assigned to no one, will never happen)",
     tags: ["engineering","leadership"],
     sentiment_score: 0.5,
-    summary: "Architecture meeting covered backend infrastructure concerns and proposed solutions.",
     created_at: "2026-03-10T09:00:00Z",
     updated_at: "2026-03-10T11:00:00Z"
   },
@@ -5549,7 +4995,6 @@ export const mockNotes = [
     content: "Spent the weekend at the cabin up north. No phone signal which was honestly exactly what I needed. Read two full books — one on stoicism (Marcus Aurelius, Meditations) and a novel about a lighthouse keeper in Norway.\n\nThe stoicism stuff really stuck with me. The idea that you can't control what happens, only your response to it. I've been applying this to the situation at work with the performance reviews. Instead of dreading the outcome, I'm focusing on what I can actually do: document my contributions clearly, be honest about what I could have done better, and not catastrophize.\n\nDid a lot of hiking. The trail around the lake is about 12km and I did it twice on Saturday. My knee was acting up by the end — probably the old running injury flaring up. Should book a physiotherapy appointment when I get back to the city.\n\nCooked everything over a fire. Made a surprisingly good chili with whatever was in the pantry. Kidney beans, canned tomatoes, some old spices. No wifi, no delivery apps, no choice but to figure it out. Felt very capable.\n\nComing back to the city felt jarring. The noise, the notifications, the pace. I want to find a way to bring some of that stillness back with me.",
     tags: ["wellbeing","reflection"],
     sentiment_score: 0.6,
-    summary: "Peaceful weekend at the cabin with reading, hiking, and self-reflection.",
     created_at: "2026-03-15T20:00:00Z",
     updated_at: "2026-03-15T21:30:00Z"
   },
@@ -5559,7 +5004,6 @@ export const mockNotes = [
     content: "Spent the afternoon going through three papers on transformer architectures. Notes below.\n\nPaper 1: Attention Is All You Need (Vaswani et al.) The original transformer paper. Re-reading it for the third time. The multi-head attention mechanism is elegant — instead of one attention function, you run h parallel attention heads, each learning different aspects of the relationships between tokens. The positional encoding using sine and cosine functions of different frequencies is clever — it lets the model generalize to sequence lengths not seen during training.\n\nPaper 2: Recent work on sparse attention. Standard attention is O(n²) in sequence length which becomes prohibitive for long documents. Sparse attention patterns (local windows + strided global tokens) bring this down to O(n√n). The tradeoff is you lose some global context but for most practical tasks this doesn't matter much.\n\nPaper 3: Mixture of Experts scaling. Instead of making one big dense model, route each token to a small subset of specialized expert subnetworks. GPT-4 is rumoured to use this approach. The routing mechanism is the tricky part — you want load balancing so no single expert gets overwhelmed, but the routing decisions need to be differentiable for backpropagation to work.\n\nOverall takeaway: the field is moving toward models that are sparse, modular, and efficient rather than just bigger and denser. The era of just scale it up seems to be giving way to smarter architectures.",
     tags: ["learning","engineering"],
     sentiment_score: 0.7,
-    summary: "Reviewed three papers on transformer architectures and scaling approaches.",
     created_at: "2026-03-18T14:00:00Z",
     updated_at: "2026-03-18T17:00:00Z"
   },
@@ -5569,7 +5013,6 @@ export const mockNotes = [
     content: "Tried three new recipes this week. The first was a Thai green curry from scratch — grinding my own curry paste with lemongrass, galangal, green chilies, and shrimp paste. The smell while pounding everything in the mortar was incredible. Added bamboo shoots and Thai eggplant which I found at the Asian grocery on Dundas. Served it over jasmine rice with crispy shallots on top.\n\nSecond attempt was homemade sourdough. My starter Gertrude has been going strong for six months now. The crumb was more open than usual — I think the longer bulk ferment at room temperature helped. The crust had that perfect shatter when you squeeze it. Gave a loaf to the neighbours and they asked for the recipe. There is no recipe. It's vibes and flour ratios.\n\nThird was a disaster. Tried to make cacio e pepe which is supposed to be the simplest pasta — just pecorino, pepper, and pasta water. The cheese clumped into a solid mass instead of forming a creamy sauce. Apparently the trick is tempering the cheese mixture with pasta water off the heat. Will try again next week. The pepper was good at least.\n\nI've been thinking about doing a pop-up dinner for friends. Maybe 12 people, five courses, BYOB. Need to figure out the logistics of cooking for that many in my tiny kitchen. The oven only fits one sheet pan at a time.",
     tags: ["cooking","hobbies"],
     sentiment_score: 0.8,
-    summary: "Documented three cooking experiments with mixed results this week.",
     created_at: "2026-03-20T19:00:00Z",
     updated_at: "2026-03-20T20:30:00Z"
   },
@@ -5579,7 +5022,6 @@ export const mockNotes = [
     content: "Been collecting ideas in my head for a while, dumping them here before I forget.\n\nIdea 1: A platform that connects retired professionals with students for mentorship. Not generic career advice but actual skill transfer — a retired electrical engineer helping a student debug their circuit designs, a former CFO reviewing a student's financial models. Monetize through university partnerships. The key insight is that retirees have time and knowledge, students have energy and questions, and there's no good marketplace connecting them.\n\nIdea 2: Neighbourhood tool library. Like a real library but for power tools, camping gear, kitchen appliances you use once a year. There's one in Toronto already (the Toronto Tool Library) but it could be an app-based model with peer-to-peer lending, insurance built in, and delivery. The environmental angle is strong — why does every household need their own drill?\n\nIdea 3: AI-powered lease agreement analyzer. You upload your rental lease and it highlights predatory clauses, compares your rent to neighbourhood averages, flags things your landlord can't legally do. Target market is first-time renters who don't know their rights. Could partner with legal aid organizations. In Ontario specifically, the Residential Tenancies Act has a lot of protections that tenants don't know about.\n\nIdea 4: A dead simple budgeting app that just tracks one thing — your daily spending limit. Take your monthly income, subtract fixed costs, divide by days in the month. That's your number. Every purchase either keeps you under or puts you over. No categories, no sync, no AI insights. Just the number.\n\nNeed to validate which of these has actual demand vs which ones just sound clever to me.",
     tags: ["engineering","design"],
     sentiment_score: 0.7,
-    summary: "Brainstormed four startup concepts spanning mentorship, sharing economy, and fintech.",
     created_at: "2026-03-22T22:00:00Z",
     updated_at: "2026-03-22T23:30:00Z"
   },
@@ -5589,7 +5031,6 @@ export const mockNotes = [
     content: "Two hour practice session today. Started with scales — working through all modes of C major. Dorian and Mixolydian are feeling natural now but Locrian still trips me up. The half-diminished quality of it just doesn't sit in my ear yet.\n\nSpent most of the session working on fingerpicking patterns for Blackbird by the Beatles. The Paul McCartney technique of using the thumb for the bass line while the index and middle fingers handle the melody is deceptively hard. My right hand keeps wanting to default to a standard arpeggio pattern instead of the independent thumb movement.\n\nAlso transcribed the intro to Neon by John Mayer. The slap technique he uses is insane — he's essentially playing bass, rhythm, and lead simultaneously on an acoustic guitar. I can get through the first four bars at about 60% speed. The thumb slap on the low E while pulling off on the high strings requires coordination I definitely don't have yet.\n\nNew gear note: tried the Fishman Rare Earth microphone pickup at the shop. It sounded way more natural than my undersaddle piezo. The feedback rejection was impressive too — I could stand right in front of the amp with no issues. It's $250 though, which is steep. Maybe for my birthday.\n\nGoal for next week: get Blackbird up to tempo and memorize the full arrangement. Also want to start learning some jazz standards — Autumn Leaves seems like a good entry point.",
     tags: ["hobbies","learning"],
     sentiment_score: 0.7,
-    summary: "Detailed guitar practice covering scales, fingerpicking, and transcription work.",
     created_at: "2026-03-24T16:00:00Z",
     updated_at: "2026-03-24T18:00:00Z"
   }

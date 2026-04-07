@@ -101,11 +101,10 @@ const migrate_2: MigrationFunc = (
 	return null;
 };
 
-// ── Migration 2 (David) ───────────────────────────────────────────────────────
-// Creates the note_embeddings table used for Gemini semantic search.
-// Embeddings are stored as a JSON-stringified float array (TEXT) since SQLite
-// has no native vector type. Cosine similarity is computed in JavaScript at
-// query time — acceptable for the scale of this project (~hundreds of notes).
+// ── Migration 3 (David) ───────────────────────────────────────────────────────
+// Creates the notes_fts FTS5 virtual table for hybrid keyword search.
+// Porter stemmer: "running" and "run" match the same note.
+// Field weights via bm25(): title=10×, tags=5×, content=1×.
 const migrate_3: MigrationFunc = (
 	database: DB,
 	fromVersion: number,
@@ -116,10 +115,12 @@ const migrate_3: MigrationFunc = (
 	try {
 		const tx = db.transaction(() => {
 			db.exec(`
-				CREATE TABLE IF NOT EXISTS note_embeddings (
-					note_id    TEXT    PRIMARY KEY NOT NULL,
-					embedding  TEXT    NOT NULL,
-					updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+				CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
+					note_id  UNINDEXED,
+					title,
+					tags,
+					content,
+					tokenize = 'porter ascii'
 				)
 			`);
 

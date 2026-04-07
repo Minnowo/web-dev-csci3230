@@ -14,7 +14,8 @@ import { ApiPostDeleteNote } from "./api/api_delete_note_post.js";
 
 // ── David's routes ────────────────────────────────────────────────────────────
 import analyzeRouter from "./routes/analyze.js";
-import smartSearchRouter from "./routes/smartSearch.js";
+import hybridSearchRouter from "./routes/hybridSearch.js";
+import noteIndexRouter from "./routes/noteIndex.js";
 
 export const ExpressApp = express();
 const PORT = 3000;
@@ -27,9 +28,10 @@ ExpressApp.get("/api/health", (req: Request, res: Response) => {
 	res.json({ status: "ok", message: "Server is running" });
 });
 
-// ── Gemini routes (David) ─────────────────────────────────────────────────────
+// ── David's routes ────────────────────────────────────────────────────────────
 ExpressApp.use("/api", analyzeRouter);
-ExpressApp.use("/api", smartSearchRouter);
+ExpressApp.use("/api", hybridSearchRouter);
+ExpressApp.use("/api", noteIndexRouter);
 
 ExpressApp.get("/", (req: Request, res: Response) => {
 	res.send("Hello from TypeScript + Express 🚀");

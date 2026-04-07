@@ -1,13 +1,13 @@
 <script setup>
 import { onMounted, onUnmounted, ref, watch, computed } from 'vue'
 import * as d3 from 'd3'
-import { getNotes, buildGraphData, smartSearch } from '../../services/api.js'
+import { getNotes, buildGraphData, hybridSearch } from '../../services/api.js'
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const svgRef = ref(null)
 const containerRef = ref(null)
 const searchQuery = ref('')
-const searchResults = ref([])     // smart search dropdown results
+const searchResults = ref([])     // search dropdown results
 const showDropdown = ref(false)   // controls dropdown visibility
 const searchLoading = ref(false)  // loading indicator during API call
 let searchDebounce = null         // debounce timer for search input
@@ -370,7 +370,7 @@ function resetZoom() {
 // Also exit focus mode automatically when filters change
 watch([showOrphans, minConnections], () => { focusedNode.value = null; initialFitDone = false; draw() })
 
-// ─── Smart search (David) ─────────────────────────────────────────────────────
+// ─── Hybrid search (David) ───────────────────────────────────────────────────
 // Debounced: waits 500ms after the user stops typing, then calls the backend.
 // Results appear in a dropdown. Clicking a result focuses that node in the graph.
 // Falls back to local keyword filter while waiting / if backend is unavailable.
@@ -378,36 +378,32 @@ watch(searchQuery, (query) => {
   if (skipSearchWatch) return
   focusedNode.value = null
 
-  // Clear previous debounce
   if (searchDebounce) clearTimeout(searchDebounce)
 
-  // If empty, clear results and revert to full graph
   if (!query || query.trim().length === 0) {
     searchResults.value = []
     showDropdown.value = false
-    searchLoading.value = false
     updateOpacity()
     return
   }
 
-  // Immediate keyword filter for responsiveness
+  // Immediate keyword filter for responsiveness while waiting for backend
   updateOpacity()
 
-  // Debounced smart search
+  // Debounced hybrid search
   searchDebounce = setTimeout(async () => {
     searchLoading.value = true
     try {
-      const res = await smartSearch(query.trim(), 8)
-      // Resolve note IDs to actual node data for display
+      const res = await hybridSearch(query.trim(), 8)
       searchResults.value = res.results
         .map(r => {
           const node = allNodes.find(n => n.id === r.id)
-          return node ? { ...node, similarity: r.similarity } : null
+          return node ? { ...node, score: r.score } : null
         })
         .filter(Boolean)
       showDropdown.value = searchResults.value.length > 0
     } catch (err) {
-      console.warn('Smart search unavailable, using keyword filter:', err.message)
+      console.warn('Hybrid search unavailable, using keyword filter:', err.message)
       searchResults.value = []
       showDropdown.value = false
     } finally {
@@ -443,13 +439,13 @@ onUnmounted(() => { if (simulation) simulation.stop() })
     <div class="flex flex-wrap items-center gap-3 p-4 border-b border-gray-800">
       <h2 class="text-lg font-semibold text-white mr-2">Graph View</h2>
 
-      <!-- Smart Search with dropdown (David) -->
+      <!-- Search with dropdown (David) -->
       <div class="relative">
         <div class="flex items-center gap-1">
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Smart search…"
+            placeholder="Search notes…"
             class="px-3 py-1.5 text-sm rounded-lg bg-gray-800 border border-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 w-64"
             @focus="showDropdown = searchResults.length > 0"
             @blur="setTimeout(() => showDropdown = false, 200)"
@@ -470,7 +466,6 @@ onUnmounted(() => { if (simulation) simulation.stop() })
           >
             <div class="flex items-center justify-between">
               <span class="text-sm font-medium text-gray-100 truncate">{{ result.title }}</span>
-              <span class="text-xs text-gray-500 ml-2 shrink-0">{{ (result.similarity * 100).toFixed(0) }}% match</span>
             </div>
             <div class="text-xs text-gray-500 mt-0.5 truncate">
               {{ result.tags.join(', ') }}
@@ -537,7 +532,7 @@ onUnmounted(() => { if (simulation) simulation.stop() })
         :style="{ left: tooltipX + 'px', top: tooltipY + 'px' }"
       >
         <p class="font-semibold text-white mb-1">{{ hoveredNode.title }}</p>
-        <p class="text-gray-400 text-xs mb-2">{{ hoveredNode.summary }}</p>
+        <p class="text-gray-400 text-xs mb-2">{{ hoveredNode.tags.join(', ') }}</p>
         <div class="flex flex-wrap gap-1 mb-2">
           <span
             v-for="tag in hoveredNode.tags" :key="tag"
