@@ -24,8 +24,15 @@ const router = createRouter({
 })
 
 // ── Navigation guard ─────────────────────────────────────────────────────────
+function getSessionCookie() {
+  return document.cookie.split('; ').reduce((r, v) => {
+    const parts = v.split('=')
+    return parts[0] === 'session' ? decodeURIComponent(parts.slice(1).join('=')) : r
+  }, null)
+}
+
 router.beforeEach((to) => {
-  const token = localStorage.getItem('token')
+  const token = getSessionCookie()
 
   // Protected route — not logged in → send to login
   if (to.meta.requiresAuth && !token) {
