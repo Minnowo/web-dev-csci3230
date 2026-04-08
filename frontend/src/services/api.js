@@ -1,6 +1,9 @@
 import { mockNotes } from './mockData.js'
+import { useAuth } from '../composables/useAuth.js'
 
-// Flip to false when Ryan's backend is ready
+// Controls whether visualization functions (getNotes, getNote) use mock data.
+// Keep true until DB_NOTES has tags and sentiment_score columns — the real
+// backend notes lack these fields and would break the visualization components.
 const USE_MOCK = true
 const API_BASE = 'http://localhost:3000/api'
 
@@ -24,6 +27,61 @@ export async function getNote(id) {
   if (USE_MOCK) return mockNotes.find(n => n.id === id) ?? null
   const res = await fetch(`${API_BASE}/notes/${id}`)
   if (!res.ok) throw new Error(`Failed to fetch note ${id}`)
+  return res.json()
+}
+
+// ─── Note CRUD (David) ───────────────────────────────────────────────────────
+// These functions talk to DB_NOTES — the real notes table.
+// All require an authenticated session (Bearer token from cookie).
+
+/** Fetch all notes for the logged-in user. Returns: [{ id, title, updated_at }] */
+export async function fetchNotes() {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes`, { headers: authHeaders() })
+  if (!res.ok) throw new Error('Failed to fetch notes')
+  return res.json()
+}
+
+/** Fetch a single note with full content. Returns: { id, title, content, created_at, updated_at } */
+export async function fetchNote(id) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/${id}`, { headers: authHeaders() })
+  if (!res.ok) throw new Error(`Failed to fetch note ${id}`)
+  return res.json()
+}
+
+/** Create a new note. Returns: { id } */
+export async function createNote(title, content = '') {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ title, content }),
+  })
+  if (!res.ok) throw new Error('Failed to create note')
+  return res.json()
+}
+
+/** Update a note's title and/or content. Returns: { id, title, content, created_at, updated_at } */
+export async function updateNote(id, title, content) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/${id}/update`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ title, content }),
+  })
+  if (!res.ok) throw new Error(`Failed to update note ${id}`)
+  return res.json()
+}
+
+/** Delete a note permanently. Returns: { id } */
+export async function deleteNote(id) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/${id}/delete`, {
+    method: 'POST',
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error(`Failed to delete note ${id}`)
   return res.json()
 }
 

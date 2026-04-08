@@ -1,11 +1,28 @@
 import { ref, computed } from 'vue'
 import * as authService from '../services/authService.js'
 
-const TOKEN_KEY = 'token'
 const USER_KEY = 'auth_user'
 
+// ─── Cookie helpers ───────────────────────────────────────────────────────────
+
+function setCookie(name, value, days = 7) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString()
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`
+}
+
+function getCookie(name) {
+  return document.cookie.split('; ').reduce((r, v) => {
+    const parts = v.split('=')
+    return parts[0] === name ? decodeURIComponent(parts.slice(1).join('=')) : r
+  }, null)
+}
+
+function deleteCookie(name) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`
+}
+
 // Module-level singleton so auth state is shared across all components
-const token = ref(localStorage.getItem(TOKEN_KEY) || null)
+const token = ref(getCookie('session') || null)
 const user = ref(JSON.parse(localStorage.getItem(USER_KEY) || 'null'))
 
 export function useAuth() {
@@ -32,7 +49,7 @@ export function useAuth() {
   async function login(username, password) {
     const data = await authService.login(username, password)
     token.value = data.token
-    localStorage.setItem(TOKEN_KEY, data.token)
+    setCookie('session', data.token)
     // Store username immediately so it's available without a whoami call
     user.value = { username, NAME: username }
     localStorage.setItem(USER_KEY, JSON.stringify({ username, NAME: username }))
@@ -40,11 +57,11 @@ export function useAuth() {
     fetchUser()
   }
 
-  /** Clear the session — removes token from memory and localStorage. */
+  /** Clear the session — expires the cookie and removes user info. */
   function logout() {
     token.value = null
     user.value = null
-    localStorage.removeItem(TOKEN_KEY)
+    deleteCookie('session')
     localStorage.removeItem(USER_KEY)
   }
 
