@@ -19,6 +19,8 @@ import noteIndexRouter from "./routes/noteIndex.js";
 import { ApiPostLinkNote } from "./api/api_link_note_post.js";
 import { ApiPostDeleteNoteLinks } from "./api/api_delete_link_note_post.js";
 import { ApiGetNoteLinks } from "./api/api_note_links_get.js";
+import { ApiPostCreateFolder } from "./api/api_create_folder_post.js";
+import { ApiPostDeleteFolder } from "./api/api_delete_folder_post.js";
 
 export const ExpressApp = express();
 const PORT = 3000;
@@ -74,6 +76,16 @@ ExpressApp.post(
 	"/api/notes/:id/delete",
 	MiddleWareAuthenticateToken,
 	ApiPostDeleteNote,
+);
+ExpressApp.post(
+	"/api/folder",
+	MiddleWareAuthenticateToken,
+	ApiPostCreateFolder,
+);
+ExpressApp.post(
+	"/api/folder/delete",
+	MiddleWareAuthenticateToken,
+	ApiPostDeleteFolder,
 );
 
 ExpressApp.listen(PORT, () => {

@@ -125,7 +125,7 @@ export async function getNoteLinks(nodeId) {
     headers: authHeaders(),
   })
   if (!res.ok) throw new Error(`Failed to get note links ${nodeId}`)
-  return res.json()
+  return res.json();
 }
 
 // Links is this type:
@@ -140,6 +140,30 @@ export async function deleteNoteLinks(links) {
       body: JSON.stringify(links)
   })
   if (!res.ok) throw new Error(`Failed to get note links ${links}`)
+}
+export async function apiCreateFolder(parent_folder_id, title) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/folder`, {
+    method: 'POST',
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({
+              parent_folder_id: parent_folder_id,
+	        title: title,
+      })
+  })
+  if (!res.ok) throw new Error(`Failed to get note links ${parent_folder_id}, ${title}`)
+  return res.json();
+}
+export async function apiDeleteFolder(folder_id) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/folder/delete`, {
+    method: 'POST',
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({
+              folder_id: folder_id,
+      })
+  })
+  if (!res.ok) throw new Error(`Failed to delete folder ${folder_id}`)
 }
 
 // ─── Gemini Analysis ──────────────────────────────────────────────────────────

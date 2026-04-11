@@ -110,6 +110,7 @@ export class DB {
 			const stmt = this.db.prepare(
 				`SELECT 
 					ID AS id, 
+                    PARENT_ID AS folder_id,
 					TITLE AS title, 
 					UPDATED AS updated_at
 					FROM DB_NOTES 
@@ -242,6 +243,40 @@ export class DB {
 
 			return { data: row.changes, error: null };
 		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public CreateFolder(
+		user_id: number,
+		parent_folder_id: number | null,
+		title: string,
+	): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				"INSERT INTO DB_FOLDER(USER_ID, PARENT_ID, NAME) VALUES(?, ?, ?)",
+			);
+
+			const info = stmt.run(user_id, parent_folder_id, title);
+
+			return { data: Number(info.lastInsertRowid), error: null };
+		} catch (err) {
+			console.info(err);
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public DeleteFolder(user_id: number, folder_id: number): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				"DELETE FROM DB_FOLDER WHERE USER_ID = ? AND ID = ?",
+			);
+
+			const info = stmt.run(user_id, folder_id);
+
+			return { data: Number(info.changes), error: null };
+		} catch (err) {
+			console.info(err);
 			return { data: null, error: DBError.from(err) };
 		}
 	}

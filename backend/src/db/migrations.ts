@@ -168,6 +168,59 @@ const migrate_4: MigrationFunc = (
 	return null;
 };
 
+const migrate_5: MigrationFunc = (
+	database: DB,
+	fromVersion: number,
+	toVersion: number,
+) => {
+	const db = database.DB();
+
+	try {
+		const tx = db.transaction(() => {
+			db.exec(`
+				CREATE TABLE IF NOT EXISTS DB_FOLDER(
+					ID           INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    USER_ID      INTEGER NOT NULL,
+                    PARENT_ID    INTEGER,
+                    NAME         TEXT NOT NULL,
+					FOREIGN KEY (PARENT_ID) REFERENCES DB_FOLDER(ID) ON DELETE CASCADE,
+					FOREIGN KEY (USER_ID) REFERENCES DB_USER(ID) ON DELETE CASCADE
+				)
+			`);
+
+			// to alter the table with a foreign key, we can just make a new table, copy the old data, drop it, and rename the new table in place of the old one.
+			db.exec(
+				`CREATE TABLE IF NOT EXISTS NEW_DB_NOTES (
+					ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    PARENT_ID INTEGER DEFAULT NULL,
+					USER_ID INTEGER NOT NULL,
+					TITLE TEXT NOT NULL,
+					CONTENT TEXT NOT NULL DEFAULT "",
+					CREATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					UPDATED TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					FOREIGN KEY (USER_ID) REFERENCES DB_USER(ID) ON DELETE CASCADE,
+					FOREIGN KEY (PARENT_ID) REFERENCES DB_FOLDER(ID) ON DELETE CASCADE
+				)`,
+			);
+			db.exec(
+				`INSERT INTO NEW_DB_NOTES (ID, USER_ID, TITLE, CONTENT, CREATED, UPDATED) SELECT * FROM DB_NOTES`,
+			);
+			db.exec(`DROP TABLE DB_NOTES`);
+			db.exec(`ALTER TABLE NEW_DB_NOTES RENAME TO DB_NOTES`);
+
+			db.prepare(
+				"UPDATE DB_VERSION SET VERSION = ? WHERE VERSION = ?",
+			).run(toVersion, fromVersion);
+		});
+
+		tx();
+	} catch (err) {
+		return DBError.from(err);
+	}
+
+	return null;
+};
+
 export const Migrations: Array<{
 	fromVersion: number;
 	toVersion: number;
@@ -178,4 +231,5 @@ export const Migrations: Array<{
 	{ fromVersion: 2, toVersion: 3, func: migrate_2 },
 	{ fromVersion: 3, toVersion: 4, func: migrate_3 },
 	{ fromVersion: 4, toVersion: 5, func: migrate_4 },
+	{ fromVersion: 5, toVersion: 6, func: migrate_5 },
 ];

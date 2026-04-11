@@ -19,7 +19,7 @@
  */
 
 import { reactive, computed } from 'vue'
-import { indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks } from '../services/api.js'
+import {apiCreateFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks } from '../services/api.js'
 
 // ─── FTS index sync (debounced to avoid firing on every keystroke) ────────────
 let indexDebounceTimer = null
@@ -177,8 +177,11 @@ export function useEditorStore() {
    * Expected response: the created item (including server-generated id)
    * Requires PARENT_ID column in DB_NOTES.
    */
-  function createFolder(parentId = null) {
-    const id = generateId()
+  async function createFolder(parentId = null) {
+
+    const res = await apiCreateFolder(parentId, "New Folder");
+    const id = res.id;
+
     state.items.push({
       id, name: 'New Folder', parentId, type: 'folder',
       updatedAt: new Date().toISOString(),
