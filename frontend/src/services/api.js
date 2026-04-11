@@ -85,6 +85,49 @@ export async function deleteNote(id) {
   return res.json()
 }
 
+// WHY IS THIS IN JS ?????????????????
+// interface LinkNoteRequestBody {
+//     links: Array<{
+//         from_id: number,
+//         to_ids: number[]
+//     }>;
+// }
+export async function linkNotes(linkNoteRequestBody) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/link`, {
+    method: 'POST',
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify(linkNoteRequestBody)
+  })
+  if (!res.ok) throw new Error(`Failed to link notes ${linkNoteRequestBody}`)
+}
+
+// This returns:
+// [
+//   {
+//     "from_note_id": 2,
+//     "to_note_id": 1
+//   },
+//   {
+//     "from_note_id": 3,
+//     "to_note_id": 1
+//   },
+//   {
+//     "from_note_id": 1,
+//     "to_note_id": 4
+//   },
+// ]
+// Where FROM_NOTE_ID or TO_NOTE_ID can be your given ID, the caller needs to figure out which way it wants
+export async function getNoteLinks(nodeId) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/${nodeId}/links`, {
+    method: 'GET',
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error(`Failed to get note links ${nodeId}`)
+  return res.json()
+}
+
 // ─── Gemini Analysis ──────────────────────────────────────────────────────────
 
 /**

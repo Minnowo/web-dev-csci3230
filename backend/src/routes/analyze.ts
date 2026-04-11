@@ -63,10 +63,7 @@ ${content}
 
 		const { tags, sentiment_score } = parsed;
 
-		if (
-			!Array.isArray(tags) ||
-			typeof sentiment_score !== "number"
-		) {
+		if (!Array.isArray(tags) || typeof sentiment_score !== "number") {
 			return res.status(500).json({
 				error: "Unexpected response shape from Gemini",
 				raw: parsed,
