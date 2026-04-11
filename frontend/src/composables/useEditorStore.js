@@ -19,7 +19,7 @@
  */
 
 import { reactive, computed } from 'vue'
-import { indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks } from '../services/api.js'
+import { indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks } from '../services/api.js'
 
 // ─── FTS index sync (debounced to avoid firing on every keystroke) ────────────
 let indexDebounceTimer = null
@@ -52,7 +52,12 @@ function debouncedSaveNote(id, title, content) {
             }
         ]})
         .then(()=> console.info("linked note"))
-        .catch((err)=> console.error(err))
+        .catch((err)=> console.error(err));
+      deleteNoteLinks({ links:
+          [{"from_note_id":2,"to_note_id":1},{"from_note_id":3,"to_note_id":1},{"from_note_id":4,"to_note_id":1},{"from_note_id":5,"to_note_id":1},{"from_note_id":6,"to_note_id":1},{"from_note_id":7,"to_note_id":1}]
+      })
+        .then(()=> console.info("links deleted"))
+        .catch((err)=> console.error(err));
   }, INDEX_DEBOUNCE_MS)
 }
 

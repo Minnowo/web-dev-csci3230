@@ -128,6 +128,20 @@ export async function getNoteLinks(nodeId) {
   return res.json()
 }
 
+// Links is this type:
+// interface DeleteNoteLinkRequestBody {
+// 	links: Array<NoteLink>;
+// }
+export async function deleteNoteLinks(links) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/link/delete`, {
+    method: 'POST',
+    headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify(links)
+  })
+  if (!res.ok) throw new Error(`Failed to get note links ${links}`)
+}
+
 // ─── Gemini Analysis ──────────────────────────────────────────────────────────
 
 /**

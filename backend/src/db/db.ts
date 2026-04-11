@@ -218,6 +218,33 @@ export class DB {
 			return { data: null, error: DBError.from(err) };
 		}
 	}
+	public DeleteNoteLink(
+		fromNoteId: number,
+		toNoteId: number,
+	): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				`
+                    DELETE FROM DB_NOTES_LINKS
+                    WHERE (FROM_NOTE_ID, TO_NOTE_ID) IN (
+                        SELECT kara.ID AS FROM_ID, made.ID AS TO_ID
+                        FROM DB_NOTES kara, DB_NOTES made
+                        WHERE
+                            kara.ID = ?
+                        AND made.ID = ?
+                        AND kara.ID != made.ID
+                        and kara.USER_ID = made.USER_ID
+                    )
+                `,
+			);
+
+			const row = stmt.run(fromNoteId, toNoteId);
+
+			return { data: row.changes, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
 
 	public Migrate(): Error | null {
 		let version = this.Version();
