@@ -27,7 +27,9 @@ export const ApiPostUpdateNote = (
 	const { title, content } = req.body as UpdateNoteRequestBody;
 
 	if (typeof title !== "string" || typeof content !== "string") {
-		res.status(400).json({ message: "Invalid data types, need to be strings" });
+		res.status(400).json({
+			message: "Invalid data types, need to be strings",
+		});
 		return;
 	}
 
@@ -58,6 +60,6 @@ export const ApiPostUpdateNote = (
 		res.status(500).json({ message: "Internal server error" });
 		return;
 	}
-	
+
 	res.status(200).json(updatedNote.data);
 };

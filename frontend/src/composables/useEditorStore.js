@@ -19,7 +19,7 @@
  */
 
 import { reactive, computed } from 'vue'
-import { indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, deleteNote } from '../services/api.js'
+import {apiCreateFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks } from '../services/api.js'
 
 // ─── FTS index sync (debounced to avoid firing on every keystroke) ────────────
 let indexDebounceTimer = null
@@ -43,6 +43,21 @@ function debouncedSaveNote(id, title, content) {
     updateNote(id, title, content).catch(err => {
       console.warn('Failed to save note:', err.message)
     })
+    getNoteLinks(id).then((links)=>console.info(links)).catch((err)=>console.error(err));
+    linkNotes({
+        links: [
+            {
+                from_id: id,
+                to_ids: [1, 2, 3, 4, 5]
+            }
+        ]})
+        .then(()=> console.info("linked note"))
+        .catch((err)=> console.error(err));
+      deleteNoteLinks({ links:
+          [{"from_note_id":2,"to_note_id":1},{"from_note_id":3,"to_note_id":1},{"from_note_id":4,"to_note_id":1},{"from_note_id":5,"to_note_id":1},{"from_note_id":6,"to_note_id":1},{"from_note_id":7,"to_note_id":1}]
+      })
+        .then(()=> console.info("links deleted"))
+        .catch((err)=> console.error(err));
   }, INDEX_DEBOUNCE_MS)
 }
 
@@ -162,8 +177,11 @@ export function useEditorStore() {
    * Expected response: the created item (including server-generated id)
    * Requires PARENT_ID column in DB_NOTES.
    */
-  function createFolder(parentId = null) {
-    const id = generateId()
+  async function createFolder(parentId = null) {
+
+    const res = await apiCreateFolder(parentId, "New Folder");
+    const id = res.id;
+
     state.items.push({
       id, name: 'New Folder', parentId, type: 'folder',
       updatedAt: new Date().toISOString(),

@@ -2,8 +2,12 @@ import { type Response } from "express";
 import { DB } from "../db/db.js";
 import type { AuthenticatedRequest } from "../types/user.js";
 
-export const ApiGetNotesList = (
-	req: AuthenticatedRequest,
+interface DeleteFolderRequestBody {
+	folder_id: number;
+}
+
+export const ApiPostDeleteFolder = (
+	req: AuthenticatedRequest<DeleteFolderRequestBody>,
 	res: Response,
 ): void => {
 	if (!req.user) {
@@ -11,14 +15,16 @@ export const ApiGetNotesList = (
 		return;
 	}
 
+	const { folder_id } = req.body as DeleteFolderRequestBody;
+
 	const db = DB.Instance();
-	const result = db.GetNotesList(req.user.ID);
+	const result = db.DeleteFolder(req.user.ID, folder_id);
 
 	if (result.error !== null) {
-		console.error(`error listing notes: ${result.error}`);
+		console.error(`error deleting folder: ${result.error}`);
 		res.status(500).json({ message: "Internal server error" });
 		return;
 	}
 
-	res.status(200).json(result.data);
+	res.status(200).end();
 };

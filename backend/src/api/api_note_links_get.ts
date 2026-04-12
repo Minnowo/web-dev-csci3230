@@ -2,7 +2,7 @@ import { type Response } from "express";
 import { DB } from "../db/db.js";
 import type { AuthenticatedRequest } from "../types/user.js";
 
-export const ApiGetNotesList = (
+export const ApiGetNoteLinks = (
 	req: AuthenticatedRequest,
 	res: Response,
 ): void => {
@@ -12,7 +12,7 @@ export const ApiGetNotesList = (
 	}
 
 	const db = DB.Instance();
-	const result = db.GetNotesList(req.user.ID);
+	const result = db.GetNoteLinks(req.user.ID);
 
 	if (result.error !== null) {
 		console.error(`error listing notes: ${result.error}`);

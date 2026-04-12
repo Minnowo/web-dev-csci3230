@@ -2,13 +2,13 @@ import { type Response } from "express";
 import { DB } from "../db/db.js";
 import type { AuthenticatedRequest } from "../types/user.js";
 
-interface CreateNoteRequestBody {
+interface CreateFolderRequestBody {
+	parent_folder_id: number | null;
 	title: string;
-	content: string;
 }
 
-export const ApiPostCreateNote = (
-	req: AuthenticatedRequest,
+export const ApiPostCreateFolder = (
+	req: AuthenticatedRequest<CreateFolderRequestBody>,
 	res: Response,
 ): void => {
 	if (!req.user) {
@@ -16,9 +16,9 @@ export const ApiPostCreateNote = (
 		return;
 	}
 
-	const { title, content } = req.body as CreateNoteRequestBody;
+	const { title, parent_folder_id } = req.body as CreateFolderRequestBody;
 
-	if (typeof title !== "string" || typeof content !== "string") {
+	if (typeof title !== "string") {
 		res.status(400).json({
 			message: "Invalid data types, need to be strings",
 		});
@@ -33,10 +33,10 @@ export const ApiPostCreateNote = (
 	}
 
 	const db = DB.Instance();
-	const result = db.CreateNote(req.user.ID, cleanTitle, content);
+	const result = db.CreateFolder(req.user.ID, parent_folder_id, cleanTitle);
 
 	if (result.error !== null) {
-		console.error(`error creating note: ${result.error}`);
+		console.error(`error creating folder: ${result.error}`);
 		res.status(500).json({ message: "Internal server error" });
 		return;
 	}
