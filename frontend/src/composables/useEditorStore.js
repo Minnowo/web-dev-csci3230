@@ -43,21 +43,24 @@ function debouncedSaveNote(id, title, content) {
     updateNote(id, title, content).catch(err => {
       console.warn('Failed to save note:', err.message)
     })
-    getNoteLinks(id).then((links)=>console.info(links)).catch((err)=>console.error(err));
-    linkNotes({
-        links: [
-            {
-                from_id: id,
-                to_ids: [1, 2, 3, 4, 5]
-            }
-        ]})
-        .then(()=> console.info("linked note"))
-        .catch((err)=> console.error(err));
-      deleteNoteLinks({ links:
-          [{"from_note_id":2,"to_note_id":1},{"from_note_id":3,"to_note_id":1},{"from_note_id":4,"to_note_id":1},{"from_note_id":5,"to_note_id":1},{"from_note_id":6,"to_note_id":1},{"from_note_id":7,"to_note_id":1}]
-      })
-        .then(()=> console.info("links deleted"))
-        .catch((err)=> console.error(err));
+    // getNoteLinks(id).then((links)=>console.info(links)).catch((err)=>console.error(err));
+    // linkNotes({
+    //     links: [
+    //         {
+    //             from_id: id,
+    //             to_ids: [1, 2, 3, 4, 5]
+    //         }
+    //     ]})
+    //     .then(()=> console.info("linked note"))
+    //     .catch((err)=> console.error(err));
+    //   deleteNoteLinks({ links:
+    //       [{"from_note_id":2,"to_note_id":1},{"from_note_id":3,"to_note_id":1},{"from_note_id":4,"to_note_id":1},{"from_note_id":5,"to_note_id":1},{"from_note_id":6,"to_note_id":1},{"from_note_id":7,"to_note_id":1}]
+    //   })
+    //     .then(()=> console.info("links deleted"))
+    //     .catch((err)=> console.error(err));
+    syncNoteLinks(id, content).catch(err => {
+      console.warn('Failed to sync note links:', err.message)
+    })
   }, INDEX_DEBOUNCE_MS)
 }
 
@@ -83,6 +86,44 @@ function generateId() {
 }
 
 const state = reactive({ items: [], activeFileId: null })
+
+// ─── Note link cache (noteId → { outbound: Set<id>, inbound: Set<id> }) ────────
+const noteLinkCache = reactive({})
+
+// Parses [[Note Name]] patterns from content and syncs links to the backend.
+async function syncNoteLinks(noteId, content) {
+  const wikiLinkRegex = /\[\[([^\]]+)\]\]/g
+  const linkedNames = new Set()
+  let match
+  while ((match = wikiLinkRegex.exec(content)) !== null) {
+    linkedNames.add(match[1].trim())
+  }
+
+  const newLinkedIds = []
+  for (const name of linkedNames) {
+    const item = state.items.find(i =>
+      i.type === 'file' && i.name.toLowerCase() === name.toLowerCase() && i.id !== noteId
+    )
+    if (item) newLinkedIds.push(item.id)
+  }
+  const newLinkedSet = new Set(newLinkedIds)
+
+  const current = noteLinkCache[noteId]
+  const currentOutbound = current ? current.outbound : new Set()
+
+  const toAdd = newLinkedIds.filter(id => !currentOutbound.has(id))
+  const toRemove = [...currentOutbound].filter(id => !newLinkedSet.has(id))
+
+  if (toAdd.length > 0) {
+    await linkNotes({ links: [{ from_id: noteId, to_ids: toAdd }] })
+  }
+  if (toRemove.length > 0) {
+    await deleteNoteLinks({ links: toRemove.map(id => ({ from_note_id: noteId, to_note_id: id })) })
+  }
+
+  if (!noteLinkCache[noteId]) noteLinkCache[noteId] = { outbound: new Set(), inbound: new Set() }
+  noteLinkCache[noteId].outbound = newLinkedSet
+}
 
 // ─── Composable ───────────────────────────────────────────────────────────────
 
@@ -129,6 +170,19 @@ export function useEditorStore() {
           item.content = ''
         }
       }
+      // Load note links if not yet cached
+      if (!noteLinkCache[id]) {
+        try {
+          const links = await getNoteLinks(id)
+          noteLinkCache[id] = {
+            outbound: new Set(links.filter(l => l.from_note_id === id).map(l => l.to_note_id)),
+            inbound:  new Set(links.filter(l => l.to_note_id   === id).map(l => l.from_note_id)),
+          }
+        } catch (err) {
+          console.warn(`Failed to load links for note ${id}:`, err.message)
+          noteLinkCache[id] = { outbound: new Set(), inbound: new Set() }
+        }
+      }
     }
   }
 
@@ -157,13 +211,13 @@ export function useEditorStore() {
    * Request body:  { title: string, content: string }
    * Expected response: { id: number }
    */
-  async function createFile(parentId = null) {
-    const { id } = await createNote('Untitled', '')
-    const item = noteToItem({ id, title: 'Untitled', content: '', updated_at: new Date().toISOString() })
+  async function createFile(parentId = null, title = 'Untitled') {
+    const { id } = await createNote(title, '')
+    const item = noteToItem({ id, title, content: '', updated_at: new Date().toISOString() })
     item.parentId = parentId
     state.items.push(item)
     state.activeFileId = id
-    indexNote(id, { title: 'Untitled', content: '' }).catch(err => {
+    indexNote(id, { title, content: '' }).catch(err => {
       console.warn('Failed to index new note:', err.message)
     })
     return id
@@ -291,6 +345,15 @@ export function useEditorStore() {
     return state.items.filter(i => i.name.toLowerCase().includes(q))
   }
 
+  /** Returns notes that the given note links to (outbound) and notes that link to it (inbound). */
+  function getLinkedNotes(noteId) {
+    const cache = noteLinkCache[noteId]
+    if (!cache) return { outbound: [], inbound: [] }
+    const outbound = [...cache.outbound].map(id => state.items.find(i => i.id === id)).filter(Boolean)
+    const inbound  = [...cache.inbound].map(id => state.items.find(i => i.id === id)).filter(Boolean)
+    return { outbound, inbound }
+  }
+
   async function init() {
     try {
       const notes = await fetchNotes()
@@ -321,6 +384,8 @@ export function useEditorStore() {
     recentFiles,
     searchItems,
     updateItemIcon,
+    getLinkedNotes,
+    syncNoteLinks,
     init,
   }
 }

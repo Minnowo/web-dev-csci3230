@@ -378,4 +378,6 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   box-shadow: 0 0 4px #4ade80;
   flex-shrink: 0;
 }
+
+
 </style>
