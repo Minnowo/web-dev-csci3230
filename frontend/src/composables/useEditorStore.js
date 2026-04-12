@@ -211,13 +211,13 @@ export function useEditorStore() {
    * Request body:  { title: string, content: string }
    * Expected response: { id: number }
    */
-  async function createFile(parentId = null) {
-    const { id } = await createNote('Untitled', '')
-    const item = noteToItem({ id, title: 'Untitled', content: '', updated_at: new Date().toISOString() })
+  async function createFile(parentId = null, title = 'Untitled') {
+    const { id } = await createNote(title, '')
+    const item = noteToItem({ id, title, content: '', updated_at: new Date().toISOString() })
     item.parentId = parentId
     state.items.push(item)
     state.activeFileId = id
-    indexNote(id, { title: 'Untitled', content: '' }).catch(err => {
+    indexNote(id, { title, content: '' }).catch(err => {
       console.warn('Failed to index new note:', err.message)
     })
     return id
@@ -385,6 +385,7 @@ export function useEditorStore() {
     searchItems,
     updateItemIcon,
     getLinkedNotes,
+    syncNoteLinks,
     init,
   }
 }

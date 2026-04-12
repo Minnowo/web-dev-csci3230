@@ -87,7 +87,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update', 'rename', 'createFirst'])
 
-const { updateItemIcon, state, setActiveFile } = useEditorStore()
+const { updateItemIcon, state, setActiveFile, createFile, syncNoteLinks } = useEditorStore()
 
 const pickerOpen = ref(false)
 const pickerPos = ref({ top: 0, left: 0 })
@@ -425,11 +425,22 @@ function selectWikiNote(note) {
   handleInput()
 }
 
-function handleWikiLinkClick(e) {
+async function handleWikiLinkClick(e) {
   if (e.target.classList.contains('wiki-link')) {
     const noteName = e.target.dataset.name
     const item = state.items.find(i => i.type === 'file' && i.name === noteName)
-    if (item) setActiveFile(item.id)
+    if (item) {
+      setActiveFile(item.id)
+    } else {
+      // Note doesn't exist — create it, then immediately sync the link
+      await createFile(null, noteName)
+      if (props.file?.id) {
+        const markdown = htmlToContent(editorRef.value?.innerHTML || '')
+        syncNoteLinks(props.file.id, markdown).catch(err => {
+          console.warn('Failed to sync links after note creation:', err.message)
+        })
+      }
+    }
   }
 }
 
