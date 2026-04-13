@@ -10,72 +10,24 @@
       </AppButton>
     </div>
 
-    <!-- Recently visited -->
-    <div class="border-t border-[var(--border)] py-8">
-      <div class="w-full max-w-2xl mx-auto px-8">
-        <h2 class="flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] mb-5">
-          <Clock class="w-4 h-4" /> Recently visited
-        </h2>
-
-        <!-- Empty state -->
-        <p v-if="recentFiles.length === 0" class="text-sm text-[var(--text-muted)]">
-          No notes yet — create your first note above.
-        </p>
-
-        <div v-else class="relative">
-          <!-- Left arrow -->
-          <button
-            v-if="canScrollLeft"
-            @click="scroll(-1)"
-            class="absolute -left-4 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-hover)] transition-colors shadow-lg"
-          >
-            <ChevronLeft class="w-4 h-4" />
-          </button>
-
-          <!-- Scroll container -->
-          <div ref="scrollRef" class="flex gap-3 overflow-x-auto scrollbar-hide" @scroll="updateScroll">
-            <NoteCard
-              v-for="file in recentFiles"
-              :key="file.id"
-              :title="file.name"
-              :date="file.lastVisitedAt || file.updatedAt"
-              class="shrink-0 w-[calc(25%-9px)]"
-              @click="openNote(file.id)"
-            >
-              <template #icon>
-                <component :is="resolveIcon(file.icon || 'FileText')" />
-              </template>
-            </NoteCard>
-          </div>
-
-          <!-- Right arrow -->
-          <button
-            v-if="canScrollRight"
-            @click="scroll(1)"
-            class="absolute -right-4 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-hover)] transition-colors shadow-lg"
-          >
-            <ChevronRight class="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Recently visited — rendered entirely by jQuery -->
+    <div id="jq-recently-visited"></div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { CirclePlus, Search, Clock, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { CirclePlus, Search } from 'lucide-vue-next'
+import $ from 'jquery'
 import AppButton from './AppButton.vue'
-import NoteCard from './NoteCard.vue'
 import { useEditorStore } from '../composables/useEditorStore'
-import { resolveIcon } from './editor/iconMap.js'
 
 const router = useRouter()
 const { createFile, setActiveFile, recentFiles } = useEditorStore()
 
-function handleCreateNote() {
-  createFile()
+async function handleCreateNote() {
+  await createFile()
   router.push('/editor')
 }
 
@@ -84,23 +36,157 @@ function openNote(id) {
   router.push('/editor')
 }
 
-const scrollRef = ref(null)
-const canScrollLeft = ref(false)
-const canScrollRight = ref(false)
+// ── Inline SVG strings (Lucide-style, 24×24 viewBox) ──────────────────────────
 
-function updateScroll() {
-  const el = scrollRef.value
-  if (!el) return
-  canScrollLeft.value = el.scrollLeft > 0
-  canScrollRight.value = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+const SVG_CLOCK = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 12"/></svg>`
+
+const SVG_FILE_TEXT = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`
+
+const SVG_CHEVRON_LEFT = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`
+
+const SVG_CHEVRON_RIGHT = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`
+
+// ── jQuery renderer ────────────────────────────────────────────────────────────
+
+function renderRecentlyVisited() {
+  const $mount = $('#jq-recently-visited')
+  $mount.empty()
+
+  // Outer section wrapper
+  const $outer = $('<div>').addClass('border-t border-[var(--border)] py-8')
+  const $inner = $('<div>').addClass('w-full max-w-2xl mx-auto px-8')
+
+  // Section heading
+  const $heading = $('<h2>')
+    .addClass('flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] mb-5')
+    .append($(SVG_CLOCK))
+    .append($('<span>').text('Recently visited'))
+  $inner.append($heading)
+
+  if (recentFiles.value.length === 0) {
+    // Empty state
+    $inner.append(
+      $('<p>')
+        .addClass('text-sm text-[var(--text-muted)]')
+        .text('No notes yet — create your first note above.')
+    )
+  } else {
+    const $relWrapper = $('<div>').addClass('relative')
+
+    // Left scroll arrow (hidden until scrolled right)
+    const $leftArrow = $('<button>')
+      .addClass(
+        'absolute -left-4 top-1/2 -translate-y-1/2 z-10 ' +
+        'flex items-center justify-center w-8 h-8 rounded-full ' +
+        'bg-[var(--surface)] border border-[var(--border)] ' +
+        'text-[var(--text-muted)] hover:text-[var(--text)] ' +
+        'hover:bg-[var(--surface-hover)] transition-colors shadow-lg'
+      )
+      .html(SVG_CHEVRON_LEFT)
+      .hide()
+
+    // Right scroll arrow
+    const $rightArrow = $('<button>')
+      .addClass(
+        'absolute -right-4 top-1/2 -translate-y-1/2 z-10 ' +
+        'flex items-center justify-center w-8 h-8 rounded-full ' +
+        'bg-[var(--surface)] border border-[var(--border)] ' +
+        'text-[var(--text-muted)] hover:text-[var(--text)] ' +
+        'hover:bg-[var(--surface-hover)] transition-colors shadow-lg'
+      )
+      .html(SVG_CHEVRON_RIGHT)
+      .hide()
+
+    // Scroll container
+    const $scrollContainer = $('<div>').addClass('flex gap-3 overflow-x-auto scrollbar-hide')
+
+    // Build a card for each recent file
+    for (const file of recentFiles.value) {
+      const rawDate = file.lastVisitedAt || file.updatedAt
+      const formattedDate = rawDate
+        ? new Date(rawDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : ''
+
+      const $card = $('<div>')
+        .addClass(
+          'jq-note-card shrink-0 cursor-pointer rounded-lg ' +
+          'border border-[var(--border)] bg-[var(--surface)] ' +
+          'p-3 flex flex-col gap-2'
+        )
+        .css('width', 'calc(25% - 9px)')
+        .data('note-id', file.id)
+
+      // File icon
+      const $iconWrap = $('<div>').addClass('text-[var(--text-muted)]').html(SVG_FILE_TEXT)
+
+      // Bottom row: title + date on the left, chevron on the right
+      const $bottom = $('<div>').addClass('flex items-end justify-between gap-1 mt-auto')
+
+      const $textGroup = $('<div>').addClass('min-w-0')
+      $textGroup.append(
+        $('<h3>').addClass('text-sm font-medium text-[var(--text)] truncate').text(file.name)
+      )
+      $textGroup.append(
+        $('<p>').addClass('text-xs text-[var(--text-muted)] mt-0.5').text(formattedDate)
+      )
+
+      const $chevron = $('<span>')
+        .addClass('jq-card-chevron flex-shrink-0 text-[var(--text-muted)]')
+        .css('opacity', '0')
+        .html(SVG_CHEVRON_RIGHT)
+
+      $bottom.append($textGroup, $chevron)
+      $card.append($iconWrap, $bottom)
+
+      // Click → open the note
+      $card.on('click', () => openNote(file.id))
+
+      // Hover → reveal/hide the card chevron
+      $card.hover(
+        function () { $(this).find('.jq-card-chevron').css('opacity', '1') },
+        function () { $(this).find('.jq-card-chevron').css('opacity', '0') }
+      )
+
+      $scrollContainer.append($card)
+    }
+
+    // Scroll event → update arrow visibility
+    $scrollContainer.on('scroll', function () {
+      const el = this
+      el.scrollLeft > 0 ? $leftArrow.show() : $leftArrow.hide()
+      el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+        ? $rightArrow.show()
+        : $rightArrow.hide()
+    })
+
+    // Arrow clicks → smooth scroll via jQuery .animate()
+    $leftArrow.on('click', function () {
+      const el = $scrollContainer[0]
+      $scrollContainer.animate({ scrollLeft: el.scrollLeft - el.clientWidth }, 300)
+    })
+
+    $rightArrow.on('click', function () {
+      const el = $scrollContainer[0]
+      $scrollContainer.animate({ scrollLeft: el.scrollLeft + el.clientWidth }, 300)
+    })
+
+    $relWrapper.append($leftArrow, $scrollContainer, $rightArrow)
+    $inner.append($relWrapper)
+
+    // Trigger initial arrow state check after DOM is painted
+    setTimeout(() => $scrollContainer.trigger('scroll'), 0)
+  }
+
+  $outer.append($inner)
+  $mount.append($outer)
 }
 
-function scroll(dir) {
-  const el = scrollRef.value
-  el.scrollBy({ left: dir * el.clientWidth, behavior: 'smooth' })
-}
+// ── Lifecycle ──────────────────────────────────────────────────────────────────
 
-onMounted(() => nextTick(updateScroll))
+onMounted(() => renderRecentlyVisited())
+
+// Re-render if the note list changes while the Dashboard is visible
+watch(recentFiles, () => renderRecentlyVisited())
 </script>
 
 <style>

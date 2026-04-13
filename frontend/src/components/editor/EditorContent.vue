@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { Clock, FileText } from 'lucide-vue-next'
 import { resolveIcon } from './iconMap.js'
 import { useEditorStore } from '../../composables/useEditorStore.js'
@@ -136,32 +136,121 @@ watch(editorRef, (el) => {
   }
 })
 
-function processWikiLinks(text) {
-  return text.replace(/\[\[([^\]]+)\]\]/g, (_, name) =>
+// Processes a plain-text line into HTML with inline markdown rendered
+// and md-syntax marker spans preserved for non-destructive editing.
+function processLineContent(text) {
+  // 1. Bold-italic (*** must come before ** and *)
+  text = text.replace(/\*\*\*([^*<>]+?)\*\*\*/g, (_, c) =>
+    `<strong><em><span class="md-syntax" contenteditable="false">***</span>${c}<span class="md-syntax" contenteditable="false">***</span></em></strong>`)
+
+  // 2. Bold
+  text = text.replace(/\*\*([^*<>]+?)\*\*/g, (_, c) =>
+    `<strong><span class="md-syntax" contenteditable="false">**</span>${c}<span class="md-syntax" contenteditable="false">**</span></strong>`)
+
+  // 3. Italic (single *, not preceded/followed by *)
+  text = text.replace(/(?<!\*)\*([^*<>\n]+?)\*(?!\*)/g, (_, c) =>
+    `<em><span class="md-syntax" contenteditable="false">*</span>${c}<span class="md-syntax" contenteditable="false">*</span></em>`)
+
+  // 4. Strikethrough
+  text = text.replace(/~~([^~<>]+?)~~/g, (_, c) =>
+    `<s><span class="md-syntax" contenteditable="false">~~</span>${c}<span class="md-syntax" contenteditable="false">~~</span></s>`)
+
+  // 5. Inline code
+  text = text.replace(/`([^`<>]+?)`/g, (_, c) =>
+    `<code><span class="md-syntax" contenteditable="false">\`</span>${c}<span class="md-syntax" contenteditable="false">\`</span></code>`)
+
+  // 6. Wiki-links
+  text = text.replace(/\[\[([^\]]+)\]\]/g, (_, name) =>
     `<span class="wiki-link" contenteditable="false" data-name="${name}">${name}</span>`)
+
+  return text
 }
 
 function contentToHtml(content) {
   if (!content) return '<p><br></p>'
-  // Simple markdown-like to HTML for initial load
-  return content
-    .split('\n')
-    .map(line => {
-      if (line.startsWith('### ')) return `<h3>${processWikiLinks(line.slice(4))}</h3>`
-      if (line.startsWith('## ')) return `<h2>${processWikiLinks(line.slice(3))}</h2>`
-      if (line.startsWith('# ')) return `<h1>${processWikiLinks(line.slice(2))}</h1>`
-      if (line.startsWith('> ')) return `<blockquote>${processWikiLinks(line.slice(2))}</blockquote>`
-      if (line.startsWith('- [ ] ')) return `<div class="checklist-item"><input type="checkbox" />${line.slice(6)}</div>`
-      if (line.startsWith('- [x] ')) return `<div class="checklist-item"><input type="checkbox" checked />${line.slice(6)}</div>`
-      if (line.startsWith('- ')) return `<li>${processWikiLinks(line.slice(2))}</li>`
-      if (line.startsWith('---')) return '<hr>'
-      if (line === '') return '<p><br></p>'
-      return `<p>${processWikiLinks(line)}</p>`
-    })
-    .join('')
+  const lines = content.split('\n')
+  const result = []
+  let i = 0
+
+  while (i < lines.length) {
+    const line = lines[i]
+
+    // GFM table: collect consecutive pipe-delimited rows
+    if (/^\|.+\|$/.test(line.trim())) {
+      const tableLines = []
+      while (i < lines.length && /^\|.+\|$/.test(lines[i].trim())) {
+        tableLines.push(lines[i])
+        i++
+      }
+      result.push(renderMarkdownTable(tableLines))
+      continue
+    }
+
+    // HTML heading tags — preserve as <h1>/<h2>/<h3> markers (not converted to #)
+    const htmlHeadingMatch = line.match(/^<(h[123])>(.*)<\/\1>$/)
+    if (htmlHeadingMatch) {
+      const tag = htmlHeadingMatch[1]
+      const inner = processLineContent(htmlHeadingMatch[2])
+      result.push(`<${tag}><span class="md-syntax" contenteditable="false">&lt;${tag}&gt;</span>${inner}<span class="md-syntax" contenteditable="false">&lt;/${tag}&gt;</span></${tag}>`)
+      i++; continue
+    }
+
+    if (line.startsWith('### ')) { result.push(`<h3><span class="md-syntax" contenteditable="false">### </span>${processLineContent(line.slice(4))}</h3>`); i++; continue }
+    if (line.startsWith('## '))  { result.push(`<h2><span class="md-syntax" contenteditable="false">## </span>${processLineContent(line.slice(3))}</h2>`); i++; continue }
+    if (line.startsWith('# '))   { result.push(`<h1><span class="md-syntax" contenteditable="false"># </span>${processLineContent(line.slice(2))}</h1>`); i++; continue }
+    if (line.startsWith('> '))   { result.push(`<blockquote>${processLineContent(line.slice(2))}</blockquote>`); i++; continue }
+    if (line.startsWith('- [ ] ')) { result.push(`<div class="checklist-item"><input type="checkbox" />${line.slice(6)}</div>`); i++; continue }
+    if (line.startsWith('- [x] ')) { result.push(`<div class="checklist-item"><input type="checkbox" checked />${line.slice(6)}</div>`); i++; continue }
+    if (line.startsWith('- '))   { result.push(`<li>${processLineContent(line.slice(2))}</li>`); i++; continue }
+    if (line.startsWith('---'))  { result.push('<hr>'); i++; continue }
+    if (line === '')             { result.push('<p><br></p>'); i++; continue }
+
+    result.push(`<p>${processLineContent(line)}</p>`)
+    i++
+  }
+
+  return result.join('')
 }
 
-// Serializes a node's content to markdown, preserving [[wiki-link]] spans.
+// Renders an array of GFM table lines into an HTML <table> element string.
+function renderMarkdownTable(lines) {
+  if (!lines.length) return ''
+
+  // Separator lines look like |---|---| — filter them out when building rows
+  const isSeparator = (l) => /^\|[\s\-:|]+\|$/.test(l.trim())
+
+  const rows = lines
+    .filter(l => !isSeparator(l))
+    .map(l => l.trim().split('|').slice(1, -1).map(c => c.trim()))
+
+  if (!rows.length) return ''
+
+  const cols = Math.max(...rows.map(r => r.length))
+  const [headerRow, ...dataRows] = rows
+
+  let html = '<table><thead><tr>'
+  for (let c = 0; c < cols; c++) {
+    html += `<th>${processLineContent(headerRow[c] ?? '')}</th>`
+  }
+  html += '</tr></thead>'
+
+  if (dataRows.length) {
+    html += '<tbody>'
+    for (const row of dataRows) {
+      html += '<tr>'
+      for (let c = 0; c < cols; c++) {
+        html += `<td>${processLineContent(row[c] ?? '')}</td>`
+      }
+      html += '</tr>'
+    }
+    html += '</tbody>'
+  }
+
+  return html + '</table>'
+}
+
+// Serializes a node's content to markdown, preserving inline formatting
+// and [[wiki-link]] spans.
 function serializeInnerMarkdown(node) {
   let result = ''
   for (const child of node.childNodes) {
@@ -171,6 +260,28 @@ function serializeInnerMarkdown(node) {
       const t = child.tagName.toLowerCase()
       if (t === 'span' && child.classList.contains('wiki-link')) {
         result += `[[${child.dataset.name || child.textContent}]]`
+      } else if (t === 'span' && child.classList.contains('md-syntax')) {
+        // Skip — marker is re-added by the serializer wrapper
+      } else if (t === 'strong' || t === 'b') {
+        const inner = serializeInnerMarkdown(child)
+        // Check if it also wraps <em> for bold-italic
+        if (child.querySelector('em') && child.childNodes.length <= 3) {
+          result += `***${serializeInnerMarkdown(child.querySelector('em'))}***`
+        } else {
+          result += `**${inner}**`
+        }
+      } else if (t === 'em' || t === 'i') {
+        // Only wrap with * if not already handled by bold-italic above
+        const parent = child.parentElement?.tagName?.toLowerCase()
+        if (parent !== 'strong' && parent !== 'b') {
+          result += `*${serializeInnerMarkdown(child)}*`
+        } else {
+          result += serializeInnerMarkdown(child)
+        }
+      } else if (t === 's' || t === 'del') {
+        result += `~~${serializeInnerMarkdown(child)}~~`
+      } else if (t === 'code') {
+        result += `\`${serializeInnerMarkdown(child)}\``
       } else if (t === 'br') {
         // ignore
       } else {
@@ -193,9 +304,17 @@ function htmlToContent(html) {
     const tag = node.tagName?.toLowerCase()
     const text = node.textContent || ''
     const rich = serializeInnerMarkdown(node)
-    if (tag === 'h1') lines.push(`# ${rich}`)
-    else if (tag === 'h2') lines.push(`## ${rich}`)
-    else if (tag === 'h3') lines.push(`### ${rich}`)
+    if (tag === 'h1' || tag === 'h2' || tag === 'h3') {
+      // Check the first md-syntax span to determine if this was typed as HTML or markdown
+      const firstMarker = node.querySelector('.md-syntax')?.textContent || ''
+      if (firstMarker.startsWith('<')) {
+        // HTML-tag style — preserve as <h1>content</h1>
+        lines.push(`<${tag}>${rich}</${tag}>`)
+      } else {
+        // Markdown style — serialize as # content
+        lines.push('#'.repeat(parseInt(tag[1])) + ' ' + rich)
+      }
+    }
     else if (tag === 'blockquote') lines.push(`> ${rich}`)
     else if (tag === 'hr') lines.push('---')
     else if (tag === 'li') lines.push(`- ${rich}`)
@@ -208,11 +327,38 @@ function htmlToContent(html) {
       const checked = node.querySelector('input')?.checked
       lines.push(checked ? `- [x] ${text.trim()}` : `- [ ] ${text.trim()}`)
     }
+    else if (tag === 'table') {
+      lines.push(...serializeTable(node))
+    }
     else {
       lines.push(rich === '' ? '' : rich)
     }
   }
   return lines.join('\n')
+}
+
+// Serializes a <table> DOM node back to GFM markdown table syntax.
+function serializeTable(tableNode) {
+  const allRows = Array.from(tableNode.querySelectorAll('tr'))
+  if (!allRows.length) return []
+
+  const parsedRows = allRows.map(row =>
+    Array.from(row.querySelectorAll('th, td')).map(cell => serializeInnerMarkdown(cell).trim())
+  )
+
+  const cols = Math.max(...parsedRows.map(r => r.length))
+  const pad = (cell) => cell || ''
+
+  const lines = []
+  // Header row
+  lines.push('| ' + parsedRows[0].map(pad).join(' | ') + ' |')
+  // Separator
+  lines.push('| ' + Array(cols).fill('---').join(' | ') + ' |')
+  // Data rows
+  for (const row of parsedRows.slice(1)) {
+    lines.push('| ' + Array(cols).fill(0).map((_, i) => pad(row[i])).join(' | ') + ' |')
+  }
+  return lines
 }
 
 // Scans the editor for any [[...]] plain-text patterns not yet wrapped in a
@@ -300,11 +446,14 @@ function renderWikiLinksInDOM() {
 
 function handleInput() {
   if (isUpdatingFromProp) return
+  applyLiveMarkdown()
+  checkAndRenderInlinePattern()
   const html = editorRef.value?.innerHTML || ''
   const markdown = htmlToContent(html)
   emit('update', markdown)
   renderWikiLinksInDOM()
   checkWikiAutocomplete()
+  updateCursorLine()
 }
 
 function handleKeydown(e) {
@@ -340,6 +489,317 @@ function handleKeydown(e) {
 function focusEditor() {
   editorRef.value?.focus()
 }
+
+// ─── Live markdown detection (Obsidian-style) ─────────────────────────────────
+function applyLiveMarkdown() {
+  if (!editorRef.value) return
+
+  const sel = window.getSelection()
+  if (!sel?.rangeCount) return
+
+  const range = sel.getRangeAt(0)
+  let node = range.startContainer
+
+  // Find the block element containing the cursor
+  let block = node.nodeType === Node.TEXT_NODE ? node.parentElement : node
+  while (block && block !== editorRef.value) {
+    const tag = block.tagName?.toLowerCase()
+    if (['p', 'div', 'h1', 'h2', 'h3', 'blockquote', 'li'].includes(tag)) break
+    block = block.parentElement
+  }
+
+  if (!block || block === editorRef.value) return
+
+  const tag = block.tagName.toLowerCase()
+  const fullText = block.textContent
+
+  // Case 1: Convert paragraph to heading if text starts with markdown prefix
+  if ((tag === 'p' || tag === 'div') && !block.querySelector('.wiki-link')) {
+    // 1a. Literal HTML heading tags: <h1>text</h1> — preserve the tags as markers
+    const htmlTagMatch = fullText.match(/^<(h[123])>([\s\S]*?)<\/\1>$/)
+    if (htmlTagMatch) {
+      const headingTag = htmlTagMatch[1]
+      const content = htmlTagMatch[2]
+      const heading = document.createElement(headingTag)
+
+      const openSpan = document.createElement('span')
+      openSpan.className = 'md-syntax'
+      openSpan.setAttribute('contenteditable', 'false')
+      openSpan.textContent = `<${headingTag}>`
+
+      const closeSpan = document.createElement('span')
+      closeSpan.className = 'md-syntax'
+      closeSpan.setAttribute('contenteditable', 'false')
+      closeSpan.textContent = `</${headingTag}>`
+
+      heading.appendChild(openSpan)
+      const contentNode = document.createTextNode(content)
+      heading.appendChild(contentNode)
+      heading.appendChild(closeSpan)
+      block.parentNode.replaceChild(heading, block)
+
+      // Place cursor at end of content (between the two spans)
+      try {
+        const newRange = document.createRange()
+        newRange.setStart(contentNode, contentNode.textContent.length)
+        newRange.collapse(true)
+        sel.removeAllRanges()
+        sel.addRange(newRange)
+      } catch (e) {}
+      return
+    }
+
+    // 1b. Markdown # prefix
+    let targetHeading = null
+    let markerLen = 0
+
+    if (fullText.startsWith('### ')) { targetHeading = 'h3'; markerLen = 4 }
+    else if (fullText.startsWith('## ')) { targetHeading = 'h2'; markerLen = 3 }
+    else if (fullText.startsWith('# ')) { targetHeading = 'h1'; markerLen = 2 }
+
+    if (targetHeading) {
+      convertBlockToHeading(block, targetHeading, markerLen, sel, range)
+    }
+  }
+
+  // Case 2: Convert heading back to paragraph if md-syntax span was deleted
+  if (['h1', 'h2', 'h3'].includes(tag)) {
+    const hasMdSyntax = !!block.querySelector('.md-syntax')
+    if (!hasMdSyntax) {
+      convertHeadingToParagraph(block, sel)
+    }
+  }
+}
+
+function convertBlockToHeading(block, headingTag, markerLen, sel, originalRange) {
+  // Remove prefix from first text node
+  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT)
+  const firstText = walker.nextNode()
+  let cursorOffset = originalRange.startOffset
+
+  if (firstText) {
+    const originalLength = firstText.textContent.length
+    if (firstText.textContent.length >= markerLen) {
+      firstText.textContent = firstText.textContent.slice(markerLen)
+    }
+  }
+
+  // Create heading element
+  const heading = document.createElement(headingTag)
+  const marker = '#'.repeat(parseInt(headingTag[1])) + ' '
+
+  // Create md-syntax span
+  const mdSpan = document.createElement('span')
+  mdSpan.className = 'md-syntax'
+  mdSpan.setAttribute('contenteditable', 'false')
+  mdSpan.textContent = marker
+  heading.appendChild(mdSpan)
+
+  // Move all children from block to heading
+  while (block.firstChild) {
+    heading.appendChild(block.firstChild)
+  }
+
+  block.parentNode.replaceChild(heading, block)
+
+  // Restore cursor position
+  try {
+    const newRange = document.createRange()
+    // Find first text node in heading (skipping md-syntax span)
+    const walker2 = document.createTreeWalker(
+      heading,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: (n) => {
+          if (n.parentElement?.classList.contains('md-syntax')) {
+            return NodeFilter.FILTER_REJECT
+          }
+          return NodeFilter.FILTER_ACCEPT
+        }
+      }
+    )
+    const firstContentText = walker2.nextNode()
+
+    if (firstContentText) {
+      const newOffset = Math.max(0, Math.min(cursorOffset - markerLen, firstContentText.textContent.length))
+      newRange.setStart(firstContentText, newOffset)
+    } else {
+      newRange.setStart(heading, heading.childNodes.length)
+    }
+    newRange.collapse(true)
+    sel.removeAllRanges()
+    sel.addRange(newRange)
+  } catch (e) {
+    // Best effort - cursor restoration failed
+  }
+}
+
+function convertHeadingToParagraph(heading, sel) {
+  const p = document.createElement('p')
+
+  // Preserve innerHTML
+  p.innerHTML = heading.innerHTML
+  heading.parentNode.replaceChild(p, heading)
+
+  // Restore cursor
+  try {
+    const currentSelection = window.getSelection()
+    if (currentSelection?.rangeCount) {
+      const range = currentSelection.getRangeAt(0)
+      const node = range.startContainer
+      const offset = range.startOffset
+
+      const newRange = document.createRange()
+      if (p.contains(node)) {
+        newRange.setStart(node, Math.min(offset, node.textContent?.length || 0))
+      } else {
+        newRange.setStart(p, 0)
+      }
+      newRange.collapse(true)
+      currentSelection.removeAllRanges()
+      currentSelection.addRange(newRange)
+    }
+  } catch (e) {
+    // Best effort
+  }
+}
+
+// ─── Real-time inline markdown rendering ──────────────────────────────────────
+
+const INLINE_PATTERNS = [
+  // Bold-italic: ***text***
+  { regex: /\*\*\*([^*]+)\*\*\*$/, open: '***', close: '***', tag: 'strong', innerTag: 'em' },
+  // Bold: **text**
+  { regex: /\*\*([^*]+)\*\*$/, open: '**', close: '**', tag: 'strong', innerTag: null },
+  // Italic: *text* (not inside **)
+  { regex: /(?<!\*)\*([^*\n]+)\*$/, open: '*', close: '*', tag: 'em', innerTag: null },
+  // Strikethrough: ~~text~~
+  { regex: /~~([^~\n]+)~~$/, open: '~~', close: '~~', tag: 's', innerTag: null },
+  // Inline code: `text`
+  { regex: /`([^`\n]+)`$/, open: '`', close: '`', tag: 'code', innerTag: null },
+]
+
+function checkAndRenderInlinePattern() {
+  const sel = window.getSelection()
+  if (!sel?.rangeCount) return
+
+  const range = sel.getRangeAt(0)
+  const anchorNode = range.startContainer
+  const anchorOffset = range.startOffset
+
+  if (anchorNode.nodeType !== Node.TEXT_NODE) return
+
+  // Skip if inside an already-formatted inline element or wiki-link
+  const parentTag = anchorNode.parentElement?.tagName?.toLowerCase()
+  const parentClass = anchorNode.parentElement?.className || ''
+  if (['strong', 'em', 's', 'code'].includes(parentTag)) return
+  if (parentClass.includes('wiki-link') || parentClass.includes('md-syntax')) return
+
+  const textUpToCursor = anchorNode.textContent.slice(0, anchorOffset)
+
+  for (const pattern of INLINE_PATTERNS) {
+    const match = textUpToCursor.match(pattern.regex)
+    if (!match) continue
+
+    const fullMatch = match[0]
+    const content = match[1]
+    const matchStart = anchorOffset - fullMatch.length
+    const afterText = anchorNode.textContent.slice(anchorOffset)
+
+    // Build the formatted element
+    const el = document.createElement(pattern.tag)
+
+    const openSpan = document.createElement('span')
+    openSpan.className = 'md-syntax'
+    openSpan.setAttribute('contenteditable', 'false')
+    openSpan.textContent = pattern.open
+
+    const closeSpan = document.createElement('span')
+    closeSpan.className = 'md-syntax'
+    closeSpan.setAttribute('contenteditable', 'false')
+    closeSpan.textContent = pattern.close
+
+    el.appendChild(openSpan)
+
+    if (pattern.innerTag) {
+      const inner = document.createElement(pattern.innerTag)
+      inner.textContent = content
+      el.appendChild(inner)
+    } else {
+      el.appendChild(document.createTextNode(content))
+    }
+
+    el.appendChild(closeSpan)
+
+    // Build replacement nodes
+    const frag = document.createDocumentFragment()
+    if (matchStart > 0) {
+      frag.appendChild(document.createTextNode(anchorNode.textContent.slice(0, matchStart)))
+    }
+    frag.appendChild(el)
+    const afterNode = document.createTextNode(afterText)
+    frag.appendChild(afterNode)
+
+    anchorNode.parentNode.replaceChild(frag, anchorNode)
+
+    // Place cursor at start of afterNode (right after the formatted element)
+    try {
+      const newRange = document.createRange()
+      newRange.setStart(afterNode, 0)
+      newRange.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(newRange)
+    } catch (e) {}
+
+    return // Only process one pattern per input event
+  }
+}
+
+// ─── Cursor-line tracking for Obsidian-style marker visibility ─────────────────
+
+function updateCursorLine() {
+  if (!editorRef.value) return
+
+  // Remove cursor-line from all current blocks
+  editorRef.value.querySelectorAll('.cursor-line').forEach(el => el.classList.remove('cursor-line'))
+
+  const sel = window.getSelection()
+  if (!sel?.rangeCount) return
+
+  // Only track if selection is inside this editor
+  if (!editorRef.value.contains(sel.getRangeAt(0).startContainer)) return
+
+  let el = sel.getRangeAt(0).startContainer
+  if (el.nodeType === Node.TEXT_NODE) el = el.parentElement
+
+  while (el && el !== editorRef.value) {
+    const t = el.tagName?.toLowerCase()
+    if (['p', 'h1', 'h2', 'h3', 'blockquote', 'li', 'div'].includes(t)) {
+      el.classList.add('cursor-line')
+      return
+    }
+    el = el.parentElement
+  }
+}
+
+function handleSelectionChange() {
+  if (!editorRef.value) return
+  const sel = window.getSelection()
+  if (sel?.rangeCount && editorRef.value.contains(sel.getRangeAt(0).startContainer)) {
+    updateCursorLine()
+  } else {
+    // Cursor left the editor — clear highlights
+    editorRef.value.querySelectorAll('.cursor-line').forEach(el => el.classList.remove('cursor-line'))
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('selectionchange', handleSelectionChange)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('selectionchange', handleSelectionChange)
+})
 
 // ─── Wiki-link autocomplete ───────────────────────────────────────────────────
 const wikiOpen = ref(false)
@@ -453,10 +913,13 @@ function applyFormat(command) {
 
   if (command === 'h1') {
     document.execCommand('formatBlock', false, 'h1')
+    ensureMdSyntaxInHeadings()
   } else if (command === 'h2') {
     document.execCommand('formatBlock', false, 'h2')
+    ensureMdSyntaxInHeadings()
   } else if (command === 'h3') {
     document.execCommand('formatBlock', false, 'h3')
+    ensureMdSyntaxInHeadings()
   } else if (command === 'code') {
     // Wrap selection in <code>
     const sel = window.getSelection()
@@ -482,6 +945,22 @@ function applyFormat(command) {
 
   // Sync content after formatting
   handleInput()
+}
+
+function ensureMdSyntaxInHeadings() {
+  if (!editorRef.value) return
+  const headings = editorRef.value.querySelectorAll('h1, h2, h3')
+  for (const h of headings) {
+    if (!h.querySelector(':scope > .md-syntax')) {
+      const level = parseInt(h.tagName[1])
+      const marker = '#'.repeat(level) + ' '
+      const span = document.createElement('span')
+      span.className = 'md-syntax'
+      span.setAttribute('contenteditable', 'false')
+      span.textContent = marker
+      h.insertBefore(span, h.firstChild)
+    }
+  }
 }
 
 defineExpose({ applyFormat })
@@ -678,6 +1157,32 @@ defineExpose({ applyFormat })
 }
 .create-btn:hover {
   opacity: 0.85;
+}
+
+/* Markdown syntax markers — hidden by default, shown only on the cursor's line */
+.editor-area :deep(.md-syntax) {
+  display: none;
+  color: var(--text-muted);
+  font-weight: inherit;
+  font-style: normal;
+}
+.editor-area :deep(.cursor-line .md-syntax) {
+  display: inline;
+  opacity: 0.55;
+}
+
+/* Inline formatting styles */
+.editor-area :deep(strong) {
+  font-weight: 700;
+  color: var(--text);
+}
+.editor-area :deep(em) {
+  font-style: italic;
+  color: var(--text);
+}
+.editor-area :deep(s) {
+  text-decoration: line-through;
+  color: var(--text-muted);
 }
 
 /* Wiki links in editor */
