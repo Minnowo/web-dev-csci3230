@@ -339,6 +339,33 @@ export function useEditorStore() {
    * backend. For name-only search the current client-side filter is sufficient.
    * Expected response: Item[]
    */
+  /**
+   * Moves a file or folder to a new parent (or root if newParentId is null).
+   * Includes a cycle guard: a folder cannot be moved into itself or any of its
+   * own descendants.
+   *
+   * TODO — Backend:
+   *   Files:   POST /api/notes/:id/move    body: { parent_folder_id: number | null }
+   *   Folders: POST /api/folder/move       body: { folder_id: number, parent_folder_id: number | null }
+   * On success: update item.parentId in state (already done optimistically here).
+   */
+  function moveItem(itemId, newParentId) {
+    const item = state.items.find(i => i.id === itemId)
+    if (!item) return
+    // No-op if already in the target parent
+    if (item.parentId === newParentId) return
+    // Cycle guard: reject if moving a folder into itself or a descendant
+    if (item.type === 'folder' && newParentId !== null) {
+      let cursor = newParentId
+      while (cursor !== null) {
+        if (cursor === itemId) return
+        const parent = state.items.find(i => i.id === cursor)
+        cursor = parent ? parent.parentId : null
+      }
+    }
+    item.parentId = newParentId
+  }
+
   function searchItems(query) {
     if (!query) return []
     const q = query.toLowerCase()
@@ -380,6 +407,7 @@ export function useEditorStore() {
     updateFileContent,
     renameItem,
     deleteItem,
+    moveItem,
     fileCount,
     recentFiles,
     searchItems,

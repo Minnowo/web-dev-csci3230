@@ -46,7 +46,14 @@
     </div>
 
     <!-- File tree -->
-    <div v-if="!collapsed" class="tree-container">
+    <div
+      v-if="!collapsed"
+      class="tree-container"
+      :class="{ 'root-drop-target': isRootDragOver }"
+      @dragover.prevent="onRootDragOver"
+      @dragleave="onRootDragLeave"
+      @drop="onRootDrop"
+    >
       <template v-if="searchQuery">
         <TreeItem
           v-for="item in searchResults"
@@ -57,6 +64,7 @@
           @select="$emit('selectFile', $event)"
           @delete="$emit('deleteItem', $event)"
           @rename="(id, name) => $emit('renameItem', id, name)"
+          @move="(draggedId, targetId) => $emit('moveItem', draggedId, targetId)"
         />
       </template>
       <template v-else>
@@ -69,6 +77,7 @@
           @select="$emit('selectFile', $event)"
           @delete="$emit('deleteItem', $event)"
           @rename="(id, name) => $emit('renameItem', id, name)"
+          @move="(draggedId, targetId) => $emit('moveItem', draggedId, targetId)"
         />
       </template>
     </div>
@@ -95,9 +104,27 @@ const props = defineProps({
   searchItems: { type: Function, required: true },
 })
 
-const emit = defineEmits(['createFile', 'createFolder', 'selectFile', 'deleteItem', 'renameItem'])
+const emit = defineEmits(['createFile', 'createFolder', 'selectFile', 'deleteItem', 'renameItem', 'moveItem'])
 
 const searchQuery = ref('')
+const isRootDragOver = ref(false)
+
+function onRootDragOver() {
+  isRootDragOver.value = true
+}
+
+function onRootDragLeave(e) {
+  // Only clear if leaving the container itself, not entering a child
+  if (!e.currentTarget.contains(e.relatedTarget)) {
+    isRootDragOver.value = false
+  }
+}
+
+function onRootDrop(e) {
+  isRootDragOver.value = false
+  const draggedId = e.dataTransfer.getData('text/plain')
+  if (draggedId) emit('moveItem', draggedId, null)
+}
 
 // ─── Local name-only filter (instant, existing behavior) ─────────────────────
 const searchResults = computed(() => {
@@ -249,6 +276,12 @@ function closeDropdown() {
 .tree-container::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 2px;
+}
+.tree-container.root-drop-target {
+  background: color-mix(in srgb, var(--label-to) 8%, transparent);
+  outline: 1px dashed var(--label-to);
+  outline-offset: -2px;
+  border-radius: 4px;
 }
 .sidebar-footer {
   padding: 8px 12px;

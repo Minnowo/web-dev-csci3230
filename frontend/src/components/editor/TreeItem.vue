@@ -2,10 +2,19 @@
   <div>
     <div
       class="tree-item"
-      :class="{ active: item.type === 'file' && item.id === activeId }"
+      :class="{
+        active: item.type === 'file' && item.id === activeId,
+        'drop-target': isDragOver,
+      }"
       :style="{ paddingLeft: depth * 16 + 8 + 'px' }"
+      draggable="true"
       @click="handleClick"
       @dblclick="startRename"
+      @dragstart.stop="onDragStart"
+      @dragend="onDragEnd"
+      @dragover.prevent.stop="onDragOver"
+      @dragleave="onDragLeave"
+      @drop.stop="onDrop"
     >
       <!-- Folder toggle chevron -->
       <ChevronRight
@@ -71,6 +80,7 @@
         @select="$emit('select', $event)"
         @delete="$emit('delete', $event)"
         @rename="(id, name) => $emit('rename', id, name)"
+        @move="(draggedId, targetId) => $emit('move', draggedId, targetId)"
       />
     </template>
   </div>
@@ -90,7 +100,7 @@ const props = defineProps({
   depth: { type: Number, default: 0 },
 })
 
-const emit = defineEmits(['select', 'delete', 'rename'])
+const emit = defineEmits(['select', 'delete', 'rename', 'move'])
 
 const { updateItemIcon } = useEditorStore()
 
@@ -100,6 +110,7 @@ const renamingName = ref('')
 const renameInput = ref(null)
 const pickerOpen = ref(false)
 const pickerPos = ref({ top: 0, left: 0 })
+const isDragOver = ref(false)
 
 const children = computed(() => props.getChildren(props.item.id))
 
@@ -146,6 +157,36 @@ function finishRename() {
 function cancelRename() {
   isRenaming.value = false
 }
+
+function onDragStart(e) {
+  e.dataTransfer.effectAllowed = 'move'
+  e.dataTransfer.setData('text/plain', String(props.item.id))
+}
+
+function onDragEnd() {
+  isDragOver.value = false
+}
+
+function onDragOver() {
+  // Only folders are valid drop targets
+  if (props.item.type === 'folder') {
+    isDragOver.value = true
+    // Auto-expand folder on hover so user can drop into nested folders
+    expanded.value = true
+  }
+}
+
+function onDragLeave() {
+  isDragOver.value = false
+}
+
+function onDrop(e) {
+  isDragOver.value = false
+  if (props.item.type !== 'folder') return
+  const draggedId = e.dataTransfer.getData('text/plain')
+  if (!draggedId || draggedId === String(props.item.id)) return
+  emit('move', draggedId, props.item.id)
+}
 </script>
 
 <style scoped>
@@ -168,6 +209,11 @@ function cancelRename() {
 .tree-item.active {
   background: color-mix(in srgb, var(--label-to) 20%, transparent);
   color: var(--text);
+}
+.tree-item.drop-target {
+  background: color-mix(in srgb, var(--label-to) 25%, transparent);
+  outline: 1px dashed var(--label-to);
+  outline-offset: -1px;
 }
 .toggle-icon {
   flex-shrink: 0;
