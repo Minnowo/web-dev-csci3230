@@ -3,7 +3,7 @@ import { DBError } from "./errors.js";
 import { Migrations } from "./migrations.js";
 import crypto from "crypto";
 import type { User } from "../types/user.js";
-import type { Note, NoteListItem } from "../types/note.js";
+import type { Note, NoteLink, NoteListItem } from "../types/note.js";
 
 export type Result<T> =
 	| { data: T; error: null }
@@ -87,7 +87,11 @@ export class DB {
 		}
 	}
 
-	public CreateNote(userId: number, title: string, content: string): Result<number> {
+	public CreateNote(
+		userId: number,
+		title: string,
+		content: string,
+	): Result<number> {
 		try {
 			const stmt = this.db.prepare(
 				"INSERT INTO DB_NOTES (USER_ID, TITLE, CONTENT) VALUES (?, ?, ?)",
@@ -98,7 +102,7 @@ export class DB {
 			return { data: Number(info.lastInsertRowid), error: null };
 		} catch (err) {
 			return { data: null, error: DBError.from(err) };
-		}	
+		}
 	}
 
 	public GetNotesList(userId: number): Result<NoteListItem[]> {
@@ -106,6 +110,7 @@ export class DB {
 			const stmt = this.db.prepare(
 				`SELECT 
 					ID AS id, 
+                    PARENT_ID AS folder_id,
 					TITLE AS title, 
 					UPDATED AS updated_at
 					FROM DB_NOTES 
@@ -114,7 +119,7 @@ export class DB {
 
 			const rows = stmt.all(userId) as NoteListItem[];
 
-			return { data: rows, error: null};				
+			return { data: rows, error: null };
 		} catch (err) {
 			return { data: null, error: DBError.from(err) };
 		}
@@ -141,23 +146,28 @@ export class DB {
 		}
 	}
 
-	public UpdateNote(noteId: number, userId: number, title: string, content: string): Result<number> {
+	public UpdateNote(
+		noteId: number,
+		userId: number,
+		title: string,
+		content: string,
+	): Result<number> {
 		try {
 			const stmt = this.db.prepare(
 				`UPDATE DB_NOTES
 				 SET TITLE = ?,
 				 	 CONTENT = ?,
 					 UPDATED = CURRENT_TIMESTAMP
-			 	 WHERE ID = ? AND USER_ID = ?`
+			 	 WHERE ID = ? AND USER_ID = ?`,
 			);
 
 			const row = stmt.run(title, content, noteId, userId);
 
-			return { data: row.changes, error: null};
+			return { data: row.changes, error: null };
 		} catch (err) {
-			return { data: null, error: DBError.from(err)};
+			return { data: null, error: DBError.from(err) };
 		}
-	} 
+	}
 
 	public DeleteNote(noteId: number, userId: number): Result<number> {
 		try {
@@ -167,9 +177,107 @@ export class DB {
 
 			const row = stmt.run(noteId, userId);
 
-			return { data: row.changes, error: null};
+			return { data: row.changes, error: null };
 		} catch (err) {
-			return { data: null, error: DBError.from(err)};
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public LinkNote(fromNoteId: number, toNoteId: number): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				`INSERT INTO DB_NOTES_LINKS(FROM_NOTE_ID, TO_NOTE_ID) 
+                    SELECT kara.ID AS FROM_NOTE_ID, made.ID AS TO_NOTE_ID
+                    FROM DB_NOTES kara, DB_NOTES made
+                    WHERE kara.ID = ? 
+                      AND made.ID = ?
+                      AND kara.ID != made.ID
+                      AND kara.USER_ID = made.USER_ID
+                `,
+			);
+
+			const row = stmt.run(fromNoteId, toNoteId);
+
+			return { data: row.changes, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+	public GetNoteLinks(noteId: number): Result<Array<NoteLink>> {
+		try {
+			const stmt = this.db.prepare(
+				`SELECT 
+                    FROM_NOTE_ID as from_note_id,
+                    TO_NOTE_ID as to_note_id
+                FROM DB_NOTES_LINKS nl WHERE ? IN (nl.FROM_NOTE_ID, nl.TO_NOTE_ID)`,
+			);
+
+			const row = stmt.all(noteId) as Array<NoteLink>;
+
+			return { data: row, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+	public DeleteNoteLink(
+		fromNoteId: number,
+		toNoteId: number,
+	): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				`
+                    DELETE FROM DB_NOTES_LINKS
+                    WHERE (FROM_NOTE_ID, TO_NOTE_ID) IN (
+                        SELECT kara.ID AS FROM_ID, made.ID AS TO_ID
+                        FROM DB_NOTES kara, DB_NOTES made
+                        WHERE
+                            kara.ID = ?
+                        AND made.ID = ?
+                        AND kara.ID != made.ID
+                        and kara.USER_ID = made.USER_ID
+                    )
+                `,
+			);
+
+			const row = stmt.run(fromNoteId, toNoteId);
+
+			return { data: row.changes, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public CreateFolder(
+		user_id: number,
+		parent_folder_id: number | null,
+		title: string,
+	): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				"INSERT INTO DB_FOLDER(USER_ID, PARENT_ID, NAME) VALUES(?, ?, ?)",
+			);
+
+			const info = stmt.run(user_id, parent_folder_id, title);
+
+			return { data: Number(info.lastInsertRowid), error: null };
+		} catch (err) {
+			console.info(err);
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public DeleteFolder(user_id: number, folder_id: number): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				"DELETE FROM DB_FOLDER WHERE USER_ID = ? AND ID = ?",
+			);
+
+			const info = stmt.run(user_id, folder_id);
+
+			return { data: Number(info.changes), error: null };
+		} catch (err) {
+			console.info(err);
+			return { data: null, error: DBError.from(err) };
 		}
 	}
 

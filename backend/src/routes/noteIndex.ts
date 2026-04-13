@@ -13,7 +13,11 @@ const router = express.Router();
 // ── Upsert (delete-then-insert, since FTS5 has no UPDATE) ────────────────────
 router.post("/notes/:id/index", (req: Request, res: Response) => {
 	const { id } = req.params;
-	const { title = "", tags = "", content = "" } = req.body as {
+	const {
+		title = "",
+		tags = "",
+		content = "",
+	} = req.body as {
 		title?: string;
 		tags?: string;
 		content?: string;

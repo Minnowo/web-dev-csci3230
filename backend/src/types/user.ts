@@ -10,6 +10,8 @@ export type User = {
 
 export type JwtUserPayload = User & JwtPayload;
 
-export interface AuthenticatedRequest extends Request {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface AuthenticatedRequest<BodyType = any>
+	extends Request<any, any, BodyType, any> {
 	user?: JwtUserPayload;
 }

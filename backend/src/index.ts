@@ -16,6 +16,11 @@ import { ApiPostDeleteNote } from "./api/api_delete_note_post.js";
 import analyzeRouter from "./routes/analyze.js";
 import hybridSearchRouter from "./routes/hybridSearch.js";
 import noteIndexRouter from "./routes/noteIndex.js";
+import { ApiPostLinkNote } from "./api/api_link_note_post.js";
+import { ApiPostDeleteNoteLinks } from "./api/api_delete_link_note_post.js";
+import { ApiGetNoteLinks } from "./api/api_note_links_get.js";
+import { ApiPostCreateFolder } from "./api/api_create_folder_post.js";
+import { ApiPostDeleteFolder } from "./api/api_delete_folder_post.js";
 
 export const ExpressApp = express();
 const PORT = 3000;
@@ -46,9 +51,42 @@ ExpressApp.get("/api/whoami", MiddleWareAuthenticateToken, ApiGetWhoAmI);
 // API endpoints for notes
 ExpressApp.get("/api/notes", MiddleWareAuthenticateToken, ApiGetNotesList);
 ExpressApp.post("/api/notes", MiddleWareAuthenticateToken, ApiPostCreateNote);
+ExpressApp.post(
+	"/api/notes/link",
+	MiddleWareAuthenticateToken,
+	ApiPostLinkNote,
+);
+ExpressApp.post(
+	"/api/notes/link/delete",
+	MiddleWareAuthenticateToken,
+	ApiPostDeleteNoteLinks,
+);
 ExpressApp.get("/api/notes/:id", MiddleWareAuthenticateToken, ApiGetNote);
-ExpressApp.post("/api/notes/:id/update", MiddleWareAuthenticateToken, ApiPostUpdateNote);
-ExpressApp.post("/api/notes/:id/delete", MiddleWareAuthenticateToken, ApiPostDeleteNote);
+ExpressApp.get(
+	"/api/notes/:id/links",
+	MiddleWareAuthenticateToken,
+	ApiGetNoteLinks,
+);
+ExpressApp.post(
+	"/api/notes/:id/update",
+	MiddleWareAuthenticateToken,
+	ApiPostUpdateNote,
+);
+ExpressApp.post(
+	"/api/notes/:id/delete",
+	MiddleWareAuthenticateToken,
+	ApiPostDeleteNote,
+);
+ExpressApp.post(
+	"/api/folder",
+	MiddleWareAuthenticateToken,
+	ApiPostCreateFolder,
+);
+ExpressApp.post(
+	"/api/folder/delete",
+	MiddleWareAuthenticateToken,
+	ApiPostDeleteFolder,
+);
 
 ExpressApp.listen(PORT, () => {
 	console.log(`Server running at http://localhost:${PORT}`);

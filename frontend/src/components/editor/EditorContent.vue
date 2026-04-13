@@ -31,6 +31,26 @@
       />
     </Teleport>
 
+    <!-- Wiki-link autocomplete -->
+    <Teleport to="body">
+      <div
+        v-if="wikiOpen && wikiResults.length"
+        class="wiki-autocomplete"
+        :style="{ top: wikiPos.top + 'px', left: wikiPos.left + 'px' }"
+      >
+        <button
+          v-for="(note, i) in wikiResults"
+          :key="note.id"
+          class="wiki-ac-item"
+          :class="{ selected: i === wikiSelectedIdx }"
+          @mousedown.prevent="selectWikiNote(note)"
+        >
+          <component :is="resolveIcon(note.icon || 'FileText')" class="w-3.5 h-3.5 flex-shrink-0" />
+          {{ note.name }}
+        </button>
+      </div>
+    </Teleport>
+
     <!-- Editable area -->
     <div
       ref="editorRef"
@@ -39,6 +59,8 @@
       spellcheck="true"
       @input="handleInput"
       @keydown="handleKeydown"
+      @click="handleWikiLinkClick"
+      @blur="handleEditorBlur"
     />
   </div>
   <div v-else class="empty-state">
@@ -65,7 +87,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update', 'rename', 'createFirst'])
 
-const { updateItemIcon } = useEditorStore()
+const { updateItemIcon, state, setActiveFile, createFile, syncNoteLinks } = useEditorStore()
 
 const pickerOpen = ref(false)
 const pickerPos = ref({ top: 0, left: 0 })
@@ -114,24 +136,49 @@ watch(editorRef, (el) => {
   }
 })
 
+function processWikiLinks(text) {
+  return text.replace(/\[\[([^\]]+)\]\]/g, (_, name) =>
+    `<span class="wiki-link" contenteditable="false" data-name="${name}">${name}</span>`)
+}
+
 function contentToHtml(content) {
   if (!content) return '<p><br></p>'
   // Simple markdown-like to HTML for initial load
   return content
     .split('\n')
     .map(line => {
-      if (line.startsWith('### ')) return `<h3>${line.slice(4)}</h3>`
-      if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`
-      if (line.startsWith('# ')) return `<h1>${line.slice(2)}</h1>`
-      if (line.startsWith('> ')) return `<blockquote>${line.slice(2)}</blockquote>`
+      if (line.startsWith('### ')) return `<h3>${processWikiLinks(line.slice(4))}</h3>`
+      if (line.startsWith('## ')) return `<h2>${processWikiLinks(line.slice(3))}</h2>`
+      if (line.startsWith('# ')) return `<h1>${processWikiLinks(line.slice(2))}</h1>`
+      if (line.startsWith('> ')) return `<blockquote>${processWikiLinks(line.slice(2))}</blockquote>`
       if (line.startsWith('- [ ] ')) return `<div class="checklist-item"><input type="checkbox" />${line.slice(6)}</div>`
       if (line.startsWith('- [x] ')) return `<div class="checklist-item"><input type="checkbox" checked />${line.slice(6)}</div>`
-      if (line.startsWith('- ')) return `<li>${line.slice(2)}</li>`
+      if (line.startsWith('- ')) return `<li>${processWikiLinks(line.slice(2))}</li>`
       if (line.startsWith('---')) return '<hr>'
       if (line === '') return '<p><br></p>'
-      return `<p>${line}</p>`
+      return `<p>${processWikiLinks(line)}</p>`
     })
     .join('')
+}
+
+// Serializes a node's content to markdown, preserving [[wiki-link]] spans.
+function serializeInnerMarkdown(node) {
+  let result = ''
+  for (const child of node.childNodes) {
+    if (child.nodeType === Node.TEXT_NODE) {
+      result += child.textContent
+    } else if (child.nodeType === Node.ELEMENT_NODE) {
+      const t = child.tagName.toLowerCase()
+      if (t === 'span' && child.classList.contains('wiki-link')) {
+        result += `[[${child.dataset.name || child.textContent}]]`
+      } else if (t === 'br') {
+        // ignore
+      } else {
+        result += serializeInnerMarkdown(child)
+      }
+    }
+  }
+  return result
 }
 
 function htmlToContent(html) {
@@ -145,15 +192,16 @@ function htmlToContent(html) {
     }
     const tag = node.tagName?.toLowerCase()
     const text = node.textContent || ''
-    if (tag === 'h1') lines.push(`# ${text}`)
-    else if (tag === 'h2') lines.push(`## ${text}`)
-    else if (tag === 'h3') lines.push(`### ${text}`)
-    else if (tag === 'blockquote') lines.push(`> ${text}`)
+    const rich = serializeInnerMarkdown(node)
+    if (tag === 'h1') lines.push(`# ${rich}`)
+    else if (tag === 'h2') lines.push(`## ${rich}`)
+    else if (tag === 'h3') lines.push(`### ${rich}`)
+    else if (tag === 'blockquote') lines.push(`> ${rich}`)
     else if (tag === 'hr') lines.push('---')
-    else if (tag === 'li') lines.push(`- ${text}`)
+    else if (tag === 'li') lines.push(`- ${rich}`)
     else if (tag === 'ul' || tag === 'ol') {
       for (const li of node.querySelectorAll('li')) {
-        lines.push(`- ${li.textContent}`)
+        lines.push(`- ${serializeInnerMarkdown(li)}`)
       }
     }
     else if (tag === 'div' && node.classList.contains('checklist-item')) {
@@ -161,10 +209,93 @@ function htmlToContent(html) {
       lines.push(checked ? `- [x] ${text.trim()}` : `- [ ] ${text.trim()}`)
     }
     else {
-      lines.push(text === '' ? '' : text)
+      lines.push(rich === '' ? '' : rich)
     }
   }
   return lines.join('\n')
+}
+
+// Scans the editor for any [[...]] plain-text patterns not yet wrapped in a
+// wiki-link span, converts them in-place, and restores the cursor position.
+function renderWikiLinksInDOM() {
+  if (!editorRef.value) return
+
+  const sel = window.getSelection()
+  const anchorNode = sel?.anchorNode
+  const anchorOffset = sel?.anchorOffset ?? 0
+
+  const walker = document.createTreeWalker(editorRef.value, NodeFilter.SHOW_TEXT)
+  const nodes = []
+  let n
+  while ((n = walker.nextNode())) {
+    if (!n.parentElement?.classList.contains('wiki-link') && /\[\[[^\]]+\]\]/.test(n.textContent)) {
+      nodes.push(n)
+    }
+  }
+  if (!nodes.length) return
+
+  let restoreTo = null
+
+  for (const textNode of nodes) {
+    const text = textNode.textContent
+    const regex = /\[\[([^\]]+)\]\]/g
+    const frag = document.createDocumentFragment()
+    let last = 0
+    let match
+    let lastInserted = null
+
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > last) {
+        const t = document.createTextNode(text.slice(last, match.index))
+        frag.appendChild(t)
+        if (textNode === anchorNode && anchorOffset >= last && anchorOffset <= match.index) {
+          restoreTo = { node: t, offset: anchorOffset - last }
+        }
+        lastInserted = t
+      }
+      const span = document.createElement('span')
+      span.className = 'wiki-link'
+      span.setAttribute('contenteditable', 'false')
+      span.setAttribute('data-name', match[1])
+      span.textContent = match[1]
+      frag.appendChild(span)
+      lastInserted = span
+      last = regex.lastIndex
+    }
+
+    if (last < text.length) {
+      const t = document.createTextNode(text.slice(last))
+      frag.appendChild(t)
+      if (textNode === anchorNode && anchorOffset >= last && !restoreTo) {
+        restoreTo = { node: t, offset: Math.min(anchorOffset - last, t.textContent.length) }
+      }
+      lastInserted = t
+    }
+
+    if (textNode === anchorNode && !restoreTo && lastInserted) {
+      if (lastInserted.nodeType === Node.TEXT_NODE) {
+        restoreTo = { node: lastInserted, offset: lastInserted.textContent.length }
+      } else {
+        restoreTo = { afterNode: lastInserted }
+      }
+    }
+
+    textNode.parentNode.replaceChild(frag, textNode)
+  }
+
+  if (sel && restoreTo) {
+    try {
+      const range = document.createRange()
+      if (restoreTo.afterNode) {
+        range.setStartAfter(restoreTo.afterNode)
+      } else {
+        range.setStart(restoreTo.node, restoreTo.offset)
+      }
+      range.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(range)
+    } catch (e) { /* best-effort cursor restoration */ }
+  }
 }
 
 function handleInput() {
@@ -172,9 +303,33 @@ function handleInput() {
   const html = editorRef.value?.innerHTML || ''
   const markdown = htmlToContent(html)
   emit('update', markdown)
+  renderWikiLinksInDOM()
+  checkWikiAutocomplete()
 }
 
 function handleKeydown(e) {
+  // Wiki-link autocomplete navigation
+  if (wikiOpen.value) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      wikiSelectedIdx.value = Math.min(wikiSelectedIdx.value + 1, wikiResults.value.length - 1)
+      return
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      wikiSelectedIdx.value = Math.max(wikiSelectedIdx.value - 1, 0)
+      return
+    }
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault()
+      if (wikiResults.value[wikiSelectedIdx.value]) selectWikiNote(wikiResults.value[wikiSelectedIdx.value])
+      return
+    }
+    if (e.key === 'Escape') {
+      closeWikiAutocomplete()
+      return
+    }
+  }
   // Tab inserts spaces instead of moving focus
   if (e.key === 'Tab') {
     e.preventDefault()
@@ -184,6 +339,113 @@ function handleKeydown(e) {
 
 function focusEditor() {
   editorRef.value?.focus()
+}
+
+// ─── Wiki-link autocomplete ───────────────────────────────────────────────────
+const wikiOpen = ref(false)
+const wikiPos = ref({ top: 0, left: 0 })
+const wikiResults = ref([])
+const wikiSelectedIdx = ref(0)
+
+function checkWikiAutocomplete() {
+  const sel = window.getSelection()
+  if (!sel?.rangeCount) { closeWikiAutocomplete(); return }
+  const range = sel.getRangeAt(0)
+  const container = range.startContainer
+
+  // Build the text before the cursor. When cursor is in an element node (e.g.
+  // right after a contenteditable=false span), aggregate preceding text nodes.
+  let textBefore = ''
+  if (container.nodeType === Node.TEXT_NODE) {
+    textBefore = container.textContent.slice(0, range.startOffset)
+  } else if (container.nodeType === Node.ELEMENT_NODE) {
+    for (let i = 0; i < range.startOffset; i++) {
+      const child = container.childNodes[i]
+      if (child?.nodeType === Node.TEXT_NODE) textBefore += child.textContent
+    }
+  } else {
+    closeWikiAutocomplete()
+    return
+  }
+
+  const match = textBefore.match(/\[\[([^\]]*)$/)
+  if (!match) { closeWikiAutocomplete(); return }
+
+  const term = match[1].toLowerCase()
+  const results = state.items
+    .filter(i => i.type === 'file' && i.name.toLowerCase().includes(term))
+    .slice(0, 8)
+  if (results.length === 0) { closeWikiAutocomplete(); return }
+
+  wikiResults.value = results
+  wikiSelectedIdx.value = 0
+  wikiOpen.value = true
+  const rect = range.getBoundingClientRect()
+  wikiPos.value = { top: rect.bottom + 4, left: rect.left }
+}
+
+function closeWikiAutocomplete() {
+  wikiOpen.value = false
+  wikiResults.value = []
+}
+
+function selectWikiNote(note) {
+  const sel = window.getSelection()
+  if (!sel?.rangeCount) return
+  const range = sel.getRangeAt(0)
+  const container = range.startContainer
+  if (container.nodeType !== Node.TEXT_NODE) return
+
+  const textBefore = container.textContent.slice(0, range.startOffset)
+  const match = textBefore.match(/\[\[([^\]]*)$/)
+  if (!match) return
+
+  // Delete [[partial text
+  const deleteRange = document.createRange()
+  deleteRange.setStart(container, range.startOffset - match[0].length)
+  deleteRange.setEnd(container, range.startOffset)
+  deleteRange.deleteContents()
+
+  // Insert wiki-link span
+  const span = document.createElement('span')
+  span.className = 'wiki-link'
+  span.setAttribute('contenteditable', 'false')
+  span.setAttribute('data-name', note.name)
+  span.textContent = note.name
+  deleteRange.insertNode(span)
+
+  // Place cursor right after the span
+  const newRange = document.createRange()
+  newRange.setStartAfter(span)
+  newRange.collapse(true)
+  sel.removeAllRanges()
+  sel.addRange(newRange)
+
+  closeWikiAutocomplete()
+  handleInput()
+}
+
+async function handleWikiLinkClick(e) {
+  if (e.target.classList.contains('wiki-link')) {
+    const noteName = e.target.dataset.name
+    const item = state.items.find(i => i.type === 'file' && i.name === noteName)
+    if (item) {
+      setActiveFile(item.id)
+    } else {
+      // Note doesn't exist — create it, then immediately sync the link
+      await createFile(null, noteName)
+      if (props.file?.id) {
+        const markdown = htmlToContent(editorRef.value?.innerHTML || '')
+        syncNoteLinks(props.file.id, markdown).catch(err => {
+          console.warn('Failed to sync links after note creation:', err.message)
+        })
+      }
+    }
+  }
+}
+
+function handleEditorBlur() {
+  setTimeout(closeWikiAutocomplete, 150)
 }
 
 function applyFormat(command) {
@@ -416,5 +678,55 @@ defineExpose({ applyFormat })
 }
 .create-btn:hover {
   opacity: 0.85;
+}
+
+/* Wiki links in editor */
+.editor-area :deep(.wiki-link) {
+  color: var(--label-to);
+  background: color-mix(in srgb, var(--label-to) 12%, transparent);
+  border-radius: 3px;
+  padding: 1px 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.editor-area :deep(.wiki-link:hover) {
+  background: color-mix(in srgb, var(--label-to) 22%, transparent);
+  text-decoration: underline;
+}
+
+/* Wiki-link autocomplete dropdown */
+.wiki-autocomplete {
+  position: fixed;
+  z-index: 9999;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+  min-width: 220px;
+  max-width: 320px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.wiki-ac-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 5px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.1s, color 0.1s;
+}
+.wiki-ac-item:hover,
+.wiki-ac-item.selected {
+  background: var(--surface-hover);
+  color: var(--text);
 }
 </style>
