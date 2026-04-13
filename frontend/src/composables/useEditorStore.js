@@ -19,7 +19,7 @@
  */
 
 import { reactive, computed } from 'vue'
-import {apiCreateFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks } from '../services/api.js'
+import {apiCreateFolder, apiMoveNote, apiMoveFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks } from '../services/api.js'
 
 // ─── FTS index sync (debounced to avoid firing on every keystroke) ────────────
 let indexDebounceTimer = null
@@ -364,7 +364,19 @@ export function useEditorStore() {
         cursor = parent ? parent.parentId : null
       }
     }
+    const previousParentId = item.parentId
     item.parentId = newParentId
+    if (item.type === 'file') {
+      apiMoveNote(itemId, newParentId).catch(err => {
+        console.warn(`Failed to move note ${itemId}:`, err.message)
+        item.parentId = previousParentId
+      })
+    } else {
+      apiMoveFolder(itemId, newParentId).catch(err => {
+        console.warn(`Failed to move folder ${itemId}:`, err.message)
+        item.parentId = previousParentId
+      })
+    }
   }
 
   function searchItems(query) {
