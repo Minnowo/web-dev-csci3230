@@ -21,6 +21,8 @@ import { ApiPostDeleteNoteLinks } from "./api/api_delete_link_note_post.js";
 import { ApiGetNoteLinks } from "./api/api_note_links_get.js";
 import { ApiPostCreateFolder } from "./api/api_create_folder_post.js";
 import { ApiPostDeleteFolder } from "./api/api_delete_folder_post.js";
+import { ApiGetFolderChildren } from "./api/api_folder_children_get.js";
+import { ApiGetFolders } from "./api/api_folders_get.js";
 
 export const ExpressApp = express();
 const PORT = 3000;
@@ -61,6 +63,7 @@ ExpressApp.post(
 	MiddleWareAuthenticateToken,
 	ApiPostDeleteNoteLinks,
 );
+
 ExpressApp.get("/api/notes/:id", MiddleWareAuthenticateToken, ApiGetNote);
 ExpressApp.get(
 	"/api/notes/:id/links",
@@ -77,6 +80,9 @@ ExpressApp.post(
 	MiddleWareAuthenticateToken,
 	ApiPostDeleteNote,
 );
+
+ExpressApp.get("/api/folders", MiddleWareAuthenticateToken, ApiGetFolders);
+ExpressApp.get("/api/folder/:id", MiddleWareAuthenticateToken, ApiGetFolderChildren);
 ExpressApp.post(
 	"/api/folder",
 	MiddleWareAuthenticateToken,
