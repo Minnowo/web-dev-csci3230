@@ -284,8 +284,10 @@ export function useEditorStore() {
    * Expected response: { updatedAt: string }
    * On success: update item.name and item.updatedAt
    */
-  function renameItem(id, newName) {
-    const item = state.items.find(i => i.id === id)
+  function renameItem(id, newName, type = null) {
+    const item = type
+      ? state.items.find(i => String(i.id) === String(id) && i.type === type)
+      : state.items.find(i => i.id === id)
     if (item) {
       item.name = newName
       item.updatedAt = new Date().toISOString()
@@ -350,30 +352,32 @@ export function useEditorStore() {
    *   Folders: POST /api/folder/move       body: { folder_id: number, parent_folder_id: number | null }
    * On success: update item.parentId in state (already done optimistically here).
    */
-  function moveItem(itemId, newParentId) {
-    const item = state.items.find(i => i.id === itemId)
+  function moveItem(itemId, itemType, newParentId) {
+    const item = state.items.find(i => String(i.id) === String(itemId) && i.type === itemType)
     if (!item) return
     // No-op if already in the target parent
-    if (item.parentId === newParentId) return
+    if (String(item.parentId) === String(newParentId)) return
     // Cycle guard: reject if moving a folder into itself or a descendant
-    if (item.type === 'folder' && newParentId !== null) {
+    if (itemType === 'folder' && newParentId !== null) {
       let cursor = newParentId
       while (cursor !== null) {
-        if (cursor === itemId) return
-        const parent = state.items.find(i => i.id === cursor)
+        if (String(cursor) === String(itemId)) return
+        const parent = state.items.find(i => String(i.id) === String(cursor) && i.type === 'folder')
         cursor = parent ? parent.parentId : null
       }
     }
     const previousParentId = item.parentId
-    item.parentId = newParentId
-    if (item.type === 'file') {
-      apiMoveNote(itemId, newParentId).catch(err => {
-        console.warn(`Failed to move note ${itemId}:`, err.message)
+    const numericItemId = Number(itemId)
+    const numericParentId = newParentId === null ? null : Number(newParentId)
+    item.parentId = numericParentId
+    if (itemType === 'file') {
+      apiMoveNote(numericItemId, numericParentId).catch(err => {
+        console.warn(`Failed to move note ${numericItemId}:`, err.message)
         item.parentId = previousParentId
       })
     } else {
-      apiMoveFolder(itemId, newParentId).catch(err => {
-        console.warn(`Failed to move folder ${itemId}:`, err.message)
+      apiMoveFolder(numericItemId, numericParentId).catch(err => {
+        console.warn(`Failed to move folder ${numericItemId}:`, err.message)
         item.parentId = previousParentId
       })
     }

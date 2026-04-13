@@ -63,8 +63,8 @@
           :get-children="getChildren"
           @select="$emit('selectFile', $event)"
           @delete="$emit('deleteItem', $event)"
-          @rename="(id, name) => $emit('renameItem', id, name)"
-          @move="(draggedId, targetId) => $emit('moveItem', draggedId, targetId)"
+          @rename="(id, name, type) => $emit('renameItem', id, name, type)"
+          @move="(id, type, targetId) => $emit('moveItem', id, type, targetId)"
         />
       </template>
       <template v-else>
@@ -76,8 +76,8 @@
           :get-children="getChildren"
           @select="$emit('selectFile', $event)"
           @delete="$emit('deleteItem', $event)"
-          @rename="(id, name) => $emit('renameItem', id, name)"
-          @move="(draggedId, targetId) => $emit('moveItem', draggedId, targetId)"
+          @rename="(id, name, type) => $emit('renameItem', id, name, type)"
+          @move="(id, type, targetId) => $emit('moveItem', id, type, targetId)"
         />
       </template>
     </div>
@@ -123,7 +123,8 @@ function onRootDragLeave(e) {
 function onRootDrop(e) {
   isRootDragOver.value = false
   const draggedId = e.dataTransfer.getData('text/plain')
-  if (draggedId) emit('moveItem', draggedId, null)
+  const draggedType = e.dataTransfer.getData('text/itemtype')
+  if (draggedId && draggedType) emit('moveItem', draggedId, draggedType, null)
 }
 
 // ─── Local name-only filter (instant, existing behavior) ─────────────────────

@@ -79,8 +79,8 @@
         :depth="depth + 1"
         @select="$emit('select', $event)"
         @delete="$emit('delete', $event)"
-        @rename="(id, name) => $emit('rename', id, name)"
-        @move="(draggedId, targetId) => $emit('move', draggedId, targetId)"
+        @rename="(id, name, type) => $emit('rename', id, name, type)"
+        @move="(id, type, targetId) => $emit('move', id, type, targetId)"
       />
     </template>
   </div>
@@ -149,7 +149,7 @@ function startRename() {
 
 function finishRename() {
   if (isRenaming.value && renamingName.value.trim()) {
-    emit('rename', props.item.id, renamingName.value.trim())
+    emit('rename', props.item.id, renamingName.value.trim(), props.item.type)
   }
   isRenaming.value = false
 }
@@ -161,6 +161,7 @@ function cancelRename() {
 function onDragStart(e) {
   e.dataTransfer.effectAllowed = 'move'
   e.dataTransfer.setData('text/plain', String(props.item.id))
+  e.dataTransfer.setData('text/itemtype', props.item.type)
 }
 
 function onDragEnd() {
@@ -184,8 +185,10 @@ function onDrop(e) {
   isDragOver.value = false
   if (props.item.type !== 'folder') return
   const draggedId = e.dataTransfer.getData('text/plain')
-  if (!draggedId || draggedId === String(props.item.id)) return
-  emit('move', draggedId, props.item.id)
+  const draggedType = e.dataTransfer.getData('text/itemtype')
+  if (!draggedId || !draggedType) return
+  if (draggedType === 'folder' && draggedId === String(props.item.id)) return
+  emit('move', draggedId, draggedType, props.item.id)
 }
 </script>
 
