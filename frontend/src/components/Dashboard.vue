@@ -74,8 +74,8 @@ import { resolveIcon } from './editor/iconMap.js'
 const router = useRouter()
 const { createFile, setActiveFile, recentFiles } = useEditorStore()
 
-function handleCreateNote() {
-  createFile()
+async function handleCreateNote() {
+  await createFile()
   router.push('/editor')
 }
 
