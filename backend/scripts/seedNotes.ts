@@ -108,7 +108,7 @@ const insertNote = db.prepare(
 	"INSERT INTO DB_NOTES (USER_ID, TITLE, CONTENT) VALUES (?, ?, ?)",
 );
 const insertFts = db.prepare(
-	"INSERT INTO notes_fts (note_id, title, tags, content) VALUES (?, ?, ?, ?)",
+	"INSERT INTO notes_fts (note_id, title, content) VALUES (?, ?, ?)",
 );
 
 const seed = db.transaction(() => {
@@ -120,7 +120,7 @@ const seed = db.transaction(() => {
 		}
 		const result = insertNote.run(userId, note.title, note.content);
 		const noteId = Number(result.lastInsertRowid);
-		insertFts.run(noteId, note.title, "", note.content);
+		insertFts.run(noteId, note.title, note.content);
 		console.log(`  added: "${note.title}" (id: ${noteId})`);
 		inserted++;
 	}
