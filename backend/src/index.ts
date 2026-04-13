@@ -21,6 +21,11 @@ import { ApiPostDeleteNoteLinks } from "./api/api_delete_link_note_post.js";
 import { ApiGetNoteLinks } from "./api/api_note_links_get.js";
 import { ApiPostCreateFolder } from "./api/api_create_folder_post.js";
 import { ApiPostDeleteFolder } from "./api/api_delete_folder_post.js";
+import { ApiGetTags } from "./api/api_tags_get.js";
+import { ApiPostTag } from "./api/api_tag_post.js";
+import { ApiPostDeleteTag } from "./api/api_tag_delete.js";
+import { ApiGetNoteTags } from "./api/api_note_tags_get.js";
+import { ApiPostNoteTags } from "./api/api_note_tags_post.js";
 
 export const ExpressApp = express();
 const PORT = 3000;
@@ -86,6 +91,25 @@ ExpressApp.post(
 	"/api/folder/delete",
 	MiddleWareAuthenticateToken,
 	ApiPostDeleteFolder,
+);
+
+// ── Tag endpoints (David) ─────────────────────────────────────────────────────
+ExpressApp.get("/api/tags", MiddleWareAuthenticateToken, ApiGetTags);
+ExpressApp.post("/api/tags", MiddleWareAuthenticateToken, ApiPostTag);
+ExpressApp.post(
+	"/api/tags/:id/delete",
+	MiddleWareAuthenticateToken,
+	ApiPostDeleteTag,
+);
+ExpressApp.get(
+	"/api/notes/:id/tags",
+	MiddleWareAuthenticateToken,
+	ApiGetNoteTags,
+);
+ExpressApp.post(
+	"/api/notes/:id/tags",
+	MiddleWareAuthenticateToken,
+	ApiPostNoteTags,
 );
 
 ExpressApp.listen(PORT, () => {
