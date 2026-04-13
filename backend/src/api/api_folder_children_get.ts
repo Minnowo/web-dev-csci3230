@@ -20,7 +20,10 @@ export const ApiGetFolderChildren = (
 	}
 
 	const db = DB.Instance();
-	const result = db.GetFoldersChildren(req.user.ID, folderId === 0 ? null : folderId);
+	const result = db.GetFoldersChildren(
+		req.user.ID,
+		folderId === 0 ? null : folderId,
+	);
 
 	if (result.error !== null) {
 		console.error(`error listing folder children: ${result.error}`);

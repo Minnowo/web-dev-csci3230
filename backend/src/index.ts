@@ -87,7 +87,11 @@ ExpressApp.post(
 );
 
 ExpressApp.get("/api/folders", MiddleWareAuthenticateToken, ApiGetFolders);
-ExpressApp.get("/api/folder/:id", MiddleWareAuthenticateToken, ApiGetFolderChildren);
+ExpressApp.get(
+	"/api/folder/:id",
+	MiddleWareAuthenticateToken,
+	ApiGetFolderChildren,
+);
 ExpressApp.post(
 	"/api/folder",
 	MiddleWareAuthenticateToken,
