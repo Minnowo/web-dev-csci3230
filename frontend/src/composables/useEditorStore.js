@@ -85,7 +85,7 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 }
 
-const state = reactive({ items: [], activeFileId: null })
+const state = reactive({ items: [], activeFileId: null, loading: true })
 
 // ─── Note link cache (noteId → { outbound: Set<id>, inbound: Set<id> }) ────────
 const noteLinkCache = reactive({})
@@ -156,7 +156,6 @@ export function useEditorStore() {
    * "recently visited" to sync. Otherwise keep client-side only.
    */
   async function setActiveFile(id) {
-    state.activeFileId = id
     const item = state.items.find(i => i.id === id && i.type === 'file')
     if (item) {
       item.lastVisitedAt = new Date().toISOString()
@@ -170,6 +169,8 @@ export function useEditorStore() {
           item.content = ''
         }
       }
+      // Set active ID only after content is ready so the editor watch fires with real content
+      state.activeFileId = id
       // Load note links if not yet cached
       if (!noteLinkCache[id]) {
         try {
@@ -382,6 +383,8 @@ export function useEditorStore() {
   }
 
   async function init() {
+    if (state.items.length > 0) return
+    state.loading = true
     try {
       const notes = await fetchNotes()
       const folders = state.items.filter(i => i.type === 'folder')
@@ -389,15 +392,18 @@ export function useEditorStore() {
       state.items.splice(0, state.items.length, ...folders, ...backendFiles)
       if (!state.items.find(i => i.id === state.activeFileId)) {
         const firstFile = state.items.find(i => i.type === 'file')
-        state.activeFileId = firstFile ? firstFile.id : null
+        if (firstFile) await setActiveFile(firstFile.id)
       }
     } catch (err) {
       console.warn('Failed to load notes from backend, using local data:', err.message)
+    } finally {
+      state.loading = false
     }
   }
 
   return {
     state,
+    loading: computed(() => state.loading),
     activeFile,
     rootItems,
     getChildren,

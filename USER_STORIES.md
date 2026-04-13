@@ -25,6 +25,14 @@
 
 - As a user, I want to see my recently visited notes so that I can quickly return to active work
 
+## Tags
+
+- As a user, I want to type #tagname in my notes so that I can tag them inline
+- As a user, I want to see tag autocomplete when I type # so that I can reuse existing tags quickly
+- As a user, I want new tags I type to be added to a global tag list automatically
+- As a user, I want to view and manage my global tag list so that I can add or remove tags directly
+- As a user, I want to auto-tag a note using AI so that relevant tags are suggested from my global list
+
 ## Visualisations
 
 - As a user, I want to search my notes using keywords so that I can find relevant notes quickly

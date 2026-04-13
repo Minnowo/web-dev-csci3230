@@ -108,18 +108,173 @@ export class DB {
 	public GetNotesList(userId: number): Result<NoteListItem[]> {
 		try {
 			const stmt = this.db.prepare(
-				`SELECT 
-					ID AS id, 
-                    PARENT_ID AS folder_id,
-					TITLE AS title, 
-					UPDATED AS updated_at
-					FROM DB_NOTES 
-					WHERE USER_ID = ? ORDER BY UPDATED DESC`,
+				`SELECT
+					n.ID        AS id,
+					n.PARENT_ID AS folder_id,
+					n.TITLE     AS title,
+					n.UPDATED   AS updated_at,
+					GROUP_CONCAT(t.NAME) AS tags
+				FROM DB_NOTES n
+				LEFT JOIN DB_NOTE_TAGS nt ON nt.NOTE_ID = n.ID
+				LEFT JOIN DB_TAGS t       ON t.ID = nt.TAG_ID
+				WHERE n.USER_ID = ?
+				GROUP BY n.ID
+				ORDER BY n.UPDATED DESC`,
 			);
 
-			const rows = stmt.all(userId) as NoteListItem[];
+			const rows = stmt.all(userId) as Array<
+				Omit<NoteListItem, "tags"> & { tags: string | null }
+			>;
+
+			return {
+				data: rows.map((r) => ({
+					...r,
+					tags: r.tags ? r.tags.split(",") : [],
+				})),
+				error: null,
+			};
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public GetTags(
+		userId: number,
+	): Result<Array<{ id: number; name: string; note_count: number }>> {
+		try {
+			const stmt = this.db.prepare(
+				`SELECT t.ID AS id, t.NAME AS name, COUNT(nt.NOTE_ID) AS note_count
+				FROM DB_TAGS t
+				LEFT JOIN DB_NOTE_TAGS nt ON nt.TAG_ID = t.ID
+				WHERE t.USER_ID = ?
+				GROUP BY t.ID
+				ORDER BY t.NAME ASC`,
+			);
+
+			const rows = stmt.all(userId) as Array<{
+				id: number;
+				name: string;
+				note_count: number;
+			}>;
 
 			return { data: rows, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public UpsertTag(userId: number, name: string): Result<number> {
+		try {
+			const normalized = name.toLowerCase().trim();
+
+			this.db
+				.prepare(
+					`INSERT INTO DB_TAGS (USER_ID, NAME) VALUES (?, ?)
+					ON CONFLICT(USER_ID, NAME) DO NOTHING`,
+				)
+				.run(userId, normalized);
+
+			const row = this.db
+				.prepare(`SELECT ID FROM DB_TAGS WHERE USER_ID = ? AND NAME = ?`)
+				.get(userId, normalized) as { ID: number };
+
+			return { data: row.ID, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public DeleteTag(userId: number, tagId: number): Result<number> {
+		try {
+			const info = this.db
+				.prepare(`DELETE FROM DB_TAGS WHERE ID = ? AND USER_ID = ?`)
+				.run(tagId, userId);
+
+			return { data: info.changes, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public GetNoteTags(
+		noteId: number,
+		userId: number,
+	): Result<Array<{ id: number; name: string }>> {
+		try {
+			const stmt = this.db.prepare(
+				`SELECT t.ID AS id, t.NAME AS name
+				FROM DB_TAGS t
+				JOIN DB_NOTE_TAGS nt ON nt.TAG_ID = t.ID
+				JOIN DB_NOTES n      ON n.ID = nt.NOTE_ID
+				WHERE nt.NOTE_ID = ? AND n.USER_ID = ?
+				ORDER BY t.NAME ASC`,
+			);
+
+			const rows = stmt.all(noteId, userId) as Array<{
+				id: number;
+				name: string;
+			}>;
+
+			return { data: rows, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public SyncNoteTags(
+		noteId: number,
+		userId: number,
+		tagNames: string[],
+	): Result<Array<{ id: number; name: string }>> {
+		try {
+			const normalized = tagNames
+				.map((n) => n.toLowerCase().trim())
+				.filter((n) => n.length > 0);
+
+			const upsertTag = this.db.prepare(
+				`INSERT INTO DB_TAGS (USER_ID, NAME) VALUES (?, ?)
+				ON CONFLICT(USER_ID, NAME) DO NOTHING`,
+			);
+			const getTagId = this.db.prepare(
+				`SELECT ID FROM DB_TAGS WHERE USER_ID = ? AND NAME = ?`,
+			);
+			const deleteOldTags = this.db.prepare(
+				`DELETE FROM DB_NOTE_TAGS WHERE NOTE_ID = ?`,
+			);
+			const insertNoteTag = this.db.prepare(
+				`INSERT INTO DB_NOTE_TAGS (NOTE_ID, TAG_ID) VALUES (?, ?)`,
+			);
+
+			const ownerCheck = this.db.prepare(
+				`SELECT ID FROM DB_NOTES WHERE ID = ? AND USER_ID = ?`,
+			);
+
+			const result = this.db.transaction(() => {
+				const owned = ownerCheck.get(noteId, userId);
+				if (!owned) return null;
+
+				const tags: Array<{ id: number; name: string }> = [];
+
+				for (const name of normalized) {
+					upsertTag.run(userId, name);
+					const row = getTagId.get(userId, name) as { ID: number };
+					tags.push({ id: row.ID, name });
+				}
+
+				deleteOldTags.run(noteId);
+
+				for (const tag of tags) {
+					insertNoteTag.run(noteId, tag.id);
+				}
+
+				return tags;
+			})();
+
+			if (result === null) {
+				return { data: null, error: new DBError("Note not found") };
+			}
+
+			return { data: result, error: null };
 		} catch (err) {
 			return { data: null, error: DBError.from(err) };
 		}

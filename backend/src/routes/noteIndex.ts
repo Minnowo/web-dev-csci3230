@@ -15,11 +15,9 @@ router.post("/notes/:id/index", (req: Request, res: Response) => {
 	const { id } = req.params;
 	const {
 		title = "",
-		tags = "",
 		content = "",
 	} = req.body as {
 		title?: string;
-		tags?: string;
 		content?: string;
 	};
 
@@ -29,8 +27,8 @@ router.post("/notes/:id/index", (req: Request, res: Response) => {
 		const tx = db.transaction(() => {
 			db.prepare("DELETE FROM notes_fts WHERE note_id = ?").run(id);
 			db.prepare(
-				"INSERT INTO notes_fts (note_id, title, tags, content) VALUES (?, ?, ?, ?)",
-			).run(id, title, tags, content);
+				"INSERT INTO notes_fts (note_id, title, content) VALUES (?, ?, ?)",
+			).run(id, title, content);
 		});
 		tx();
 
