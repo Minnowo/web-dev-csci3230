@@ -9,8 +9,10 @@ export type Note = {
 
 export type NoteListItem = {
 	id: number;
+	folder_id: number | null;
 	title: string;
 	updated_at: string;
+	tags: string[];
 };
 
 export type NoteLink = {

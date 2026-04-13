@@ -24,7 +24,8 @@ import AppButton from './AppButton.vue'
 import { useEditorStore } from '../composables/useEditorStore'
 
 const router = useRouter()
-const { createFile, setActiveFile, recentFiles } = useEditorStore()
+const { createFile, setActiveFile, recentFiles, loading, init } = useEditorStore()
+onMounted(init)
 
 async function handleCreateNote() {
   await createFile()
@@ -63,8 +64,8 @@ function renderRecentlyVisited() {
     .append($('<span>').text('Recently visited'))
   $inner.append($heading)
 
-  if (recentFiles.value.length === 0) {
-    // Empty state
+  if (recentFiles.value.length === 0 && !loading.value) {
+    // Empty state — only show after notes have finished loading
     $inner.append(
       $('<p>')
         .addClass('text-sm text-[var(--text-muted)]')

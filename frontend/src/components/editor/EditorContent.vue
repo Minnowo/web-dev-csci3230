@@ -63,7 +63,7 @@
       @blur="handleEditorBlur"
     />
   </div>
-  <div v-else class="empty-state">
+  <div v-else-if="!loading" class="empty-state">
     <FileText class="w-12 h-12 text-[var(--text-muted)]" />
     <p>No notes yet</p>
     <p class="sub">Your vault is empty. Create your first note and start building your knowledge base.</p>
@@ -87,7 +87,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update', 'rename', 'createFirst'])
 
-const { updateItemIcon, state, setActiveFile, createFile, syncNoteLinks } = useEditorStore()
+const { updateItemIcon, state, setActiveFile, createFile, syncNoteLinks, loading } = useEditorStore()
 
 const pickerOpen = ref(false)
 const pickerPos = ref({ top: 0, left: 0 })

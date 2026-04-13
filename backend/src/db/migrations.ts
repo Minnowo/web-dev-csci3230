@@ -103,7 +103,7 @@ const migrate_2: MigrationFunc = (
 // ── Migration 3 (David) ───────────────────────────────────────────────────────
 // Creates the notes_fts FTS5 virtual table for hybrid keyword search.
 // Porter stemmer: "running" and "run" match the same note.
-// Field weights via bm25(): title=10×, tags=5×, content=1×.
+// Field weights via bm25(): title=10×, content=1×.
 const migrate_3: MigrationFunc = (
 	database: DB,
 	fromVersion: number,
@@ -117,7 +117,6 @@ const migrate_3: MigrationFunc = (
 				CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
 					note_id  UNINDEXED,
 					title,
-					tags,
 					content,
 					tokenize = 'porter ascii'
 				)
@@ -221,6 +220,49 @@ const migrate_5: MigrationFunc = (
 	return null;
 };
 
+const migrate_6: MigrationFunc = (
+	database: DB,
+	fromVersion: number,
+	toVersion: number,
+) => {
+	const db = database.DB();
+
+	try {
+		const tx = db.transaction(() => {
+			db.exec(`
+				CREATE TABLE IF NOT EXISTS DB_TAGS (
+					ID       INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+					USER_ID  INTEGER NOT NULL,
+					NAME     TEXT NOT NULL,
+					CREATED  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					UNIQUE(USER_ID, NAME),
+					FOREIGN KEY (USER_ID) REFERENCES DB_USER(ID) ON DELETE CASCADE
+				)
+			`);
+
+			db.exec(`
+				CREATE TABLE IF NOT EXISTS DB_NOTE_TAGS (
+					NOTE_ID  INTEGER NOT NULL,
+					TAG_ID   INTEGER NOT NULL,
+					PRIMARY KEY (NOTE_ID, TAG_ID),
+					FOREIGN KEY (NOTE_ID) REFERENCES DB_NOTES(ID) ON DELETE CASCADE,
+					FOREIGN KEY (TAG_ID)  REFERENCES DB_TAGS(ID)  ON DELETE CASCADE
+				)
+			`);
+
+			db.prepare(
+				"UPDATE DB_VERSION SET VERSION = ? WHERE VERSION = ?",
+			).run(toVersion, fromVersion);
+		});
+
+		tx();
+	} catch (err) {
+		return DBError.from(err);
+	}
+
+	return null;
+};
+
 export const Migrations: Array<{
 	fromVersion: number;
 	toVersion: number;
@@ -232,4 +274,5 @@ export const Migrations: Array<{
 	{ fromVersion: 3, toVersion: 4, func: migrate_3 },
 	{ fromVersion: 4, toVersion: 5, func: migrate_4 },
 	{ fromVersion: 5, toVersion: 6, func: migrate_5 },
+	{ fromVersion: 6, toVersion: 7, func: migrate_6 },
 ];
