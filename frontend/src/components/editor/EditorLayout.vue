@@ -11,7 +11,7 @@
       :collapsed="sidebarCollapsed"
       :get-children="getChildren"
       :search-items="searchItems"
-      @create-file="createFile()"
+      @create-file="handleCreateFile"
       @create-folder="createFolder()"
       @select-file="setActiveFile"
       @delete-item="deleteItem"
@@ -85,7 +85,7 @@
             :file="activeFile"
             @update="handleContentUpdate"
             @rename="renameItem"
-            @create-first="createFile()"
+            @create-first="handleCreateFile"
           />
 
           <EditorPreview
@@ -153,6 +153,14 @@ const toolbarVisible = ref(true)
 const menuOpen = ref(false)
 const menuRef = ref(null)
 const editorContentRef = ref(null)
+
+async function handleCreateFile() {
+  try {
+    await createFile()
+  } catch (err) {
+    console.error('Failed to create note:', err)
+  }
+}
 
 function handleContentUpdate(content) {
   if (activeFile.value) {
