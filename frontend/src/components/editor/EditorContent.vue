@@ -83,6 +83,7 @@ import IconPicker from './IconPicker.vue'
 
 const props = defineProps({
   file: { type: Object, default: null },
+  livePreview: { type: Boolean, default: true },
 })
 
 const emit = defineEmits(['update', 'rename', 'createFirst'])
@@ -121,7 +122,7 @@ function formatDate(dateStr) {
 }
 
 // When active file changes, load its content into the editor
-watch(() => props.file?.id, () => {
+watch([() => props.file?.id, () => props.livePreview], () => {
   if (props.file && editorRef.value) {
     isUpdatingFromProp = true
     editorRef.value.innerHTML = contentToHtml(props.file.content)
@@ -175,6 +176,15 @@ function contentToHtml(content) {
   while (i < lines.length) {
     const line = lines[i]
 
+    if (!props.livePreview) {
+        i++;
+        if (line === "") {
+            result.push(`<p class="font-mono"><br></p>`);
+        } else {
+            result.push(`<p class="font-mono">${line}</p>`);
+        }
+        continue;
+    }
     // GFM table: collect consecutive pipe-delimited rows
     if (/^\|.+\|$/.test(line.trim())) {
       const tableLines = []
@@ -446,8 +456,10 @@ function renderWikiLinksInDOM() {
 
 function handleInput() {
   if (isUpdatingFromProp) return
-  applyLiveMarkdown()
-  checkAndRenderInlinePattern()
+  if (props.livePreview) {
+      applyLiveMarkdown()
+      checkAndRenderInlinePattern()
+  }
   const html = editorRef.value?.innerHTML || ''
   const markdown = htmlToContent(html)
   emit('update', markdown)
@@ -676,7 +688,7 @@ const INLINE_PATTERNS = [
   // Strikethrough: ~~text~~
   { regex: /~~([^~\n]+)~~$/, open: '~~', close: '~~', tag: 's', innerTag: null },
   // Inline code: `text`
-  { regex: /`([^`\n]+)`$/, open: '`', close: '`', tag: 'code', innerTag: null },
+  { regex: /`([^\`\n]+)`$/, open: '`', close: '`', tag: 'code', innerTag: null },
 ]
 
 function checkAndRenderInlinePattern() {
