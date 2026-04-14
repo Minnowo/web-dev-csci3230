@@ -287,6 +287,47 @@ const migrate_7: MigrationFunc = (
 	return null;
 };
 
+const migrate_8: MigrationFunc = (
+	database: DB,
+	fromVersion: number,
+	toVersion: number,
+) => {
+	const db = database.DB();
+
+	try {
+		const tx = db.transaction(() => {
+			db.exec(`
+				CREATE TABLE IF NOT EXISTS DB_FILES (
+					ID             INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+					USER_ID        INTEGER NOT NULL,
+					NOTE_ID        INTEGER,
+					FOLDER_ID      INTEGER,
+					ORIGINAL_NAME  TEXT NOT NULL,
+					STORED_NAME    TEXT NOT NULL,
+					MIME_TYPE      TEXT NOT NULL,
+					EXTENSION      TEXT,
+					SIZE_BYTES     INTEGER NOT NULL,
+					STORAGE_PATH   TEXT NOT NULL,
+					CREATED        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					FOREIGN KEY (USER_ID)   REFERENCES DB_USER(ID) ON DELETE CASCADE,
+					FOREIGN KEY (NOTE_ID)   REFERENCES DB_NOTES(ID) ON DELETE CASCADE,
+					FOREIGN KEY (FOLDER_ID) REFERENCES DB_FOLDER(ID) ON DELETE CASCADE
+				)
+			`);
+			
+			db.prepare(
+				"UPDATE DB_VERSION SET VERSION = ? WHERE VERSION = ?",
+			).run(toVersion, fromVersion);
+		});
+
+		tx();
+	} catch (err) {
+		return DBError.from(err);
+	}
+
+	return null;
+};
+
 export const Migrations: Array<{
 	fromVersion: number;
 	toVersion: number;
@@ -300,4 +341,5 @@ export const Migrations: Array<{
 	{ fromVersion: 5, toVersion: 6, func: migrate_5 },
 	{ fromVersion: 6, toVersion: 7, func: migrate_6 },
 	{ fromVersion: 7, toVersion: 8, func: migrate_7 },
+	{ fromVersion: 8, toVersion: 9, func: migrate_8 },
 ];
