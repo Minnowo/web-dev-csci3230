@@ -19,6 +19,7 @@ import noteIndexRouter from "./routes/noteIndex.js";
 import { ApiPostLinkNote } from "./api/api_link_note_post.js";
 import { ApiPostDeleteNoteLinks } from "./api/api_delete_link_note_post.js";
 import { ApiGetNoteLinks } from "./api/api_note_links_get.js";
+import { ApiGetAllNoteLinks } from "./api/api_note_links_all_get.js";
 import { ApiPostCreateFolder } from "./api/api_create_folder_post.js";
 import { ApiPostDeleteFolder } from "./api/api_delete_folder_post.js";
 import { ApiGetTags } from "./api/api_tags_get.js";
@@ -55,6 +56,7 @@ ExpressApp.get("/api/whoami", MiddleWareAuthenticateToken, ApiGetWhoAmI);
 
 // API endpoints for notes
 ExpressApp.get("/api/notes", MiddleWareAuthenticateToken, ApiGetNotesList);
+ExpressApp.get("/api/notes/links", MiddleWareAuthenticateToken, ApiGetAllNoteLinks);
 ExpressApp.post("/api/notes", MiddleWareAuthenticateToken, ApiPostCreateNote);
 ExpressApp.post(
 	"/api/notes/link",

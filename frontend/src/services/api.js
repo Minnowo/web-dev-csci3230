@@ -1,33 +1,22 @@
-import { mockNotes } from './mockData.js'
 import { useAuth } from '../composables/useAuth.js'
 
-// Controls whether visualization functions (getNotes, getNote) use mock data.
-// Keep true until DB_NOTES has tags and sentiment_score columns — the real
-// backend notes lack these fields and would break the visualization components.
-const USE_MOCK = true
 const API_BASE = 'http://localhost:3000/api'
 
-// ─── Notes ────────────────────────────────────────────────────────────────────
+// ─── Notes (Visualizations) ───────────────────────────────────────────────────
 
 /**
- * Fetch all notes.
- * Returns: [{ id, title, content, tags, sentiment_score, created_at, updated_at }]
+ * Fetch all notes for visualizations (authenticated).
+ * Returns: [{ id, folder_id, title, created_at, updated_at, tags: string[] }]
  */
 export async function getNotes() {
-  if (USE_MOCK) return mockNotes
-  const res = await fetch(`${API_BASE}/notes`)
-  if (!res.ok) throw new Error('Failed to fetch notes')
-  return res.json()
+  return fetchNotes()
 }
 
 /**
- * Fetch a single note by ID.
+ * Fetch a single note by ID for visualizations (authenticated).
  */
 export async function getNote(id) {
-  if (USE_MOCK) return mockNotes.find(n => n.id === id) ?? null
-  const res = await fetch(`${API_BASE}/notes/${id}`)
-  if (!res.ok) throw new Error(`Failed to fetch note ${id}`)
-  return res.json()
+  return fetchNote(id)
 }
 
 // ─── Note CRUD (David) ───────────────────────────────────────────────────────
@@ -125,6 +114,14 @@ export async function fetchNoteTags(noteId) {
   if (!res.ok) throw new Error(`Failed to fetch tags for note ${noteId}`)
   const { tags } = await res.json()
   return tags ?? []
+}
+
+/** Fetch all wiki-links for the logged-in user. Returns: [{ from_note_id, to_note_id }] */
+export async function fetchAllLinks() {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/links`, { headers: authHeaders() })
+  if (!res.ok) throw new Error('Failed to fetch all note links')
+  return res.json()
 }
 
 /** Replace all tags on a note. Returns: { tags: [{ id, name }] } */
@@ -287,51 +284,69 @@ export async function deleteNoteIndex(id) {
 // ─── Graph Helpers ────────────────────────────────────────────────────────────
 
 /**
- * Compute links between notes that share at least one tag.
- * Returns: [{ source: id, target: id, sharedTags: [...] }]
+ * Build graph data from notes and wiki-links.
+ *
+ * Returns four separate collections so GraphView can combine them based on toggles:
+ *   noteNodes  — one node per note
+ *   tagNodes   — one node per unique tag (id = "tag-{name}")
+ *   wikiEdges  — explicit note↔note links from [[wiki-links]] (DB_NOTES_LINKS)
+ *   tagEdges   — note↔tag edges derived from each note's tags array
+ *
+ * connectionCount on noteNodes counts all edges (wiki + tag) so node sizing
+ * reflects total connectivity regardless of which toggles are active.
  */
-export function computeLinks(notes) {
-  const links = []
-  for (let i = 0; i < notes.length; i++) {
-    for (let j = i + 1; j < notes.length; j++) {
-      const shared = notes[i].tags.filter(t => notes[j].tags.includes(t))
-      if (shared.length) {
-        links.push({
-          source: notes[i].id,
-          target: notes[j].id,
-          sharedTags: shared
-        })
+export function buildGraphData(notes, wikiLinks = []) {
+  // Build tag nodes from all unique tags across notes
+  const tagMap = new Map()
+  notes.forEach(n => {
+    ;(n.tags ?? []).forEach(tag => {
+      if (!tagMap.has(tag)) {
+        tagMap.set(tag, { id: `tag-${tag}`, name: tag, noteCount: 0, type: 'tag' })
       }
-    }
-  }
-  return links
-}
+      tagMap.get(tag).noteCount++
+    })
+  })
+  const tagNodes = [...tagMap.values()]
 
-/**
- * Build graph data (nodes + links) from a notes array.
- * Nodes include a connectionCount for sizing.
- */
-export function buildGraphData(notes) {
-  const links = computeLinks(notes)
-
-  // Count connections per note
-  const connectionCount = {}
-  notes.forEach(n => connectionCount[n.id] = 0)
-  links.forEach(l => {
-    connectionCount[l.source]++
-    connectionCount[l.target]++
+  // Build tag edges (note → tag node)
+  const tagEdges = []
+  notes.forEach(n => {
+    ;(n.tags ?? []).forEach(tag => {
+      if (tagMap.has(tag)) {
+        tagEdges.push({ source: n.id, target: `tag-${tag}`, type: 'tag' })
+      }
+    })
   })
 
-  const nodes = notes.map(n => ({
-    id: n.id,
-    title: n.title,
-    tags: n.tags,
-    updated_at: n.updated_at,
-    connectionCount: connectionCount[n.id],
-    dominantTag: n.tags[0] ?? 'untagged'
+  // Normalise wiki-links from backend shape { from_note_id, to_note_id }
+  const wikiEdges = wikiLinks.map(l => ({
+    source: l.from_note_id,
+    target: l.to_note_id,
+    type: 'wiki'
   }))
 
-  return { nodes, links }
+  // Connection count per note — sum of wiki edges + tag edges
+  const connectionCount = {}
+  notes.forEach(n => { connectionCount[n.id] = 0 })
+  wikiEdges.forEach(l => {
+    if (connectionCount[l.source] !== undefined) connectionCount[l.source]++
+    if (connectionCount[l.target] !== undefined) connectionCount[l.target]++
+  })
+  tagEdges.forEach(l => {
+    if (connectionCount[l.source] !== undefined) connectionCount[l.source]++
+  })
+
+  const noteNodes = notes.map(n => ({
+    id: n.id,
+    title: n.title,
+    tags: n.tags ?? [],
+    created_at: n.created_at,
+    updated_at: n.updated_at,
+    connectionCount: connectionCount[n.id] ?? 0,
+    type: 'note'
+  }))
+
+  return { noteNodes, tagNodes, wikiEdges, tagEdges }
 }
 
 // ─── Sentiment Calendar Helpers ───────────────────────────────────────────────

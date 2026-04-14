@@ -112,6 +112,7 @@ export class DB {
 					n.ID        AS id,
 					n.PARENT_ID AS folder_id,
 					n.TITLE     AS title,
+					n.CREATED   AS created_at,
 					n.UPDATED   AS updated_at,
 					GROUP_CONCAT(t.NAME) AS tags
 				FROM DB_NOTES n
@@ -358,6 +359,21 @@ export class DB {
 			return { data: null, error: DBError.from(err) };
 		}
 	}
+	public GetAllNoteLinks(userId: number): Result<Array<NoteLink>> {
+		try {
+			const stmt = this.db.prepare(
+				`SELECT nl.FROM_NOTE_ID as from_note_id, nl.TO_NOTE_ID as to_note_id
+				FROM DB_NOTES_LINKS nl
+				JOIN DB_NOTES n ON n.ID = nl.FROM_NOTE_ID
+				WHERE n.USER_ID = ?`,
+			);
+			const rows = stmt.all(userId) as Array<NoteLink>;
+			return { data: rows, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
 	public GetNoteLinks(noteId: number): Result<Array<NoteLink>> {
 		try {
 			const stmt = this.db.prepare(

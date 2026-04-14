@@ -137,7 +137,7 @@ watch(searchQuery, (query) => {
 })
 
 function selectHybridResult(result) {
-  emit('selectFile', result.id)
+  emit('selectFile', Number(result.id))
   searchQuery.value = ''
   hybridResults.value = []
   showDropdown.value = false

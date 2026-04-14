@@ -11,6 +11,7 @@ export type NoteListItem = {
 	id: number;
 	folder_id: number | null;
 	title: string;
+	created_at: string;
 	updated_at: string;
 	tags: string[];
 };
