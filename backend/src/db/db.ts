@@ -536,6 +536,27 @@ export class DB {
 		}
 	}
 
+	public GetAllNotesWithContent(userId: number): Result<Note[]> {
+		try {
+			const stmt = this.db.prepare(
+				`SELECT
+					ID AS id,
+					PARENT_ID AS folder_id,
+					TITLE AS title,
+					CONTENT AS content,
+					CREATED AS created_at,
+					UPDATED AS updated_at
+				FROM DB_NOTES
+				WHERE USER_ID = ?`,
+			);
+
+			const rows = stmt.all(userId) as Note[];
+			return { data: rows, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
 	public Migrate(): Error | null {
 		let version = this.Version();
 

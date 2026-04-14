@@ -1,14 +1,7 @@
 import { type Response } from "express";
 import { DB } from "../db/db.js";
 import type { AuthenticatedRequest } from "../types/user.js";
-
-function cleanTitle(title: string): string {
-	return title
-		.trim()
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/^-|-$/g, "");
-}
+import { safeName } from "./api_folder_export_get.js";
 
 export const ApiGetNoteExportMd = (
 	req: AuthenticatedRequest,
@@ -41,7 +34,7 @@ export const ApiGetNoteExportMd = (
 		return;
 	}
 
-	const filename = cleanTitle(result.data.title) || "untitled-note";
+	const filename = safeName(result.data.title);
 
 	res.setHeader("Content-Type", "text/markdown; charset=utf-8");
 	res.setHeader(
