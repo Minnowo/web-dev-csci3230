@@ -84,6 +84,7 @@
             v-if="viewMode !== 'preview'"
             ref="editorContentRef"
             :file="activeFile"
+            :livePreview="viewMode !== 'split'"
             @update="handleContentUpdate"
             @rename="renameItem"
             @create-first="handleCreateFile"

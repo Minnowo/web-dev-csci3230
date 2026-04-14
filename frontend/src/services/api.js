@@ -165,6 +165,44 @@ export async function apiDeleteFolder(folder_id) {
   })
   if (!res.ok) throw new Error(`Failed to delete folder ${folder_id}`)
 }
+/*
+returns an array of this type:
+export type Folder = {
+    id: number;
+    parent_folder_id: number | null;
+    name: string;
+};
+*/
+export async function apiGetFolders() {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/folders`, {
+    method: 'GET',
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error(`Failed to delete folder ${folder_id}`)
+  return res.json();
+}
+/*
+returns an array of this type::
+export type FolderChildren = {
+    files: Note[];
+    folders: Folder[];
+};
+*/
+export async function apiGetFolderChildren(folder_id) {
+    if(folder_id == null) {
+        folder_id = 0;
+    }
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/folder/${folder_id}`, {
+    method: 'GET',
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error(`Failed to delete folder ${folder_id}`)
+  return res.json();
+}
+window.apiGetFolderChildren = apiGetFolderChildren;
+window.apiGetFolders = apiGetFolders;
 
 export async function apiMoveNote(note_id, parent_folder_id) {
   const { authHeaders } = useAuth()
