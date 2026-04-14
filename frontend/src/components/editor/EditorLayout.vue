@@ -16,6 +16,7 @@
       @select-file="setActiveFile"
       @delete-item="deleteItem"
       @rename-item="renameItem"
+      @move-item="moveItem"
     />
 
     <!-- Main editor area -->
@@ -83,6 +84,7 @@
             v-if="viewMode !== 'preview'"
             ref="editorContentRef"
             :file="activeFile"
+            :livePreview="viewMode !== 'split'"
             @update="handleContentUpdate"
             @rename="renameItem"
             @create-first="handleCreateFile"
@@ -136,7 +138,7 @@ import EditorPreview from './EditorPreview.vue'
 const {
   activeFile, rootItems, fileCount,
   getChildren, setActiveFile, createFile, createFolder,
-  updateFileContent, renameItem, deleteItem, searchItems,
+  updateFileContent, renameItem, deleteItem, moveItem, searchItems,
 } = useEditorStore()
 
 const contentStats = computed(() => {

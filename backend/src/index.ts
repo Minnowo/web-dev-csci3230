@@ -21,6 +21,8 @@ import { ApiPostDeleteNoteLinks } from "./api/api_delete_link_note_post.js";
 import { ApiGetNoteLinks } from "./api/api_note_links_get.js";
 import { ApiPostCreateFolder } from "./api/api_create_folder_post.js";
 import { ApiPostDeleteFolder } from "./api/api_delete_folder_post.js";
+import { ApiPostMoveNote } from "./api/api_move_note_post.js";
+import { ApiPostMoveFolder } from "./api/api_move_folder_post.js";
 import { ApiGetTags } from "./api/api_tags_get.js";
 import { ApiPostTag } from "./api/api_tag_post.js";
 import { ApiPostDeleteTag } from "./api/api_tag_delete.js";
@@ -29,6 +31,8 @@ import { ApiPostNoteTags } from "./api/api_note_tags_post.js";
 import { ApiGetFilesList } from "./api/api_files_list_get.js";
 import { ApiPostFileUpload } from "./api/api_post_file_upload.js";
 import { runUploadThen } from "./middleware/multerUpload.js";
+import { ApiGetFolderChildren } from "./api/api_folder_children_get.js";
+import { ApiGetFolders } from "./api/api_folders_get.js";
 
 export const ExpressApp = express();
 const PORT = 3000;
@@ -69,6 +73,7 @@ ExpressApp.post(
 	MiddleWareAuthenticateToken,
 	ApiPostDeleteNoteLinks,
 );
+
 ExpressApp.get("/api/notes/:id", MiddleWareAuthenticateToken, ApiGetNote);
 ExpressApp.get(
 	"/api/notes/:id/links",
@@ -95,6 +100,13 @@ ExpressApp.post(
 	MiddleWareAuthenticateToken,
 	runUploadThen(ApiPostFileUpload),
 );
+
+ExpressApp.get("/api/folders", MiddleWareAuthenticateToken, ApiGetFolders);
+ExpressApp.get(
+	"/api/folder/:id",
+	MiddleWareAuthenticateToken,
+	ApiGetFolderChildren,
+);
 ExpressApp.post(
 	"/api/folder",
 	MiddleWareAuthenticateToken,
@@ -104,6 +116,16 @@ ExpressApp.post(
 	"/api/folder/delete",
 	MiddleWareAuthenticateToken,
 	ApiPostDeleteFolder,
+);
+ExpressApp.post(
+	"/api/notes/:id/move",
+	MiddleWareAuthenticateToken,
+	ApiPostMoveNote,
+);
+ExpressApp.post(
+	"/api/folder/move",
+	MiddleWareAuthenticateToken,
+	ApiPostMoveFolder,
 );
 
 // ── Tag endpoints (David) ─────────────────────────────────────────────────────
