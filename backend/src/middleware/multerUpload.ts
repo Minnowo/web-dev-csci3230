@@ -39,7 +39,7 @@ export const uploadSingleFileMiddleware = multer({
 		if (!ALLOWED_EXTENSIONS.has(ext)) {
 			cb(
 				new Error(
-					"Only .md, .png, .jpg, .jpeg, and .gif files are allowed",
+					"Only .md, .png, .jpg, .jpeg, .gif, and .pdf files are allowed",
 				),
 			);
 			return;
@@ -48,15 +48,16 @@ export const uploadSingleFileMiddleware = multer({
 	},
 }).single("file");
 
-const IMAGE_MAGIC: Record<string, number[]> = {
+const MAGIC_BYTES: Record<string, number[]> = {
 	".png": [0x89, 0x50, 0x4e, 0x47],
 	".jpg": [0xff, 0xd8, 0xff],
 	".jpeg": [0xff, 0xd8, 0xff],
 	".gif": [0x47, 0x49, 0x46, 0x38],
+	".pdf": [0x25, 0x50, 0x44, 0x46], 
 };
 
 function fileContentMatchesExtension(filePath: string, ext: string): boolean {
-	const expected = IMAGE_MAGIC[ext];
+	const expected = MAGIC_BYTES[ext];
 	if (!expected) return true; // .md and other text formats — nothing to check
 
 	const fd = fs.openSync(filePath, "r");

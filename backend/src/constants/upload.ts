@@ -11,6 +11,7 @@ export const ALLOWED_EXTENSIONS = new Set([
 	".jpg",
 	".jpeg",
 	".gif",
+	".pdf",
 ]);
 
 /** Canonical MIME stored in DB (derived from extension after allowlist). */
@@ -20,6 +21,7 @@ export const MIME_FOR_EXTENSION: Record<string, string> = {
 	".jpg": "image/jpeg",
 	".jpeg": "image/jpeg",
 	".gif": "image/gif",
+	".pdf": "application/pdf",
 };
 
 export function canonicalMimeForExtension(extWithDotLower: string): string | null {
