@@ -463,8 +463,6 @@ export class DB {
 	private static fileRowToAsset(row: {
 		id: number;
 		user_id: number;
-		note_id: number | null;
-		folder_id: number | null;
 		original_name: string;
 		stored_name: string;
 		mime_type: string;
@@ -476,8 +474,6 @@ export class DB {
 		return {
 			id: row.id,
 			user_id: row.user_id,
-			note_id: row.note_id,
-			folder_id: row.folder_id,
 			original_name: row.original_name,
 			stored_name: row.stored_name,
 			mime_type: row.mime_type,
@@ -490,8 +486,6 @@ export class DB {
 
 	public CreateFileAsset(input: {
 		userId: number;
-		noteId: number | null;
-		folderId: number | null;
 		originalName: string;
 		storedName: string;
 		mimeType: string;
@@ -500,47 +494,16 @@ export class DB {
 		storagePath: string;
 	}): Result<number> {
 		try {
-			if (input.noteId !== null && input.folderId !== null) {
-				return {
-					data: null,
-					error: new DBError("Cannot attach file to both a note and a folder"),
-				};
-			}
-
-			if (input.noteId !== null) {
-				const n = this.db
-					.prepare(
-						"SELECT ID FROM DB_NOTES WHERE ID = ? AND USER_ID = ?",
-					)
-					.get(input.noteId, input.userId);
-				if (!n) {
-					return { data: null, error: new DBError("Note not found") };
-				}
-			}
-
-			if (input.folderId !== null) {
-				const f = this.db
-					.prepare(
-						"SELECT ID FROM DB_FOLDER WHERE ID = ? AND USER_ID = ?",
-					)
-					.get(input.folderId, input.userId);
-				if (!f) {
-					return { data: null, error: new DBError("Folder not found") };
-				}
-			}
-
 			const stmt = this.db.prepare(
 				`INSERT INTO DB_FILES (
-					USER_ID, NOTE_ID, FOLDER_ID,
+					USER_ID,
 					ORIGINAL_NAME, STORED_NAME, MIME_TYPE, EXTENSION,
 					SIZE_BYTES, STORAGE_PATH
-				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				) VALUES (?, ?, ?, ?, ?, ?, ?)`,
 			);
 
 			const info = stmt.run(
 				input.userId,
-				input.noteId,
-				input.folderId,
 				input.originalName,
 				input.storedName,
 				input.mimeType,
@@ -564,8 +527,6 @@ export class DB {
 				`SELECT
 					ID AS id,
 					USER_ID AS user_id,
-					NOTE_ID AS note_id,
-					FOLDER_ID AS folder_id,
 					ORIGINAL_NAME AS original_name,
 					STORED_NAME AS stored_name,
 					MIME_TYPE AS mime_type,
@@ -591,86 +552,12 @@ export class DB {
 		}
 	}
 
-	public ListFileAssetsForNote(
-		noteId: number,
-		userId: number,
-	): Result<FileAsset[]> {
-		try {
-			const stmt = this.db.prepare(
-				`SELECT
-					f.ID AS id,
-					f.USER_ID AS user_id,
-					f.NOTE_ID AS note_id,
-					f.FOLDER_ID AS folder_id,
-					f.ORIGINAL_NAME AS original_name,
-					f.STORED_NAME AS stored_name,
-					f.MIME_TYPE AS mime_type,
-					f.EXTENSION AS extension,
-					f.SIZE_BYTES AS size_bytes,
-					f.STORAGE_PATH AS storage_path,
-					f.CREATED AS created_at
-				FROM DB_FILES f
-				INNER JOIN DB_NOTES n ON n.ID = f.NOTE_ID
-				WHERE f.NOTE_ID = ? AND n.USER_ID = ?`,
-			);
-
-			const rows = stmt.all(noteId, userId) as Array<
-				Parameters<typeof DB.fileRowToAsset>[0]
-			>;
-
-			return {
-				data: rows.map((r) => DB.fileRowToAsset(r)),
-				error: null,
-			};
-		} catch (err) {
-			return { data: null, error: DBError.from(err) };
-		}
-	}
-
-	public ListFileAssetsForFolder(
-		folderId: number,
-		userId: number,
-	): Result<FileAsset[]> {
-		try {
-			const stmt = this.db.prepare(
-				`SELECT
-					f.ID AS id,
-					f.USER_ID AS user_id,
-					f.NOTE_ID AS note_id,
-					f.FOLDER_ID AS folder_id,
-					f.ORIGINAL_NAME AS original_name,
-					f.STORED_NAME AS stored_name,
-					f.MIME_TYPE AS mime_type,
-					f.EXTENSION AS extension,
-					f.SIZE_BYTES AS size_bytes,
-					f.STORAGE_PATH AS storage_path,
-					f.CREATED AS created_at
-				FROM DB_FILES f
-				INNER JOIN DB_FOLDER d ON d.ID = f.FOLDER_ID
-				WHERE f.FOLDER_ID = ? AND d.USER_ID = ?`,
-			);
-
-			const rows = stmt.all(folderId, userId) as Array<
-				Parameters<typeof DB.fileRowToAsset>[0]
-			>;
-
-			return {
-				data: rows.map((r) => DB.fileRowToAsset(r)),
-				error: null,
-			};
-		} catch (err) {
-			return { data: null, error: DBError.from(err) };
-		}
-	}
-
-	public ListFileAssetsLoose(userId: number): Result<FileAsset[]> {
+	public ListFileAssetsForUser(userId: number): Result<FileAsset[]> {
 		try {
 			const stmt = this.db.prepare(
 				`SELECT
 					ID AS id,
 					USER_ID AS user_id,
-					NOTE_ID AS note_id,
-					FOLDER_ID AS folder_id,
 					ORIGINAL_NAME AS original_name,
 					STORED_NAME AS stored_name,
 					MIME_TYPE AS mime_type,
@@ -679,7 +566,8 @@ export class DB {
 					STORAGE_PATH AS storage_path,
 					CREATED AS created_at
 				FROM DB_FILES
-				WHERE USER_ID = ? AND NOTE_ID IS NULL AND FOLDER_ID IS NULL`,
+				WHERE USER_ID = ?
+				ORDER BY CREATED DESC`,
 			);
 
 			const rows = stmt.all(userId) as Array<
