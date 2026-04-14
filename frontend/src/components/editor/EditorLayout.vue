@@ -45,6 +45,11 @@
             {{ viewMode === 'preview' ? 'Edit' : 'Preview' }}
           </button>
 
+          <!-- Tag panel toggle -->
+          <button class="topbar-btn" :class="{ active: tagPanelOpen }" title="Toggle tag panel" @click="tagPanelOpen = !tagPanelOpen">
+            <Tags class="w-4 h-4" />
+          </button>
+
           <!-- Options menu -->
           <div class="relative" ref="menuRef">
             <button class="topbar-btn" title="Options" @click="menuOpen = !menuOpen">
@@ -117,6 +122,10 @@
         </div>
       </div>
     </div>
+
+    <!-- Tag panel -->
+    <EditorTagPanel v-if="tagPanelOpen" />
+
   </div>
 </template>
 
@@ -124,7 +133,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import {
   PanelLeftClose, PanelLeftOpen, FileText, Pencil,
-  Columns2, Eye, EyeOff, MoreHorizontal
+  Columns2, Eye, EyeOff, MoreHorizontal, Tags
 } from 'lucide-vue-next'
 import { useEditorStore } from '../../composables/useEditorStore'
 import EditorIconStrip from './EditorIconStrip.vue'
@@ -132,6 +141,7 @@ import EditorSidebar from './EditorSidebar.vue'
 import EditorToolbar from './EditorToolbar.vue'
 import EditorContent from './EditorContent.vue'
 import EditorPreview from './EditorPreview.vue'
+import EditorTagPanel from './EditorTagPanel.vue'
 
 const {
   activeFile, rootItems, fileCount,
@@ -149,6 +159,7 @@ const contentStats = computed(() => {
 
 const viewMode = ref('edit')
 const sidebarCollapsed = ref(false)
+const tagPanelOpen = ref(false)
 const toolbarVisible = ref(true)
 const menuOpen = ref(false)
 const menuRef = ref(null)
@@ -244,6 +255,9 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 .topbar-btn:hover {
   background: var(--surface-hover);
   color: var(--text);
+}
+.topbar-btn.active {
+  color: var(--tag-color);
 }
 .breadcrumb {
   display: flex;

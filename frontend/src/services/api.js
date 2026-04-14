@@ -85,6 +85,60 @@ export async function deleteNote(id) {
   return res.json()
 }
 
+// ─── Tags (David) ────────────────────────────────────────────────────────────
+
+/** Fetch all tags for the logged-in user. Returns: [{ id, name, note_count }] */
+export async function fetchTags() {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/tags`, { headers: authHeaders() })
+  if (!res.ok) throw new Error('Failed to fetch tags')
+  const { tags } = await res.json()
+  return tags ?? []
+}
+
+/** Create a new global tag. Returns: { id, name } */
+export async function createTag(name) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/tags`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ name }),
+  })
+  if (!res.ok) throw new Error('Failed to create tag')
+  return res.json()
+}
+
+/** Delete a global tag by ID. */
+export async function deleteTag(tagId) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/tags/${tagId}/delete`, {
+    method: 'POST',
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error(`Failed to delete tag ${tagId}`)
+}
+
+/** Fetch tags for a specific note. Returns: [{ id, name }] */
+export async function fetchNoteTags(noteId) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/${noteId}/tags`, { headers: authHeaders() })
+  if (!res.ok) throw new Error(`Failed to fetch tags for note ${noteId}`)
+  const { tags } = await res.json()
+  return tags ?? []
+}
+
+/** Replace all tags on a note. Returns: { tags: [{ id, name }] } */
+export async function syncNoteTags(noteId, tags) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/${noteId}/tags`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ tags }),
+  })
+  if (!res.ok) throw new Error(`Failed to sync tags for note ${noteId}`)
+  return res.json()
+}
+
 // WHY IS THIS IN JS ?????????????????
 // interface LinkNoteRequestBody {
 //     links: Array<{
@@ -172,18 +226,11 @@ export async function apiDeleteFolder(folder_id) {
  * Analyze a note with Gemini — returns tags, sentiment_score.
  * Called after a note is saved.
  */
-export async function analyzeNote(id, content) {
-  if (USE_MOCK) {
-    await new Promise(r => setTimeout(r, 500))
-    return {
-      tags: ['work', 'planning'],
-      sentiment_score: 0.6,
-    }
-  }
+export async function analyzeNote(id, content, existingTags = []) {
   const res = await fetch(`${API_BASE}/notes/${id}/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content })
+    body: JSON.stringify({ content, tags: existingTags })
   })
   if (!res.ok) throw new Error('Failed to analyze note')
   return res.json()

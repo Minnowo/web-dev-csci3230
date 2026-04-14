@@ -31,6 +31,25 @@
       />
     </Teleport>
 
+    <!-- Tag autocomplete -->
+    <Teleport to="body">
+      <div
+        v-if="tagOpen && tagResults.length"
+        class="tag-autocomplete"
+        :style="{ top: tagPos.top + 'px', left: tagPos.left + 'px' }"
+      >
+        <button
+          v-for="(tag, i) in tagResults"
+          :key="tag"
+          class="tag-ac-item"
+          :class="{ selected: i === tagSelectedIdx }"
+          @mousedown.prevent="selectTag(tag)"
+        >
+          #{{ tag }}
+        </button>
+      </div>
+    </Teleport>
+
     <!-- Wiki-link autocomplete -->
     <Teleport to="body">
       <div
@@ -87,7 +106,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update', 'rename', 'createFirst'])
 
-const { updateItemIcon, state, setActiveFile, createFile, syncNoteLinks, loading } = useEditorStore()
+const { updateItemIcon, state, setActiveFile, createFile, syncNoteLinks, loading, globalTags, ensureGlobalTag } = useEditorStore()
 
 const pickerOpen = ref(false)
 const pickerPos = ref({ top: 0, left: 0 })
@@ -159,7 +178,11 @@ function processLineContent(text) {
   text = text.replace(/`([^`<>]+?)`/g, (_, c) =>
     `<code><span class="md-syntax" contenteditable="false">\`</span>${c}<span class="md-syntax" contenteditable="false">\`</span></code>`)
 
-  // 6. Wiki-links
+  // 6. Tags (#tagname — not # alone or # followed by space)
+  text = text.replace(/#([\w-]+)/g, (_, name) =>
+    `<span class="tag-link" contenteditable="false" data-tag="${name}">#${name}</span>`)
+
+  // 7. Wiki-links
   text = text.replace(/\[\[([^\]]+)\]\]/g, (_, name) =>
     `<span class="wiki-link" contenteditable="false" data-name="${name}">${name}</span>`)
 
@@ -258,7 +281,9 @@ function serializeInnerMarkdown(node) {
       result += child.textContent
     } else if (child.nodeType === Node.ELEMENT_NODE) {
       const t = child.tagName.toLowerCase()
-      if (t === 'span' && child.classList.contains('wiki-link')) {
+      if (t === 'span' && child.classList.contains('tag-link')) {
+        result += `#${child.dataset.tag || child.textContent.slice(1)}`
+      } else if (t === 'span' && child.classList.contains('wiki-link')) {
         result += `[[${child.dataset.name || child.textContent}]]`
       } else if (t === 'span' && child.classList.contains('md-syntax')) {
         // Skip — marker is re-added by the serializer wrapper
@@ -452,11 +477,46 @@ function handleInput() {
   const markdown = htmlToContent(html)
   emit('update', markdown)
   renderWikiLinksInDOM()
+  renderTagsInDOM()
   checkWikiAutocomplete()
+  checkTagAutocomplete()
   updateCursorLine()
 }
 
 function handleKeydown(e) {
+  // When user closes a #tag with space/enter/tab, immediately register it as a global tag.
+  // Only fires when autocomplete is not open (otherwise we'd register the partial, not the selection).
+  if ((e.key === ' ' || e.key === 'Enter' || e.key === 'Tab') && !tagOpen.value) {
+    const sel = window.getSelection()
+    if (sel?.rangeCount) {
+      const container = sel.getRangeAt(0).startContainer
+      if (container.nodeType === Node.TEXT_NODE) {
+        const textBefore = container.textContent.slice(0, sel.getRangeAt(0).startOffset)
+        const match = textBefore.match(/#([\w-]+)$/)
+        if (match) ensureGlobalTag(match[1].toLowerCase())
+      }
+    }
+  }
+
+  // Tag autocomplete navigation
+  if (tagOpen.value) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      tagSelectedIdx.value = Math.min(tagSelectedIdx.value + 1, tagResults.value.length - 1)
+      return
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      tagSelectedIdx.value = Math.max(tagSelectedIdx.value - 1, 0)
+      return
+    }
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault()
+      if (tagResults.value[tagSelectedIdx.value]) selectTag(tagResults.value[tagSelectedIdx.value])
+      return
+    }
+    if (e.key === ' ' || e.key === 'Escape') { closeTagAutocomplete(); return }
+  }
   // Wiki-link autocomplete navigation
   if (wikiOpen.value) {
     if (e.key === 'ArrowDown') {
@@ -801,6 +861,169 @@ onUnmounted(() => {
   document.removeEventListener('selectionchange', handleSelectionChange)
 })
 
+// ─── Tag autocomplete ─────────────────────────────────────────────────────────
+const tagOpen = ref(false)
+const tagPos = ref({ top: 0, left: 0 })
+const tagResults = ref([])
+const tagSelectedIdx = ref(0)
+
+function checkTagAutocomplete() {
+  const sel = window.getSelection()
+  if (!sel?.rangeCount) { closeTagAutocomplete(); return }
+  const range = sel.getRangeAt(0)
+  const container = range.startContainer
+  if (container.nodeType !== Node.TEXT_NODE) { closeTagAutocomplete(); return }
+
+  const textBefore = container.textContent.slice(0, range.startOffset)
+  const match = textBefore.match(/#([\w-]*)$/)
+  if (!match) { closeTagAutocomplete(); return }
+
+  const term = match[1].toLowerCase()
+  const results = globalTags
+    .map(t => t.name)
+    .filter(name => name.includes(term))
+    .slice(0, 8)
+
+  if (results.length === 0) { closeTagAutocomplete(); return }
+
+  tagResults.value = results
+  tagSelectedIdx.value = 0
+  tagOpen.value = true
+  const rect = range.getBoundingClientRect()
+  tagPos.value = { top: rect.bottom + 4, left: rect.left }
+}
+
+function closeTagAutocomplete() {
+  tagOpen.value = false
+  tagResults.value = []
+}
+
+function selectTag(tagName) {
+  const sel = window.getSelection()
+  if (!sel?.rangeCount) return
+  const range = sel.getRangeAt(0)
+  const container = range.startContainer
+  if (container.nodeType !== Node.TEXT_NODE) return
+
+  const textBefore = container.textContent.slice(0, range.startOffset)
+  const match = textBefore.match(/#([\w-]*)$/)
+  if (!match) return
+
+  const deleteRange = document.createRange()
+  deleteRange.setStart(container, range.startOffset - match[0].length)
+  deleteRange.setEnd(container, range.startOffset)
+  deleteRange.deleteContents()
+
+  const span = document.createElement('span')
+  span.className = 'tag-link'
+  span.setAttribute('contenteditable', 'false')
+  span.setAttribute('data-tag', tagName)
+  span.textContent = `#${tagName}`
+  deleteRange.insertNode(span)
+
+  const spaceNode = document.createTextNode(' ')
+  span.parentNode.insertBefore(spaceNode, span.nextSibling)
+
+  const newRange = document.createRange()
+  newRange.setStart(spaceNode, 1)
+  newRange.collapse(true)
+  sel.removeAllRanges()
+  sel.addRange(newRange)
+
+  closeTagAutocomplete()
+  handleInput()
+}
+
+// ─── Tag DOM rendering ────────────────────────────────────────────────────────
+function renderTagsInDOM() {
+  if (!editorRef.value) return
+
+  const sel = window.getSelection()
+  const anchorNode = sel?.anchorNode
+  const anchorOffset = sel?.anchorOffset ?? 0
+
+  const walker = document.createTreeWalker(editorRef.value, NodeFilter.SHOW_TEXT)
+  const nodes = []
+  let n
+  while ((n = walker.nextNode())) {
+    const parent = n.parentElement
+    // Skip this node only if the cursor is mid-word inside a #tag — still typing
+    if (n === anchorNode && /#[\w-]*$/.test(n.textContent.slice(0, anchorOffset))) continue
+    if (
+      !parent?.classList.contains('tag-link') &&
+      !parent?.classList.contains('wiki-link') &&
+      !parent?.classList.contains('md-syntax') &&
+      /#([\w-]+)/.test(n.textContent)
+    ) {
+      nodes.push(n)
+    }
+  }
+  if (!nodes.length) return
+
+  let restoreTo = null
+
+  for (const textNode of nodes) {
+    const text = textNode.textContent
+    const regex = /#([\w-]+)/g
+    const frag = document.createDocumentFragment()
+    let last = 0
+    let match
+    let lastInserted = null
+
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > last) {
+        const t = document.createTextNode(text.slice(last, match.index))
+        frag.appendChild(t)
+        if (textNode === anchorNode && anchorOffset >= last && anchorOffset <= match.index) {
+          restoreTo = { node: t, offset: anchorOffset - last }
+        }
+        lastInserted = t
+      }
+      const span = document.createElement('span')
+      span.className = 'tag-link'
+      span.setAttribute('contenteditable', 'false')
+      span.setAttribute('data-tag', match[1])
+      span.textContent = `#${match[1]}`
+      frag.appendChild(span)
+      lastInserted = span
+      last = regex.lastIndex
+    }
+
+    if (last < text.length) {
+      const t = document.createTextNode(text.slice(last))
+      frag.appendChild(t)
+      if (textNode === anchorNode && anchorOffset >= last && !restoreTo) {
+        restoreTo = { node: t, offset: Math.min(anchorOffset - last, t.textContent.length) }
+      }
+      lastInserted = t
+    }
+
+    if (textNode === anchorNode && !restoreTo && lastInserted) {
+      if (lastInserted.nodeType === Node.TEXT_NODE) {
+        restoreTo = { node: lastInserted, offset: lastInserted.textContent.length }
+      } else {
+        restoreTo = { afterNode: lastInserted }
+      }
+    }
+
+    textNode.parentNode.replaceChild(frag, textNode)
+  }
+
+  if (sel && restoreTo) {
+    try {
+      const range = document.createRange()
+      if (restoreTo.afterNode) {
+        range.setStartAfter(restoreTo.afterNode)
+      } else {
+        range.setStart(restoreTo.node, restoreTo.offset)
+      }
+      range.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(range)
+    } catch (e) { /* best-effort */ }
+  }
+}
+
 // ─── Wiki-link autocomplete ───────────────────────────────────────────────────
 const wikiOpen = ref(false)
 const wikiPos = ref({ top: 0, left: 0 })
@@ -905,7 +1128,7 @@ async function handleWikiLinkClick(e) {
 }
 
 function handleEditorBlur() {
-  setTimeout(closeWikiAutocomplete, 150)
+  setTimeout(() => { closeWikiAutocomplete(); closeTagAutocomplete() }, 150)
 }
 
 function applyFormat(command) {
@@ -1183,6 +1406,50 @@ defineExpose({ applyFormat })
 .editor-area :deep(s) {
   text-decoration: line-through;
   color: var(--text-muted);
+}
+
+/* Tags in editor */
+.editor-area :deep(.tag-link) {
+  color: var(--tag-color);
+  background: var(--tag-bg);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-weight: 500;
+}
+
+/* Tag autocomplete dropdown */
+.tag-autocomplete {
+  position: fixed;
+  z-index: 9999;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px;
+  min-width: 160px;
+  max-width: 260px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.tag-ac-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 5px;
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.1s, color 0.1s;
+}
+.tag-ac-item:hover,
+.tag-ac-item.selected {
+  background: var(--surface-hover);
+  color: var(--text);
 }
 
 /* Wiki links in editor */

@@ -19,7 +19,7 @@
  */
 
 import { reactive, computed } from 'vue'
-import {apiCreateFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks } from '../services/api.js'
+import {apiCreateFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks, fetchTags, fetchNoteTags, syncNoteTags, createTag } from '../services/api.js'
 
 // ─── FTS index sync (debounced to avoid firing on every keystroke) ────────────
 let indexDebounceTimer = null
@@ -61,6 +61,9 @@ function debouncedSaveNote(id, title, content) {
     syncNoteLinks(id, content).catch(err => {
       console.warn('Failed to sync note links:', err.message)
     })
+    syncContentTags(id, content).catch(err => {
+      console.warn('Failed to sync note tags:', err.message)
+    })
   }, INDEX_DEBOUNCE_MS)
 }
 
@@ -89,6 +92,51 @@ const state = reactive({ items: [], activeFileId: null, loading: true })
 
 // ─── Note link cache (noteId → { outbound: Set<id>, inbound: Set<id> }) ────────
 const noteLinkCache = reactive({})
+
+// ─── Tag state ────────────────────────────────────────────────────────────────
+const noteTagCache    = reactive({})  // noteId → string[] (union — what the panel shows)
+const contentTagCache = reactive({})  // noteId → string[] (derived from #tag in content)
+const panelTagCache   = reactive({})  // noteId → string[] (added via panel / auto-tag)
+const globalTags      = reactive([])  // [{ id, name, note_count }]
+
+function parseContentTags(content) {
+  const tagRegex = /#([\w-]+)/g
+  const found = new Set()
+  let match
+  while ((match = tagRegex.exec(content)) !== null) found.add(match[1].toLowerCase())
+  return [...found]
+}
+
+function rebuildNoteTagCache(noteId) {
+  const union = new Set([
+    ...(contentTagCache[noteId] ?? []),
+    ...(panelTagCache[noteId]   ?? []),
+  ])
+  noteTagCache[noteId] = [...union]
+}
+
+// Parses #tag patterns from content and syncs to backend (debounced via debouncedSaveNote).
+// Only associates tags that already exist in the global list — never creates new global tags.
+// New global tags are created immediately when the user closes a #tag (space/enter/tab).
+async function syncContentTags(noteId, content) {
+  const allContentTags = parseContentTags(content)
+  // Filter to only tags that already exist globally — prevents mid-word debounce from creating tags
+  const existingNames = new Set(globalTags.map(t => t.name))
+  contentTagCache[noteId] = allContentTags.filter(t => existingNames.has(t))
+  rebuildNoteTagCache(noteId)
+  const { tags: saved } = await syncNoteTags(noteId, noteTagCache[noteId])
+  noteTagCache[noteId] = saved.map(t => t.name)
+}
+
+// Creates a global tag if it doesn't exist yet and adds it to the in-memory list.
+// Called immediately when the user closes a #tag with space/enter/tab.
+async function ensureGlobalTag(name) {
+  if (globalTags.find(t => t.name === name)) return
+  try {
+    const result = await createTag(name)
+    globalTags.push({ id: result.id, name, note_count: 0 })
+  } catch { /* ignore — tag may have been created concurrently */ }
+}
 
 // Parses [[Note Name]] patterns from content and syncs links to the backend.
 async function syncNoteLinks(noteId, content) {
@@ -171,6 +219,23 @@ export function useEditorStore() {
       }
       // Set active ID only after content is ready so the editor watch fires with real content
       state.activeFileId = id
+      // Lazy-load note tags if not yet cached — split into content vs panel tags.
+      // Guard on panelTagCache (not noteTagCache) since syncContentTags can set noteTagCache
+      // before setActiveFile runs, which would incorrectly skip two-cache initialization.
+      if (panelTagCache[id] === undefined) {
+        try {
+          const tags = await fetchNoteTags(id)
+          const dbTagNames = tags.map(t => t.name)
+          const contentTags = new Set(parseContentTags(item.content ?? ''))
+          contentTagCache[id] = [...contentTags]
+          panelTagCache[id]   = dbTagNames.filter(name => !contentTags.has(name))
+          noteTagCache[id]    = dbTagNames
+        } catch {
+          contentTagCache[id] = []
+          panelTagCache[id]   = []
+          noteTagCache[id]    = []
+        }
+      }
       // Load note links if not yet cached
       if (!noteLinkCache[id]) {
         try {
@@ -346,6 +411,57 @@ export function useEditorStore() {
     return state.items.filter(i => i.name.toLowerCase().includes(q))
   }
 
+  /** Returns the union of content + panel tags for a note. */
+  function getNoteTags(noteId) {
+    return noteTagCache[noteId] ?? []
+  }
+
+  /** Returns only the tags derived from #tag text in the note content. */
+  function getContentTags(noteId) {
+    return contentTagCache[noteId] ?? []
+  }
+
+  /** Returns only the tags added via panel or auto-tag. */
+  function getPanelTags(noteId) {
+    return panelTagCache[noteId] ?? []
+  }
+
+  /** Merges tags into the panel cache and syncs the union to the backend. Used by auto-tag. */
+  async function setNoteTags(noteId, tags) {
+    const merged = new Set([...(panelTagCache[noteId] ?? []), ...tags])
+    panelTagCache[noteId] = [...merged]
+    rebuildNoteTagCache(noteId)
+    const { tags: saved } = await syncNoteTags(noteId, noteTagCache[noteId])
+    noteTagCache[noteId] = saved.map(t => t.name)
+    const fresh = await fetchTags()
+    globalTags.splice(0, globalTags.length, ...fresh)
+  }
+
+  /** Re-fetches note tags from backend and repopulates both caches. Called by panel refresh. */
+  async function reloadNoteTags(noteId) {
+    const item = state.items.find(i => i.id === noteId)
+    if (!item) return
+    try {
+      const tags = await fetchNoteTags(noteId)
+      const dbTagNames = tags.map(t => t.name)
+      const existingNames = new Set(globalTags.map(g => g.name))
+      const contentTags = new Set(parseContentTags(item.content ?? '').filter(t => existingNames.has(t)))
+      contentTagCache[noteId] = [...contentTags]
+      panelTagCache[noteId]   = dbTagNames.filter(name => !contentTags.has(name))
+      noteTagCache[noteId]    = dbTagNames
+    } catch { /* keep existing cache on error */ }
+  }
+
+  /** Removes a panel-managed tag and syncs to backend. */
+  async function deletePanelTag(noteId, tagName) {
+    panelTagCache[noteId] = (panelTagCache[noteId] ?? []).filter(t => t !== tagName)
+    rebuildNoteTagCache(noteId)
+    const { tags: saved } = await syncNoteTags(noteId, noteTagCache[noteId])
+    noteTagCache[noteId] = saved.map(t => t.name)
+    const fresh = await fetchTags()
+    globalTags.splice(0, globalTags.length, ...fresh)
+  }
+
   /** Returns notes that the given note links to (outbound) and notes that link to it (inbound). */
   function getLinkedNotes(noteId) {
     const cache = noteLinkCache[noteId]
@@ -359,7 +475,8 @@ export function useEditorStore() {
     if (state.items.length > 0) return
     state.loading = true
     try {
-      const notes = await fetchNotes()
+      const [notes, tags] = await Promise.all([fetchNotes(), fetchTags()])
+      globalTags.splice(0, globalTags.length, ...tags)
       const folders = state.items.filter(i => i.type === 'folder')
       const backendFiles = notes.map(noteToItem)
       state.items.splice(0, state.items.length, ...folders, ...backendFiles)
@@ -392,6 +509,14 @@ export function useEditorStore() {
     updateItemIcon,
     getLinkedNotes,
     syncNoteLinks,
+    globalTags,
+    getNoteTags,
+    getContentTags,
+    getPanelTags,
+    setNoteTags,
+    deletePanelTag,
+    reloadNoteTags,
+    ensureGlobalTag,
     init,
   }
 }
