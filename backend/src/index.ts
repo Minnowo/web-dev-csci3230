@@ -28,6 +28,9 @@ import { ApiPostTag } from "./api/api_tag_post.js";
 import { ApiPostDeleteTag } from "./api/api_tag_delete.js";
 import { ApiGetNoteTags } from "./api/api_note_tags_get.js";
 import { ApiPostNoteTags } from "./api/api_note_tags_post.js";
+import { ApiGetFilesList } from "./api/api_files_list_get.js";
+import { ApiPostFileUpload } from "./api/api_post_file_upload.js";
+import { runUploadThen } from "./middleware/multerUpload.js";
 import { ApiGetFolderChildren } from "./api/api_folder_children_get.js";
 import { ApiGetFolders } from "./api/api_folders_get.js";
 
@@ -86,6 +89,16 @@ ExpressApp.post(
 	"/api/notes/:id/delete",
 	MiddleWareAuthenticateToken,
 	ApiPostDeleteNote,
+);
+ExpressApp.get(
+	"/api/files",
+	MiddleWareAuthenticateToken,
+	ApiGetFilesList,
+);
+ExpressApp.post(
+	"/api/files/upload",
+	MiddleWareAuthenticateToken,
+	runUploadThen(ApiPostFileUpload),
 );
 
 ExpressApp.get("/api/folders", MiddleWareAuthenticateToken, ApiGetFolders);
