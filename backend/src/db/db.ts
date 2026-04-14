@@ -4,6 +4,7 @@ import { Migrations } from "./migrations.js";
 import crypto from "crypto";
 import type { User } from "../types/user.js";
 import type { Note, NoteLink, NoteListItem } from "../types/note.js";
+import type { Folder, FolderChildren } from "../types/folder.js";
 
 export type Result<T> =
 	| { data: T; error: null }
@@ -175,7 +176,9 @@ export class DB {
 				.run(userId, normalized);
 
 			const row = this.db
-				.prepare(`SELECT ID FROM DB_TAGS WHERE USER_ID = ? AND NAME = ?`)
+				.prepare(
+					`SELECT ID FROM DB_TAGS WHERE USER_ID = ? AND NAME = ?`,
+				)
 				.get(userId, normalized) as { ID: number };
 
 			return { data: row.ID, error: null };
@@ -430,6 +433,75 @@ export class DB {
 			const info = stmt.run(user_id, folder_id);
 
 			return { data: Number(info.changes), error: null };
+		} catch (err) {
+			console.info(err);
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public GetFolders(user_id: number): Result<Folder[]> {
+		try {
+			const stmtFolders = this.db.prepare(
+				`SELECT` +
+					` ID as id,` +
+					` PARENT_ID as parent_folder_id,` +
+					` NAME as name` +
+					` FROM DB_FOLDER` +
+					` WHERE USER_ID = ?` +
+					` ORDER BY PARENT_ID ASC`,
+			);
+
+			const folders = stmtFolders.all(user_id) as Folder[];
+
+			return { data: folders, error: null };
+		} catch (err) {
+			console.info(err);
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+	public GetFoldersChildren(
+		user_id: number,
+		folder_id: number | null,
+	): Result<FolderChildren> {
+		try {
+			const stmtFolders = this.db.prepare(
+				`SELECT` +
+					` ID as id,` +
+					` PARENT_ID as parent_folder_id,` +
+					` NAME as name` +
+					` FROM DB_FOLDER` +
+					` WHERE USER_ID = ? AND PARENT_ID IS ?`,
+			);
+
+			const stmtNotes = this.db.prepare(
+				`SELECT` +
+					` ID as id,` +
+					` PARENT_ID as folder_id,` +
+					` TITLE as title,` +
+					` CONTENT as content,` +
+					` CREATED as created_at,` +
+					` UPDATED as updated_at` +
+					` FROM DB_NOTES` +
+					` WHERE USER_ID = ? AND PARENT_ID IS ?`,
+			);
+
+			const tx = this.db.transaction(
+				(user_id: number, folder_id: number | null) => {
+					const folders = stmtFolders.all(
+						user_id,
+						folder_id,
+					) as Folder[];
+					const files = stmtNotes.all(user_id, folder_id) as Note[];
+					return {
+						files,
+						folders,
+					};
+				},
+			);
+
+			const results = tx(user_id, folder_id);
+
+			return { data: results, error: null };
 		} catch (err) {
 			console.info(err);
 			return { data: null, error: DBError.from(err) };
