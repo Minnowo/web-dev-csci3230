@@ -10,7 +10,7 @@
         <input
           class="note-title"
           :value="file.name"
-          @input="$emit('rename', file.id, $event.target.value)"
+          @input="$emit('rename', file.id, $event.target.value, 'file')"
           @keydown.enter.prevent="focusEditor"
         />
       </div>

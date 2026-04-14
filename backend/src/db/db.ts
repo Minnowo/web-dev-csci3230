@@ -439,6 +439,34 @@ export class DB {
 		}
 	}
 
+	public MoveNote(note_id: number, user_id: number, parent_folder_id: number | null): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				"UPDATE DB_NOTES SET PARENT_ID = ? WHERE ID = ? AND USER_ID = ?",
+			);
+
+			const info = stmt.run(parent_folder_id, note_id, user_id);
+
+			return { data: Number(info.changes), error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public MoveFolder(folder_id: number, user_id: number, parent_folder_id: number | null): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				"UPDATE DB_FOLDER SET PARENT_ID = ? WHERE ID = ? AND USER_ID = ?",
+			);
+
+			const info = stmt.run(parent_folder_id, folder_id, user_id);
+
+			return { data: Number(info.changes), error: null };
+		} catch (err) {
+            return { data: null, error: DBError.from(err) };
+        }
+    }
+      
 	public GetFolders(user_id: number): Result<Folder[]> {
 		try {
 			const stmtFolders = this.db.prepare(

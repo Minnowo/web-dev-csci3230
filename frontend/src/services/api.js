@@ -204,6 +204,26 @@ export async function apiGetFolderChildren(folder_id) {
 window.apiGetFolderChildren = apiGetFolderChildren;
 window.apiGetFolders = apiGetFolders;
 
+export async function apiMoveNote(note_id, parent_folder_id) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/${note_id}/move`, {
+    method: 'POST',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ parent_folder_id }),
+  })
+  if (!res.ok) throw new Error(`Failed to move note ${note_id}`)
+}
+
+export async function apiMoveFolder(folder_id, parent_folder_id) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/folder/move`, {
+    method: 'POST',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder_id, parent_folder_id }),
+  })
+  if (!res.ok) throw new Error(`Failed to move folder ${folder_id}`)
+}
+
 // ─── Gemini Analysis ──────────────────────────────────────────────────────────
 
 /**
