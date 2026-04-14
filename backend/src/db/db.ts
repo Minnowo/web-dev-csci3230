@@ -284,7 +284,7 @@ export class DB {
 		}
 	}
 
-	public GetSingleNote(noteId: number, userId: number): Result<Note> {
+	public GetSingleNote(noteId: number, userId: number): Result<Note | null> {
 		try {
 			const stmt = this.db.prepare(
 				`SELECT 
@@ -301,8 +301,7 @@ export class DB {
 
 			const row = stmt.get(noteId, userId) as Note | undefined;
 			if (!row) {
-				// Return null data for a 404 state. (Errors are only for DB crashes). 
-				return { data: null, error: null } as unknown as Result<Note>;
+				return { data: null, error: null };
 			}
 			
 			return { data: row, error: null };
@@ -521,7 +520,7 @@ export class DB {
 	public GetFileAssetForUser(
 		fileId: number,
 		userId: number,
-	): Result<FileAsset> {
+	): Result<FileAsset | null> {
 		try {
 			const stmt = this.db.prepare(
 				`SELECT
@@ -543,7 +542,7 @@ export class DB {
 				| undefined;
 
 			if (!row) {
-				return { data: null, error: null } as unknown as Result<FileAsset>;
+				return { data: null, error: null };
 			}
 
 			return { data: DB.fileRowToAsset(row), error: null };

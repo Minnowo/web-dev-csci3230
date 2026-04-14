@@ -48,6 +48,25 @@ export const uploadSingleFileMiddleware = multer({
 	},
 }).single("file");
 
+const IMAGE_MAGIC: Record<string, number[]> = {
+	".png": [0x89, 0x50, 0x4e, 0x47],
+	".jpg": [0xff, 0xd8, 0xff],
+	".jpeg": [0xff, 0xd8, 0xff],
+	".gif": [0x47, 0x49, 0x46, 0x38],
+};
+
+function fileContentMatchesExtension(filePath: string, ext: string): boolean {
+	const expected = IMAGE_MAGIC[ext];
+	if (!expected) return true; // .md and other text formats — nothing to check
+
+	const fd = fs.openSync(filePath, "r");
+	const buf = Buffer.alloc(expected.length);
+	fs.readSync(fd, buf, 0, expected.length, 0);
+	fs.closeSync(fd);
+
+	return expected.every((byte, i) => buf[i] === byte);
+}
+
 export function runUploadThen(
 	handler: (req: AuthenticatedRequest, res: Response) => void,
 ): (req: AuthenticatedRequest, res: Response) => void {
@@ -64,6 +83,19 @@ export function runUploadThen(
 				res.status(400).json({ message: msg });
 				return;
 			}
+
+			const file = req.file;
+			if (file) {
+				const ext = path.extname(file.originalname).toLowerCase();
+				if (!fileContentMatchesExtension(file.path, ext)) {
+					fs.unlink(file.path, () => {});
+					res.status(400).json({
+						message: "File content does not match its extension",
+					});
+					return;
+				}
+			}
+
 			handler(req, res);
 		});
 	};
