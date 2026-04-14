@@ -91,13 +91,14 @@ export class DB {
 		userId: number,
 		title: string,
 		content: string,
+		icon: string | null,
 	): Result<number> {
 		try {
 			const stmt = this.db.prepare(
-				"INSERT INTO DB_NOTES (USER_ID, TITLE, CONTENT) VALUES (?, ?, ?)",
+				"INSERT INTO DB_NOTES (USER_ID, TITLE, CONTENT, ICON) VALUES (?, ?, ?, ?)",
 			);
 
-			const info = stmt.run(userId, title, content);
+			const info = stmt.run(userId, title, content, icon);
 
 			return { data: Number(info.lastInsertRowid), error: null };
 		} catch (err) {
@@ -112,6 +113,7 @@ export class DB {
 					n.ID        AS id,
 					n.PARENT_ID AS folder_id,
 					n.TITLE     AS title,
+					n.ICON      AS icon,
 					n.UPDATED   AS updated_at,
 					GROUP_CONCAT(t.NAME) AS tags
 				FROM DB_NOTES n
@@ -123,12 +125,13 @@ export class DB {
 			);
 
 			const rows = stmt.all(userId) as Array<
-				Omit<NoteListItem, "tags"> & { tags: string | null }
+				Omit<NoteListItem, "tags"> & { tags: string | null; icon: string | null }
 			>;
 
 			return {
 				data: rows.map((r) => ({
 					...r,
+					icon: r.icon ?? null,
 					tags: r.tags ? r.tags.split(",") : [],
 				})),
 				error: null,
@@ -284,17 +287,23 @@ export class DB {
 		try {
 			const stmt = this.db.prepare(
 				`SELECT 
-					ID AS id, 
-					TITLE AS title, 
-					CONTENT AS content, 
-					CREATED AS created_at, 
-					UPDATED AS updated_at 
-				 FROM DB_NOTES 
+					ID AS id,
+					PARENT_ID AS folder_id,
+					TITLE AS title,
+					CONTENT AS content,
+					ICON AS icon,
+					CREATED AS created_at,
+					UPDATED AS updated_at
+				 FROM DB_NOTES
 				 WHERE ID = ? AND USER_ID = ?`,
 			);
 
-			const row = stmt.get(noteId, userId) as Note;
-
+			const row = stmt.get(noteId, userId) as Note | undefined;
+			if (!row) {
+				// Return null data for a 404 state. (Errors are only for DB crashes). 
+				return { data: null, error: null } as unknown as Result<Note>;
+			}
+			
 			return { data: row, error: null };
 		} catch (err) {
 			return { data: null, error: DBError.from(err) };
@@ -306,17 +315,31 @@ export class DB {
 		userId: number,
 		title: string,
 		content: string,
+		icon?: string | null,
 	): Result<number> {
 		try {
+			if (icon === undefined) {
+				const stmt = this.db.prepare(
+					`UPDATE DB_NOTES
+					 SET TITLE = ?,
+					 	 CONTENT = ?,
+						 UPDATED = CURRENT_TIMESTAMP
+				 	 WHERE ID = ? AND USER_ID = ?`,
+				);
+				const row = stmt.run(title, content, noteId, userId);
+				return { data: row.changes, error: null };
+			}
+
 			const stmt = this.db.prepare(
 				`UPDATE DB_NOTES
 				 SET TITLE = ?,
 				 	 CONTENT = ?,
+					 ICON = ?,
 					 UPDATED = CURRENT_TIMESTAMP
 			 	 WHERE ID = ? AND USER_ID = ?`,
 			);
 
-			const row = stmt.run(title, content, noteId, userId);
+			const row = stmt.run(title, content, icon, noteId, userId);
 
 			return { data: row.changes, error: null };
 		} catch (err) {
