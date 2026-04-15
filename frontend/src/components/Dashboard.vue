@@ -5,8 +5,8 @@
       <AppButton label="Create Note" @click="handleCreateNote">
         <template #icon><CirclePlus /></template>
       </AppButton>
-      <AppButton label="Search Notes">
-        <template #icon><Search /></template>
+      <AppButton label="View Graph" @click="$router.push('/graph')">
+        <template #icon><Network /></template>
       </AppButton>
     </div>
 
@@ -18,7 +18,7 @@
 <script setup>
 import { onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { CirclePlus, Search } from 'lucide-vue-next'
+import { CirclePlus, Network } from 'lucide-vue-next'
 import $ from 'jquery'
 import AppButton from './AppButton.vue'
 import { useEditorStore } from '../composables/useEditorStore'
