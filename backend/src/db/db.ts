@@ -478,6 +478,21 @@ export class DB {
 		}
 	}
 
+	public RenameFolder(user_id: number, folder_id: number, name: string): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				"UPDATE DB_FOLDER SET NAME = ? WHERE ID = ? AND USER_ID = ?",
+			);
+
+			const info = stmt.run(name, folder_id, user_id);
+
+			return { data: Number(info.changes), error: null };
+		} catch (err) {
+			console.info(err);
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
 	private static fileRowToAsset(row: {
 		id: number;
 		user_id: number;
