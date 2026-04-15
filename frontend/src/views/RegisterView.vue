@@ -1,5 +1,8 @@
 <template>
-  <AuthCard title="Create an account" subtitle="Start building your knowledge base">
+  <AuthCard
+    title="Create an account"
+    subtitle="Start building your knowledge base"
+  >
     <form class="auth-form" @submit.prevent="handleSubmit">
       <!-- Success banner -->
       <div v-if="successMsg" class="auth-success">
@@ -58,7 +61,7 @@
 
       <button type="submit" class="auth-btn" :disabled="loading">
         <span v-if="loading" class="btn-loading" />
-        {{ loading ? 'Creating account…' : 'Create account' }}
+        {{ loading ? "Creating account…" : "Create account" }}
       </button>
     </form>
 
@@ -70,70 +73,75 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { User, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-vue-next'
-import { useAuth } from '../composables/useAuth.js'
-import AuthCard from '../components/auth/AuthCard.vue'
-import AuthInput from '../components/auth/AuthInput.vue'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { User, Mail, Lock, AlertCircle, CheckCircle } from "lucide-vue-next";
+import { useAuth } from "../composables/useAuth.js";
+import AuthCard from "../components/auth/AuthCard.vue";
+import AuthInput from "../components/auth/AuthInput.vue";
 
-const router = useRouter()
-const { register } = useAuth()
+const router = useRouter();
+const { register } = useAuth();
 
-const username        = ref('')
-const email           = ref('')
-const password        = ref('')
-const confirmPassword = ref('')
-const loading         = ref(false)
-const errorMsg        = ref('')
-const successMsg      = ref('')
-const errors          = ref({ username: '', email: '', password: '', confirmPassword: '' })
+const username = ref("");
+const email = ref("");
+const password = ref("");
+const confirmPassword = ref("");
+const loading = ref(false);
+const errorMsg = ref("");
+const successMsg = ref("");
+const errors = ref({
+  username: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+});
 
 function validate() {
-  errors.value = { username: '', email: '', password: '', confirmPassword: '' }
-  let valid = true
+  errors.value = { username: "", email: "", password: "", confirmPassword: "" };
+  let valid = true;
 
   if (!username.value.trim()) {
-    errors.value.username = 'Username is required'
-    valid = false
+    errors.value.username = "Username is required";
+    valid = false;
   }
   if (!email.value.trim()) {
-    errors.value.email = 'Email is required'
-    valid = false
+    errors.value.email = "Email is required";
+    valid = false;
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-    errors.value.email = 'Enter a valid email address'
-    valid = false
+    errors.value.email = "Enter a valid email address";
+    valid = false;
   }
   if (!password.value) {
-    errors.value.password = 'Password is required'
-    valid = false
+    errors.value.password = "Password is required";
+    valid = false;
   } else if (password.value.length < 6) {
-    errors.value.password = 'Password must be at least 6 characters'
-    valid = false
+    errors.value.password = "Password must be at least 6 characters";
+    valid = false;
   }
   if (confirmPassword.value !== password.value) {
-    errors.value.confirmPassword = 'Passwords do not match'
-    valid = false
+    errors.value.confirmPassword = "Passwords do not match";
+    valid = false;
   }
-  return valid
+  return valid;
 }
 
 async function handleSubmit() {
-  errorMsg.value = ''
-  successMsg.value = ''
-  if (!validate()) return
-  loading.value = true
+  errorMsg.value = "";
+  successMsg.value = "";
+  if (!validate()) return;
+  loading.value = true;
   try {
-    await register(username.value.trim(), email.value.trim(), password.value)
-    successMsg.value = 'Registration successful, please proceed to login.'
-    username.value = ''
-    email.value = ''
-    password.value = ''
-    confirmPassword.value = ''
+    await register(username.value.trim(), email.value.trim(), password.value);
+    successMsg.value = "Registration successful, please proceed to login.";
+    username.value = "";
+    email.value = "";
+    password.value = "";
+    confirmPassword.value = "";
   } catch (err) {
-    errorMsg.value = err.message
+    errorMsg.value = err.message;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 </script>
@@ -193,13 +201,17 @@ async function handleSubmit() {
 .btn-loading {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(0,0,0,0.2);
+  border: 2px solid rgba(0, 0, 0, 0.2);
   border-top-color: var(--bg);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .auth-link {
   color: var(--label-to);
   text-decoration: none;

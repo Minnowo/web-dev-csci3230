@@ -7,7 +7,11 @@
       <button class="tb-btn" title="Italic" @click="$emit('format', 'italic')">
         <Italic class="w-4 h-4" />
       </button>
-      <button class="tb-btn" title="Strikethrough" @click="$emit('format', 'strikeThrough')">
+      <button
+        class="tb-btn"
+        title="Strikethrough"
+        @click="$emit('format', 'strikeThrough')"
+      >
         <Strikethrough class="w-4 h-4" />
       </button>
       <button class="tb-btn" title="Code" @click="$emit('format', 'code')">
@@ -18,13 +22,25 @@
     <div class="toolbar-sep" />
 
     <div class="toolbar-group">
-      <button class="tb-btn tb-text" title="Heading 1" @click="$emit('format', 'h1')">
+      <button
+        class="tb-btn tb-text"
+        title="Heading 1"
+        @click="$emit('format', 'h1')"
+      >
         <Heading1 class="w-4 h-4" />
       </button>
-      <button class="tb-btn tb-text" title="Heading 2" @click="$emit('format', 'h2')">
+      <button
+        class="tb-btn tb-text"
+        title="Heading 2"
+        @click="$emit('format', 'h2')"
+      >
         <Heading2 class="w-4 h-4" />
       </button>
-      <button class="tb-btn tb-text" title="Heading 3" @click="$emit('format', 'h3')">
+      <button
+        class="tb-btn tb-text"
+        title="Heading 3"
+        @click="$emit('format', 'h3')"
+      >
         <Heading3 class="w-4 h-4" />
       </button>
     </div>
@@ -32,13 +48,25 @@
     <div class="toolbar-sep" />
 
     <div class="toolbar-group">
-      <button class="tb-btn" title="Bullet List" @click="$emit('format', 'insertUnorderedList')">
+      <button
+        class="tb-btn"
+        title="Bullet List"
+        @click="$emit('format', 'insertUnorderedList')"
+      >
         <List class="w-4 h-4" />
       </button>
-      <button class="tb-btn" title="Numbered List" @click="$emit('format', 'insertOrderedList')">
+      <button
+        class="tb-btn"
+        title="Numbered List"
+        @click="$emit('format', 'insertOrderedList')"
+      >
         <ListOrdered class="w-4 h-4" />
       </button>
-      <button class="tb-btn" title="Checklist" @click="$emit('format', 'checklist')">
+      <button
+        class="tb-btn"
+        title="Checklist"
+        @click="$emit('format', 'checklist')"
+      >
         <ListChecks class="w-4 h-4" />
       </button>
     </div>
@@ -46,16 +74,28 @@
     <div class="toolbar-sep" />
 
     <div class="toolbar-group">
-      <button class="tb-btn" title="Blockquote" @click="$emit('format', 'blockquote')">
+      <button
+        class="tb-btn"
+        title="Blockquote"
+        @click="$emit('format', 'blockquote')"
+      >
         <Quote class="w-4 h-4" />
       </button>
-      <button class="tb-btn" title="Link" @click="$emit('format', 'createLink')">
+      <button
+        class="tb-btn"
+        title="Link"
+        @click="$emit('format', 'createLink')"
+      >
         <Link class="w-4 h-4" />
       </button>
       <button class="tb-btn" title="Table" @click="$emit('format', 'table')">
         <Table class="w-4 h-4" />
       </button>
-      <button class="tb-btn" title="Horizontal Rule" @click="$emit('format', 'insertHorizontalRule')">
+      <button
+        class="tb-btn"
+        title="Horizontal Rule"
+        @click="$emit('format', 'insertHorizontalRule')"
+      >
         <Minus class="w-4 h-4" />
       </button>
     </div>
@@ -64,17 +104,27 @@
 
 <script setup>
 import {
-  Bold, Italic, Strikethrough, Code,
-  Heading1, Heading2, Heading3,
-  List, ListOrdered, ListChecks,
-  Quote, Link, Table, Minus
-} from 'lucide-vue-next'
+  Bold,
+  Italic,
+  Strikethrough,
+  Code,
+  Heading1,
+  Heading2,
+  Heading3,
+  List,
+  ListOrdered,
+  ListChecks,
+  Quote,
+  Link,
+  Table,
+  Minus,
+} from "lucide-vue-next";
 
 defineProps({
   visible: { type: Boolean, default: true },
-})
+});
 
-defineEmits(['format'])
+defineEmits(["format"]);
 </script>
 
 <style scoped>
@@ -109,7 +159,9 @@ defineEmits(['format'])
   border: none;
   color: var(--text-dim);
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 .tb-btn:hover {
   background: var(--surface-hover);
