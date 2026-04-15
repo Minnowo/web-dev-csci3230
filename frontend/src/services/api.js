@@ -74,7 +74,6 @@ export async function deleteNote(id) {
   return res.json()
 }
 
-// ─── Tags (David) ────────────────────────────────────────────────────────────
 
 /** Fetch all tags for the logged-in user. Returns: [{ id, name, note_count }] */
 export async function fetchTags() {
