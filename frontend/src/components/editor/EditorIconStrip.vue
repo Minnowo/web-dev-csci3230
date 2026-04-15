@@ -1,6 +1,13 @@
 <template>
   <div class="icon-strip">
-    <button v-for="item in topIcons" :key="item.label" class="icon-btn" :title="item.label">
+    <button
+      v-for="item in topIcons"
+      :key="item.label"
+      class="icon-btn"
+      :class="{ active: activeView === item.view }"
+      :title="item.label"
+      @click="$emit('set-view', item.view)"
+    >
       <component :is="item.icon" class="w-5 h-5" />
     </button>
 
@@ -23,14 +30,16 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { FileText, Search, Star, Settings, LogOut } from 'lucide-vue-next'
+import { FileText, Search, Star, Tags, Settings, LogOut } from 'lucide-vue-next'
 import { useAuth } from '../../composables/useAuth.js'
 import { useRouter } from 'vue-router'
 
+defineProps({ activeView: String })
+defineEmits(['set-view'])
+
 const topIcons = [
-  { icon: FileText, label: 'Files' },
-  { icon: Search, label: 'Search' },
-  { icon: Star, label: 'Favorites' },
+  { icon: FileText, label: 'Files', view: 'files' },
+  { icon: Tags, label: 'Tags', view: 'tags' },
 ]
 
 const { logout } = useAuth()
@@ -81,6 +90,10 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 .icon-btn:hover {
   background: var(--surface-hover);
   color: var(--text);
+}
+.icon-btn.active {
+  background: var(--surface-hover);
+  color: var(--tag-color);
 }
 .settings-menu {
   position: fixed;
