@@ -12,16 +12,13 @@
       <div class="section-label">This note</div>
       <template v-if="activeFile">
         <div class="note-tags">
-          <span v-for="tag in panelTags" :key="'p-' + tag" class="tag-chip panel-tag">
+          <span v-for="tag in noteTags" :key="tag" class="tag-chip">
             #{{ tag }}
-            <button class="chip-remove" title="Remove tag" @click="removePanelTag(tag)">
+            <button class="chip-remove" title="Remove tag" @click="removeTag(tag)">
               <X class="w-2.5 h-2.5" />
             </button>
           </span>
-          <span v-for="tag in contentOnlyTags" :key="'c-' + tag" class="tag-chip content-tag" title="Remove from note content to delete">
-            #{{ tag }}
-          </span>
-          <span v-if="!panelTags.length && !contentOnlyTags.length" class="empty-msg">No tags yet</span>
+          <span v-if="!noteTags.length" class="empty-msg">No tags yet</span>
         </div>
         <button
           class="auto-tag-btn"
@@ -49,6 +46,7 @@
           placeholder="New tag..."
           maxlength="30"
           @input="sanitizeTagInput"
+          @paste.prevent="handleTagPaste"
           @keydown.enter="createNewTag"
           @keydown.escape="newTagName = ''"
         />
@@ -80,16 +78,19 @@ import { Plus, X, RefreshCw, Sparkles } from 'lucide-vue-next'
 import { useEditorStore } from '../../composables/useEditorStore.js'
 import { createTag, deleteTag, fetchTags, analyzeNote } from '../../services/api.js'
 
-const { globalTags, activeFile, setNoteTags, getPanelTags, getContentTags, deletePanelTag, reloadNoteTags } = useEditorStore()
+const {
+  globalTags,
+  activeFile,
+  addTagsToContent,
+  removeTagFromContent,
+  parseContentTags,
+  reloadNoteTags,
+} = useEditorStore()
 
-// Panel tags for active note (deletable)
-const panelTags = computed(() => activeFile.value ? getPanelTags(activeFile.value.id) : [])
-// Content tags not already in panel (shown read-only)
-const contentOnlyTags = computed(() => {
-  if (!activeFile.value) return []
-  const panel = new Set(getPanelTags(activeFile.value.id))
-  return getContentTags(activeFile.value.id).filter(t => !panel.has(t))
-})
+// All tags for the active note, read directly from file content
+const noteTags = computed(() =>
+  activeFile.value ? parseContentTags(activeFile.value.content ?? '') : []
+)
 
 const newTagName = ref('')
 const error = ref('')
@@ -102,7 +103,13 @@ async function refreshTags() {
 }
 
 function sanitizeTagInput() {
-  newTagName.value = newTagName.value.replace(/[^a-zA-Z0-9]/g, '')
+  newTagName.value = newTagName.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 30)
+}
+
+function handleTagPaste(e) {
+  const pasted = e.clipboardData.getData('text')
+  const sanitized = pasted.replace(/[^a-zA-Z0-9]/g, '')
+  newTagName.value = (newTagName.value + sanitized).slice(0, 30)
 }
 
 async function createNewTag() {
@@ -121,19 +128,15 @@ async function createNewTag() {
     await createTag(name)
     newTagName.value = ''
     await refreshTags()
-  } catch (err) {
+  } catch {
     error.value = 'Failed to create tag'
   }
 }
 
-async function removePanelTag(tagName) {
+function removeTag(tagName) {
   if (!activeFile.value) return
   error.value = ''
-  try {
-    await deletePanelTag(activeFile.value.id, tagName)
-  } catch {
-    error.value = 'Failed to remove tag'
-  }
+  removeTagFromContent(activeFile.value.id, tagName)
 }
 
 async function autoTag() {
@@ -145,7 +148,7 @@ async function autoTag() {
   try {
     const { tags } = await analyzeNote(id, content, globalTags.map(t => t.name))
     const validTags = tags.filter(t => globalTags.some(g => g.name === t))
-    await setNoteTags(id, validTags)
+    addTagsToContent(id, validTags)
   } catch {
     error.value = 'Auto-tag failed'
   } finally {
@@ -158,7 +161,7 @@ async function deleteGlobalTag(tag) {
   try {
     await deleteTag(tag.id)
     await refreshTags()
-  } catch (err) {
+  } catch {
     error.value = 'Failed to delete tag'
   }
 }
@@ -224,6 +227,7 @@ async function deleteGlobalTag(tag) {
   gap: 6px;
   align-items: center;
 }
+
 .char-count {
   display: block;
   font-size: 11px;
@@ -231,6 +235,7 @@ async function deleteGlobalTag(tag) {
   text-align: right;
   margin-top: 3px;
 }
+
 .char-count.at-limit {
   color: #f87171;
 }
@@ -329,6 +334,7 @@ async function deleteGlobalTag(tag) {
   flex-wrap: wrap;
   gap: 5px;
   min-height: 20px;
+  margin-top: 6px;
 }
 
 .tag-chip {
@@ -341,10 +347,6 @@ async function deleteGlobalTag(tag) {
   font-weight: 500;
   color: var(--tag-color);
   background: var(--tag-bg);
-}
-
-.content-tag {
-  opacity: 0.6;
 }
 
 .chip-remove {
@@ -387,6 +389,21 @@ async function deleteGlobalTag(tag) {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) var(--surface);
+}
+
+.tag-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tag-list::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+.tag-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
 }
 
 .empty-msg {

@@ -74,10 +74,12 @@ const panelTagCache   = reactive({})
 const globalTags      = reactive([]) 
 
 function parseContentTags(content) {
-  const tagRegex = /#([\w-]+)/g
+  const tagRegex = /#([a-zA-Z0-9]+)/g
   const found = new Set()
   let match
-  while ((match = tagRegex.exec(content)) !== null) found.add(match[1].toLowerCase())
+  while ((match = tagRegex.exec(content)) !== null) {
+    if (match[1].length <= 30) found.add(match[1].toLowerCase())
+  }
   return [...found]
 }
 
@@ -100,6 +102,7 @@ async function syncContentTags(noteId, content) {
 
 
 async function ensureGlobalTag(name) {
+  if (!/^[a-zA-Z0-9]{1,30}$/.test(name)) return
   if (globalTags.find(t => t.name === name)) return
   try {
     const result = await createTag(name)
@@ -251,6 +254,14 @@ export function useEditorStore() {
     indexNote(id, { title, content }).catch(err => {
       console.warn('Failed to index imported note:', err.message)
     })
+    // Register any #hashtags found in imported content as global tags and sync to note
+    const contentTags = parseContentTags(content)
+    if (contentTags.length) {
+      await Promise.all(contentTags.map(t => ensureGlobalTag(t)))
+      const fresh = await fetchTags()
+      globalTags.splice(0, globalTags.length, ...fresh)
+      await syncContentTags(id, content)
+    }
     return id
   }
 
@@ -431,6 +442,24 @@ export function useEditorStore() {
     globalTags.splice(0, globalTags.length, ...fresh)
   }
 
+  function addTagsToContent(noteId, tagNames) {
+    const item = state.items.find(i => i.id === noteId && i.type === 'file')
+    if (!item) return
+    const existing = new Set(parseContentTags(item.content ?? ''))
+    const toAdd = tagNames.filter(t => !existing.has(t.toLowerCase()))
+    if (!toAdd.length) return
+    const newContent = (item.content ?? '').trimEnd() + '\n' + toAdd.map(t => `#${t}`).join(' ')
+    updateFileContent(noteId, newContent)
+  }
+
+  function removeTagFromContent(noteId, tagName) {
+    const item = state.items.find(i => i.id === noteId && i.type === 'file')
+    if (!item) return
+    const pattern = new RegExp(`\\s*#${tagName}(?=[\\s,;.!?\\n]|$)`, 'gi')
+    const newContent = (item.content ?? '').replace(pattern, '').replace(/\n{3,}/g, '\n\n').trimEnd()
+    updateFileContent(noteId, newContent)
+  }
+
   function getLinkedNotes(noteId) {
     const cache = noteLinkCache[noteId]
     if (!cache) return { outbound: [], inbound: [] }
@@ -495,6 +524,9 @@ export function useEditorStore() {
     deletePanelTag,
     reloadNoteTags,
     ensureGlobalTag,
+    addTagsToContent,
+    removeTagFromContent,
+    parseContentTags,
     init,
   }
 }

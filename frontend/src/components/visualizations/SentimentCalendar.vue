@@ -36,7 +36,7 @@ function getCellSize() {
 }
 
 const activityScale = computed(() =>
-  d3.scaleSequential(d3.interpolateBlues).domain([0, maxActivityCount])
+  d3.scaleSequential(d3.interpolateBlues).domain([0, maxPerDay.value])
 )
 
 const emptyColor = computed(() => isDark.value ? '#1e293b' : '#e2e8f0')
