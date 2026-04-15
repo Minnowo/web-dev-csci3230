@@ -28,11 +28,17 @@
               <component :is="resolveIcon(name)" class="w-4 h-4" />
             </button>
           </div>
-          <p v-if="filteredIcons.length === 0" class="picker-empty">No icons found</p>
+          <p v-if="filteredIcons.length === 0" class="picker-empty">
+            No icons found
+          </p>
         </template>
 
         <template v-else>
-          <div v-for="group in ICON_GROUPS" :key="group.label" class="picker-group">
+          <div
+            v-for="group in ICON_GROUPS"
+            :key="group.label"
+            class="picker-group"
+          >
             <p class="group-label">{{ group.label }}</p>
             <div class="icon-grid">
               <button
@@ -54,37 +60,37 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { Search } from 'lucide-vue-next'
-import { ICON_GROUPS, ICON_MAP, resolveIcon } from './iconMap.js'
+import { ref, computed, onMounted } from "vue";
+import { Search } from "lucide-vue-next";
+import { ICON_GROUPS, ICON_MAP, resolveIcon } from "./iconMap.js";
 
 const props = defineProps({
-  current: { type: String, default: 'FileText' },
+  current: { type: String, default: "FileText" },
   position: { type: Object, default: () => ({ top: 0, left: 0 }) },
-})
+});
 
-const emit = defineEmits(['select', 'close'])
+const emit = defineEmits(["select", "close"]);
 
-const query = ref('')
-const searchRef = ref(null)
+const query = ref("");
+const searchRef = ref(null);
 
-onMounted(() => searchRef.value?.focus())
+onMounted(() => searchRef.value?.focus());
 
 const positionStyle = computed(() => ({
-  top: props.position.top + 'px',
-  left: props.position.left + 'px',
-}))
+  top: props.position.top + "px",
+  left: props.position.left + "px",
+}));
 
-const allIconNames = computed(() => Object.keys(ICON_MAP))
+const allIconNames = computed(() => Object.keys(ICON_MAP));
 
 const filteredIcons = computed(() => {
-  const q = query.value.toLowerCase()
-  return allIconNames.value.filter(n => n.toLowerCase().includes(q))
-})
+  const q = query.value.toLowerCase();
+  return allIconNames.value.filter((n) => n.toLowerCase().includes(q));
+});
 
 function pick(name) {
-  emit('select', name)
-  emit('close')
+  emit("select", name);
+  emit("close");
 }
 </script>
 
@@ -103,7 +109,7 @@ function pick(name) {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
   z-index: 201;
   overflow: hidden;
 }
@@ -140,8 +146,13 @@ function pick(name) {
   overflow-y: auto;
   padding: 8px;
 }
-.picker-body::-webkit-scrollbar { width: 4px; }
-.picker-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.picker-body::-webkit-scrollbar {
+  width: 4px;
+}
+.picker-body::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
 .picker-group {
   margin-bottom: 10px;
 }
@@ -169,7 +180,9 @@ function pick(name) {
   background: none;
   color: var(--text-dim);
   cursor: pointer;
-  transition: background 0.1s, color 0.1s;
+  transition:
+    background 0.1s,
+    color 0.1s;
 }
 .icon-cell:hover {
   background: var(--surface-hover);

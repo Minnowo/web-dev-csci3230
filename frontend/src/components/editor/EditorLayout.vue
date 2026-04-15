@@ -1,7 +1,10 @@
 <template>
   <div class="editor-layout">
     <!-- Icon Strip -->
-    <EditorIconStrip :active-view="sidebarView" @set-view="sidebarView = $event" />
+    <EditorIconStrip
+      :active-view="sidebarView"
+      @set-view="sidebarView = $event"
+    />
 
     <!-- Left panel (sidebar or tag panel) -->
     <div class="left-panel" :class="{ collapsed: sidebarCollapsed }">
@@ -13,9 +16,9 @@
         :collapsed="sidebarCollapsed"
         :get-children="getChildren"
         :search-items="searchItems"
-      :search-by-tag="searchByTag"
-      :tag-query="tagQuery"
-      @tag-query-consumed="tagQuery = ''"
+        :search-by-tag="searchByTag"
+        :tag-query="tagQuery"
+        @tag-query-consumed="tagQuery = ''"
         @create-file="handleCreateFile"
         @create-folder="createFolder()"
         @select-file="setActiveFile"
@@ -48,25 +51,38 @@
 
         <div class="topbar-right">
           <!-- Single edit/preview toggle -->
-          <button class="mode-toggle" @click="toggleViewMode" :title="viewMode === 'preview' ? 'Switch to Edit' : 'Switch to Preview'">
+          <button
+            class="mode-toggle"
+            @click="toggleViewMode"
+            :title="
+              viewMode === 'preview' ? 'Switch to Edit' : 'Switch to Preview'
+            "
+          >
             <Pencil v-if="viewMode === 'preview'" class="w-3.5 h-3.5" />
             <Eye v-else class="w-3.5 h-3.5" />
-            {{ viewMode === 'preview' ? 'Edit' : 'Preview' }}
+            {{ viewMode === "preview" ? "Edit" : "Preview" }}
           </button>
 
           <!-- Options menu -->
           <div class="relative" ref="menuRef">
-            <button class="topbar-btn" title="Options" @click="menuOpen = !menuOpen">
+            <button
+              class="topbar-btn"
+              title="Options"
+              @click="menuOpen = !menuOpen"
+            >
               <MoreHorizontal class="w-4 h-4" />
             </button>
             <div v-if="menuOpen" class="options-menu">
               <button class="menu-item" @click="toggleToolbar">
-                <component :is="toolbarVisible ? EyeOff : Eye" class="w-4 h-4" />
-                {{ toolbarVisible ? 'Hide Toolbar' : 'Show Toolbar' }}
+                <component
+                  :is="toolbarVisible ? EyeOff : Eye"
+                  class="w-4 h-4"
+                />
+                {{ toolbarVisible ? "Hide Toolbar" : "Show Toolbar" }}
               </button>
-              <button class="menu-item" @click="viewMode = 'split'; menuOpen = false">
+              <button class="menu-item" @click="toggleSplitViewMode()">
                 <Columns2 class="w-4 h-4" />
-                Split View
+                {{ viewMode !== "split" ? "Split View" : "Inline" }}
               </button>
               <template v-if="activeFile">
                 <div class="menu-divider" />
@@ -107,7 +123,12 @@
             @update="handleContentUpdate"
             @rename="renameItem"
             @create-first="handleCreateFile"
-            @tag-click="tag => { sidebarView = 'files'; tagQuery = 'tag:' + tag }"
+            @tag-click="
+              (tag) => {
+                sidebarView = 'files';
+                tagQuery = 'tag:' + tag;
+              }
+            "
           />
 
           <EditorPreview
@@ -119,7 +140,9 @@
           <div v-if="viewMode === 'preview' && !activeFile" class="empty-state">
             <Eye class="w-12 h-12 text-[var(--text-muted)]" />
             <p class="text-lg font-semibold mt-3">Nothing to preview</p>
-            <p class="text-sm text-[var(--text-muted)]">Select a note to see its preview</p>
+            <p class="text-sm text-[var(--text-muted)]">
+              Select a note to see its preview
+            </p>
           </div>
         </div>
       </div>
@@ -133,96 +156,117 @@
         <span class="status-stat">{{ contentStats.lines }} lines</span>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import {
-  PanelLeftClose, PanelLeftOpen, FileText, Pencil,
-  Columns2, Eye, EyeOff, MoreHorizontal, Download
-} from 'lucide-vue-next'
-import { useEditorStore } from '../../composables/useEditorStore'
-import EditorIconStrip from './EditorIconStrip.vue'
-import EditorSidebar from './EditorSidebar.vue'
-import EditorToolbar from './EditorToolbar.vue'
-import EditorContent from './EditorContent.vue'
-import EditorPreview from './EditorPreview.vue'
-import EditorTagPanel from './EditorTagPanel.vue'
-import EditorAssetsPanel from './EditorAssetsPanel.vue'
-import { exportNoteAsMd, exportNoteAsHtml } from '../../services/api.js'
+  PanelLeftClose,
+  PanelLeftOpen,
+  FileText,
+  Pencil,
+  Columns2,
+  Eye,
+  EyeOff,
+  MoreHorizontal,
+  Download,
+} from "lucide-vue-next";
+import { useEditorStore } from "../../composables/useEditorStore";
+import EditorIconStrip from "./EditorIconStrip.vue";
+import EditorSidebar from "./EditorSidebar.vue";
+import EditorToolbar from "./EditorToolbar.vue";
+import EditorContent from "./EditorContent.vue";
+import EditorPreview from "./EditorPreview.vue";
+import EditorTagPanel from "./EditorTagPanel.vue";
+import EditorAssetsPanel from "./EditorAssetsPanel.vue";
+import { exportNoteAsMd, exportNoteAsHtml } from "../../services/api.js";
 
 const {
-  activeFile, rootItems, fileCount,
-  getChildren, setActiveFile, createFile, createFolder,
-  updateFileContent, renameItem, deleteItem, moveItem, searchItems, searchByTag,
-} = useEditorStore()
+  activeFile,
+  rootItems,
+  fileCount,
+  getChildren,
+  setActiveFile,
+  createFile,
+  createFolder,
+  updateFileContent,
+  renameItem,
+  deleteItem,
+  moveItem,
+  searchItems,
+  searchByTag,
+} = useEditorStore();
 
 const contentStats = computed(() => {
-  const text = activeFile.value?.content || ''
-  const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length
-  const chars = text.length
-  const lines = text === '' ? 0 : text.split('\n').length
-  return { words, chars, lines }
-})
+  const text = activeFile.value?.content || "";
+  const words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+  const chars = text.length;
+  const lines = text === "" ? 0 : text.split("\n").length;
+  return { words, chars, lines };
+});
 
-const viewMode = ref('edit')
-const sidebarCollapsed = ref(false)
-const sidebarView = ref('files')
-const tagQuery = ref('')
-const toolbarVisible = ref(true)
-const menuOpen = ref(false)
-const menuRef = ref(null)
-const editorContentRef = ref(null)
+const viewMode = ref("edit");
+const sidebarCollapsed = ref(false);
+const sidebarView = ref("files");
+const tagQuery = ref("");
+const toolbarVisible = ref(true);
+const menuOpen = ref(false);
+const menuRef = ref(null);
+const editorContentRef = ref(null);
 
 async function handleCreateFile() {
   try {
-    await createFile()
+    await createFile();
   } catch (err) {
-    console.error('Failed to create note:', err)
+    console.error("Failed to create note:", err);
   }
 }
 
 function handleContentUpdate(content) {
   if (activeFile.value) {
-    updateFileContent(activeFile.value.id, content)
+    updateFileContent(activeFile.value.id, content);
   }
 }
 
 function handleFormat(command) {
-  editorContentRef.value?.applyFormat(command)
+  editorContentRef.value?.applyFormat(command);
 }
 
 function toggleViewMode() {
-  viewMode.value = viewMode.value === 'preview' ? 'edit' : 'preview'
+  viewMode.value = viewMode.value === "preview" ? "edit" : "preview";
+}
+
+function toggleSplitViewMode() {
+  viewMode.value = viewMode.value === "split" ? "edit" : "split";
+  menuOpen.value = false;
 }
 
 function toggleToolbar() {
-  toolbarVisible.value = !toolbarVisible.value
-  menuOpen.value = false
+  toolbarVisible.value = !toolbarVisible.value;
+  menuOpen.value = false;
 }
 
 async function handleExportMd() {
-  menuOpen.value = false
-  if (!activeFile.value) return
-  await exportNoteAsMd(activeFile.value.id, activeFile.value.name)
+  menuOpen.value = false;
+  if (!activeFile.value) return;
+  await exportNoteAsMd(activeFile.value.id, activeFile.value.name);
 }
 
 async function handleExportHtml() {
-  menuOpen.value = false
-  if (!activeFile.value) return
-  await exportNoteAsHtml(activeFile.value.id, activeFile.value.name)
+  menuOpen.value = false;
+  if (!activeFile.value) return;
+  await exportNoteAsHtml(activeFile.value.id, activeFile.value.name);
 }
 
 function handleClickOutside(e) {
   if (menuRef.value && !menuRef.value.contains(e.target)) {
-    menuOpen.value = false
+    menuOpen.value = false;
   }
 }
 
-onMounted(() => document.addEventListener('click', handleClickOutside))
-onUnmounted(() => document.removeEventListener('click', handleClickOutside))
+onMounted(() => document.addEventListener("click", handleClickOutside));
+onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 </script>
 
 <style scoped>
@@ -236,7 +280,9 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 .left-panel {
   display: flex;
   overflow: hidden;
-  transition: width 0.2s, min-width 0.2s;
+  transition:
+    width 0.2s,
+    min-width 0.2s;
 }
 .left-panel.collapsed {
   width: 0;
@@ -283,7 +329,9 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 .topbar-btn:hover {
   background: var(--surface-hover);
@@ -331,7 +379,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   padding: 4px;
   min-width: 180px;
   z-index: 50;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 .menu-item {
   display: flex;
@@ -345,7 +393,9 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   color: var(--text-dim);
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
   text-align: left;
 }
 .menu-item:hover {
@@ -438,6 +488,4 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   box-shadow: 0 0 4px #4ade80;
   flex-shrink: 0;
 }
-
-
 </style>

@@ -3,60 +3,62 @@
 /* ── Register CSS vars as Tailwind colors ──────────────────── */
 /* Allows e.g. text-c-text, bg-c-surface instead of text-[var(--text)] */
 @theme {
-  --color-c-bg:             var(--bg);
-  --color-c-surface:        var(--surface);
-  --color-c-surface-hover:  var(--surface-hover);
-  --color-c-border:         var(--border);
-  --color-c-border-hover:   var(--border-hover);
-  --color-c-text:           var(--text);
-  --color-c-text-muted:     var(--text-muted);
-  --color-c-text-dim:       var(--text-dim);
-  --color-c-nav-bg:         var(--nav-bg);
-  --color-c-nav-border:     var(--nav-border);
-  --color-c-label-from:     var(--label-from);
-  --color-c-label-to:       var(--label-to);
+  --color-c-bg: var(--bg);
+  --color-c-surface: var(--surface);
+  --color-c-surface-hover: var(--surface-hover);
+  --color-c-border: var(--border);
+  --color-c-border-hover: var(--border-hover);
+  --color-c-text: var(--text);
+  --color-c-text-muted: var(--text-muted);
+  --color-c-text-dim: var(--text-dim);
+  --color-c-nav-bg: var(--nav-bg);
+  --color-c-nav-border: var(--nav-border);
+  --color-c-label-from: var(--label-from);
+  --color-c-label-to: var(--label-to);
 }
 
 /* ── Theme tokens ───────────────────────────────────────────── */
 :root {
-  --bg:             #0a0d14;
-  --surface:        #161b27;
-  --surface-hover:  #1e2535;
-  --border:         rgba(255,255,255,0.08);
-  --border-hover:   rgba(255,255,255,0.15);
-  --text:           #ffffff;
-  --text-muted:     rgba(255,255,255,0.4);
-  --text-dim:       rgba(255,255,255,0.6);
-  --nav-bg:         #0f1117;
-  --nav-border:     rgba(255,255,255,0.1);
-  --label-from:     #ffffff;
-  --label-to:       #7dd3fc;
-  --tag-color:      #c084fc;
-  --tag-bg:         rgba(192, 132, 252, 0.15);
+  --bg: #0a0d14;
+  --surface: #161b27;
+  --surface-hover: #1e2535;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.15);
+  --text: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --text-dim: rgba(255, 255, 255, 0.6);
+  --nav-bg: #0f1117;
+  --nav-border: rgba(255, 255, 255, 0.1);
+  --label-from: #ffffff;
+  --label-to: #7dd3fc;
+  --tag-color: #c084fc;
+  --tag-bg: rgba(192, 132, 252, 0.15);
 }
 
 :root.light {
-  --bg:             #f0f2f5;
-  --surface:        #ffffff;
-  --surface-hover:  #e8ecf2;
-  --border:         rgba(0,0,0,0.09);
-  --border-hover:   rgba(0,0,0,0.18);
-  --text:           #1a1a2e;
-  --text-muted:     rgba(0,0,0,0.45);
-  --text-dim:       rgba(0,0,0,0.55);
-  --nav-bg:         #ffffff;
-  --nav-border:     rgba(0,0,0,0.1);
-  --label-from:     #1a1a2e;
-  --label-to:       #0369a1;
-  --tag-color:      #9333ea;
-  --tag-bg:         rgba(147, 51, 234, 0.12);
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --surface-hover: #e8ecf2;
+  --border: rgba(0, 0, 0, 0.09);
+  --border-hover: rgba(0, 0, 0, 0.18);
+  --text: #1a1a2e;
+  --text-muted: rgba(0, 0, 0, 0.45);
+  --text-dim: rgba(0, 0, 0, 0.55);
+  --nav-bg: #ffffff;
+  --nav-border: rgba(0, 0, 0, 0.1);
+  --label-from: #1a1a2e;
+  --label-to: #0369a1;
+  --tag-color: #9333ea;
+  --tag-bg: rgba(147, 51, 234, 0.12);
 }
 
 body {
   background: var(--bg);
   color: var(--text);
   margin: 0;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 /* :root {
   --text: #6b6375;

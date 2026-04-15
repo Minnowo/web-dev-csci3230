@@ -7,11 +7,11 @@
 </template>
 
 <script setup>
-import VueMarkdown from 'vue-markdown-render'
+import VueMarkdown from "vue-markdown-render";
 
 defineProps({
-  content: { type: String, default: '' },
-})
+  content: { type: String, default: "" },
+});
 </script>
 
 <style scoped>

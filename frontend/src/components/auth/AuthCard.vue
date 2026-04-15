@@ -27,13 +27,13 @@
 </template>
 
 <script setup>
-import { BookOpen } from 'lucide-vue-next'
+import { BookOpen } from "lucide-vue-next";
 
 defineProps({
-  title:     { type: String, required: true },
-  subtitle:  { type: String, default: '' },
+  title: { type: String, required: true },
+  subtitle: { type: String, default: "" },
   brandIcon: { type: Object, default: () => BookOpen },
-})
+});
 </script>
 
 <style scoped>
@@ -74,7 +74,11 @@ defineProps({
 .brand-name {
   font-size: 18px;
   font-weight: 700;
-  background: linear-gradient(90deg, var(--label-from) 0%, var(--label-to) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--label-from) 0%,
+    var(--label-to) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

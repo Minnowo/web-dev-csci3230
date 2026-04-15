@@ -29,26 +29,27 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { Eye, EyeOff } from 'lucide-vue-next'
+import { ref, computed } from "vue";
+import { Eye, EyeOff } from "lucide-vue-next";
 
 const props = defineProps({
-  modelValue:   { type: String, default: '' },
-  label:        { type: String, required: true },
-  type:         { type: String, default: 'text' },
-  placeholder:  { type: String, default: '' },
-  icon:         { type: Object, default: null },
-  error:        { type: String, default: '' },
-  autocomplete: { type: String, default: 'off' },
-})
+  modelValue: { type: String, default: "" },
+  label: { type: String, required: true },
+  type: { type: String, default: "text" },
+  placeholder: { type: String, default: "" },
+  icon: { type: Object, default: null },
+  error: { type: String, default: "" },
+  autocomplete: { type: String, default: "off" },
+});
 
-defineEmits(['update:modelValue', 'submit'])
+defineEmits(["update:modelValue", "submit"]);
 
-const showPassword = ref(false)
+const showPassword = ref(false);
 const inputType = computed(() => {
-  if (props.type === 'password') return showPassword.value ? 'text' : 'password'
-  return props.type
-})
+  if (props.type === "password")
+    return showPassword.value ? "text" : "password";
+  return props.type;
+});
 </script>
 
 <style scoped>
