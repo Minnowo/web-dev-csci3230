@@ -1,5 +1,5 @@
 import { reactive, computed } from 'vue'
-import {apiCreateFolder, apiGetFolders, apiMoveNote, apiMoveFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks, fetchTags, fetchNoteTags, syncNoteTags, createTag } from '../services/api.js'
+import {apiCreateFolder, apiGetFolders, apiMoveNote, apiMoveFolder, apiRenameFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks, fetchTags, fetchNoteTags, syncNoteTags, createTag } from '../services/api.js'
 
 let indexDebounceTimer = null
 const INDEX_DEBOUNCE_MS = 1000
@@ -276,6 +276,10 @@ export function useEditorStore() {
           console.warn(`Failed to rename note ${id}:`, err.message)
         })
         debouncedIndexNote(id, newName, item.content || '')
+      } else if (item.type === 'folder') {
+        apiRenameFolder(item.id, newName).catch(err => {
+          console.warn(`Failed to rename folder ${id}:`, err.message)
+        })
       }
     }
   }

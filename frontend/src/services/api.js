@@ -274,6 +274,16 @@ export async function apiMoveFolder(folder_id, parent_folder_id) {
   if (!res.ok) throw new Error(`Failed to move folder ${folder_id}`)
 }
 
+export async function apiRenameFolder(folder_id, name) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/folder/rename`, {
+    method: 'POST',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder_id, name }),
+  })
+  if (!res.ok) throw new Error(`Failed to rename folder ${folder_id}`)
+}
+
 // ─── File & Export ────────────────────────────────────────────────────────────
 
 async function triggerAuthenticatedDownload(url, fallbackName) {
