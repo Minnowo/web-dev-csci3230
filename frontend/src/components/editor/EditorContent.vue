@@ -129,6 +129,7 @@ function handleIconSelect(iconName) {
 
 const editorRef = ref(null)
 let isUpdatingFromProp = false
+let lastEmittedContent = ''
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
@@ -143,11 +144,22 @@ function formatDate(dateStr) {
 // When active file changes, load its content into the editor
 watch([() => props.file?.id, () => props.livePreview], () => {
   if (props.file && editorRef.value) {
+    lastEmittedContent = props.file.content ?? ''
     isUpdatingFromProp = true
     editorRef.value.innerHTML = contentToHtml(props.file.content)
     nextTick(() => { isUpdatingFromProp = false })
   }
 }, { immediate: true })
+
+// When content is updated externally (e.g. auto-tag writes to file), re-render the editor
+watch(() => props.file?.content, (newContent) => {
+  if (!editorRef.value || !props.file) return
+  if ((newContent ?? '') === lastEmittedContent) return  // editor itself caused this change
+  lastEmittedContent = newContent ?? ''
+  isUpdatingFromProp = true
+  editorRef.value.innerHTML = contentToHtml(newContent)
+  nextTick(() => { isUpdatingFromProp = false })
+})
 
 // Also handle initial mount
 watch(editorRef, (el) => {
@@ -180,7 +192,7 @@ function processLineContent(text) {
     `<code><span class="md-syntax" contenteditable="false">\`</span>${c}<span class="md-syntax" contenteditable="false">\`</span></code>`)
 
   // 6. Tags (#tagname — not # alone or # followed by space)
-  text = text.replace(/#([\w-]+)/g, (_, name) =>
+  text = text.replace(/#([a-zA-Z0-9]{1,30})/g, (_, name) =>
     `<span class="tag-link" contenteditable="false" data-tag="${name}">#${name}</span>`)
 
   // 7. Wiki-links (skip self-references)
@@ -496,6 +508,7 @@ function handleInput() {
   }
   const html = editorRef.value?.innerHTML || ''
   const markdown = htmlToContent(html)
+  lastEmittedContent = markdown
   emit('update', markdown)
   renderWikiLinksInDOM()
   renderTagsInDOM()
@@ -513,7 +526,7 @@ function handleKeydown(e) {
       const container = sel.getRangeAt(0).startContainer
       if (container.nodeType === Node.TEXT_NODE) {
         const textBefore = container.textContent.slice(0, sel.getRangeAt(0).startOffset)
-        const match = textBefore.match(/#([\w-]+)$/)
+        const match = textBefore.match(/#([a-zA-Z0-9]{1,30})$/)
         if (match) ensureGlobalTag(match[1].toLowerCase())
       }
     }
@@ -896,7 +909,7 @@ function checkTagAutocomplete() {
   if (container.nodeType !== Node.TEXT_NODE) { closeTagAutocomplete(); return }
 
   const textBefore = container.textContent.slice(0, range.startOffset)
-  const match = textBefore.match(/#([\w-]*)$/)
+  const match = textBefore.match(/#([a-zA-Z0-9]*)$/)
   if (!match) { closeTagAutocomplete(); return }
 
   const term = match[1].toLowerCase()
@@ -927,7 +940,7 @@ function selectTag(tagName) {
   if (container.nodeType !== Node.TEXT_NODE) return
 
   const textBefore = container.textContent.slice(0, range.startOffset)
-  const match = textBefore.match(/#([\w-]*)$/)
+  const match = textBefore.match(/#([a-zA-Z0-9]*)$/)
   if (!match) return
 
   const deleteRange = document.createRange()
@@ -969,12 +982,12 @@ function renderTagsInDOM() {
   while ((n = walker.nextNode())) {
     const parent = n.parentElement
     // Skip this node only if the cursor is mid-word inside a #tag — still typing
-    if (n === anchorNode && /#[\w-]*$/.test(n.textContent.slice(0, anchorOffset))) continue
+    if (n === anchorNode && /#[a-zA-Z0-9]*$/.test(n.textContent.slice(0, anchorOffset))) continue
     if (
       !parent?.classList.contains('tag-link') &&
       !parent?.classList.contains('wiki-link') &&
       !parent?.classList.contains('md-syntax') &&
-      /#([\w-]+)/.test(n.textContent)
+      /#([a-zA-Z0-9]{1,30})/.test(n.textContent)
     ) {
       nodes.push(n)
     }
@@ -985,7 +998,7 @@ function renderTagsInDOM() {
 
   for (const textNode of nodes) {
     const text = textNode.textContent
-    const regex = /#([\w-]+)/g
+    const regex = /#([a-zA-Z0-9]{1,30})/g
     const frag = document.createDocumentFragment()
     let last = 0
     let match

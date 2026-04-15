@@ -1075,7 +1075,6 @@ async function waitForBackend(retries = 20, intervalMs = 3000) {
 		try {
 			const res = await fetch(`${API}/health`);
 			if (res.ok) {
-				log("Backend is up.");
 				return;
 			}
 		} catch {
@@ -1090,25 +1089,10 @@ async function waitForBackend(retries = 20, intervalMs = 3000) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
-	log("─────────────────────────────────────");
-	log(" GraphNotes seed script");
-	log(`─────────────────────────────────────`);
-	log(`API: ${API}`);
-	log(`Notes to seed: ${NOTES.length}`);
-
 	await waitForBackend();
 
 	// 1. Register (ok to fail if user exists)
-	const reg = await post("/register", {
-		username: USERNAME,
-		email: EMAIL,
-		password: PASSWORD,
-	});
-	if (reg.ok) {
-		log(`Registered new user: ${USERNAME}`);
-	} else {
-		log(`User already exists, continuing...`);
-	}
+	await post("/register", { username: USERNAME, email: EMAIL, password: PASSWORD });
 
 	// 2. Login
 	const login = await post("/login", {
@@ -1117,7 +1101,6 @@ async function main() {
 	});
 	if (!login.ok) throw new Error(`Login failed (status ${login.status})`);
 	const token = login.data.token;
-	log(`Logged in as ${USERNAME}`);
 
 	// 3. Load existing tags (idempotency)
 	const existingTagsRes = await get("/tags", token);
@@ -1131,7 +1114,6 @@ async function main() {
 		const r = await post("/tags", { name }, token);
 		if (r.ok && r.data?.id) tagIdByName[name] = r.data.id;
 	}
-	log(`Tags ready: ${Object.keys(tagIdByName).length} total`);
 
 	// 4. Load existing notes (idempotency)
 	const existingNotesRes = await get("/notes", token);
@@ -1141,10 +1123,7 @@ async function main() {
 
 	let created = 0;
 	for (const note of NOTES) {
-		if (noteIdByTitle[note.title]) {
-			log(`  skip: "${note.title}" (already exists)`);
-			continue;
-		}
+		if (noteIdByTitle[note.title]) continue;
 		const tagLine = note.tags.length
 			? "\n\n" + note.tags.map((t) => `#${t}`).join(" ")
 			: "";
@@ -1153,10 +1132,7 @@ async function main() {
 			{ title: note.title, content: note.content + tagLine },
 			token,
 		);
-		if (!r.ok) {
-			log(`  WARN: failed to create "${note.title}"`);
-			continue;
-		}
+		if (!r.ok) continue;
 		const id = r.data?.id;
 		noteIdByTitle[note.title] = id;
 
@@ -1164,24 +1140,14 @@ async function main() {
 			await post(`/notes/${id}/tags`, { tags: note.tags }, token);
 		}
 
-		log(`  created: "${note.title}" (id: ${id})`);
 		created++;
 	}
-	log(`Notes: ${created} created, ${NOTES.length - created} skipped`);
-
 	// 5. Apply creation dates (always re-applied so re-running keeps timeline accurate)
-	log("Applying creation dates...");
 	for (const note of NOTES) {
 		const id = noteIdByTitle[note.title];
 		if (!id) continue;
-		const r = await post(
-			`/notes/${id}/created-at`,
-			{ created_at: note.created_at },
-			token,
-		);
-		if (!r.ok) log(`  WARN: failed to backdate "${note.title}"`);
+		await post(`/notes/${id}/created-at`, { created_at: note.created_at }, token);
 	}
-	log("Dates applied");
 
 	// 6. Create wiki-links
 	let linkCount = 0;
@@ -1196,12 +1162,8 @@ async function main() {
 			{ links: [{ from_id: fromId, to_ids: toIds }] },
 			token,
 		);
-		if (r.ok) {
-			log(`  linked: "${note.title}" → ${note.links.join(", ")}`);
-			linkCount += toIds.length;
-		}
+		if (r.ok) linkCount += toIds.length;
 	}
-	log(`Links: ${linkCount} created`);
 
 	// 7. Index notes for search
 	for (const note of NOTES) {
@@ -1213,18 +1175,7 @@ async function main() {
 			tags: note.tags.join(" "),
 		});
 	}
-	log("Search index updated");
-
-	log("");
-	log("─────────────────────────────────────");
-	log(" Seed complete!");
-	log(
-		` ${NOTES.length} notes · 2022–2026 · ${Object.keys(tagIdByName).length} tags`,
-	);
-	log(" Test credentials:");
-	log(`   username : ${USERNAME}`);
-	log(`   password : ${PASSWORD}`);
-	log("─────────────────────────────────────");
+	log(`Seed complete: ${created} created, ${NOTES.length - created} skipped, ${linkCount} links`);
 }
 
 main().catch((err) => {
