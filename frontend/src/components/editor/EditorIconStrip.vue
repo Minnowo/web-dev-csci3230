@@ -20,6 +20,10 @@
       </button>
 
       <div v-if="menuOpen" class="settings-menu">
+        <button class="menu-item" @click="toggle">
+          <Sun v-if="isDark" class="w-4 h-4" /> <Moon v-else class="w-4 h-4" />
+          {{ isDark ? 'Light mode' : 'Dark mode' }}
+        </button>
         <button class="menu-item logout" @click="handleLogout">
           <LogOut class="w-4 h-4" /> Log out
         </button>
@@ -30,8 +34,9 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { FileText, Search, Star, Tags, Settings, LogOut, Paperclip } from 'lucide-vue-next'
+import { FileText, Search, Star, Tags, Settings, LogOut, Paperclip, Sun, Moon } from 'lucide-vue-next'
 import { useAuth } from '../../composables/useAuth.js'
+import { useTheme } from '../../composables/useTheme.js'
 import { useRouter } from 'vue-router'
 
 defineProps({ activeView: String })
@@ -44,6 +49,7 @@ const topIcons = [
 ]
 
 const { logout } = useAuth()
+const { isDark, toggle } = useTheme()
 const router = useRouter()
 const menuOpen = ref(false)
 const settingsRef = ref(null)
@@ -121,6 +127,12 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   cursor: pointer;
   transition: background 0.12s;
   text-align: left;
+}
+.menu-item {
+  color: var(--text);
+}
+.menu-item:hover {
+  background: var(--surface-hover);
 }
 .menu-item.logout {
   color: #f87171;
