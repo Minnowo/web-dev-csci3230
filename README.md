@@ -8,13 +8,12 @@ A personal knowledge management web app inspired by Obsidian. Write notes in Mar
 
 1. [Overview](#overview)
 2. [Screenshots](#screenshots)
-3. [Tech Stack](#tech-stack)
-4. [Course Requirements](#course-requirements)
+3. [Implementation Highlights](#implementation-highlights)
+4. [Setup](#setup)
 5. [User Guide](#user-guide)
 6. [Features Reference](#features-reference)
 7. [API Overview](#api-overview)
-8. [Setup](#setup)
-9. [Project Structure](#project-structure)
+8. [Project Structure](#project-structure)
 
 ---
 
@@ -45,148 +44,93 @@ The app is a single-page application with a Vue 3 frontend and a TypeScript/Expr
 
 ---
 
-## Tech Stack
+## Implementation Highlights
 
-| Layer | Technology |
+| Area | Technology / Approach |
 |---|---|
-| Frontend framework | Vue 3 (Composition API) + Vite |
-| Styling | Tailwind CSS + CSS custom properties (theme tokens) |
-| Visualizations | D3.js (force graph, calendar heatmap) |
-| DOM manipulation | jQuery (dashboard recently-visited widget) |
-| Backend | TypeScript + Express.js |
-| Database | SQLite via `better-sqlite3` |
-| Full-text search | SQLite FTS5 with BM25 ranking + Porter stemming |
-| AI / external API | Google Gemini (`gemini-2.5-flash`) via `@google/generative-ai` |
-| Containerization | Docker + Docker Compose |
+| **Frontend** | Vue 3 (Composition API) + Vite + Tailwind CSS |
+| **Backend** | TypeScript + Express.js |
+| **Database** | SQLite via `better-sqlite3` — migrations run automatically on startup |
+| **AJAX** | All backend calls go through `frontend/src/services/api.js` using the Fetch API — no page reloads |
+| **Authentication** | Session-cookie-based auth; passwords hashed server-side; navigation guards enforce auth on all protected routes |
+| **Visualizations** | D3.js — force-directed knowledge graph with multiple interaction modes, and a GitHub-style activity calendar heatmap |
+| **Full-text search** | SQLite FTS5 with BM25 ranking + Porter stemming; title weighted 10× over content |
+| **AI (external web service)** | Google Gemini (`gemini-2.5-flash`) called server-side — analyzes note content and returns tag suggestions from the user's existing library |
+| **jQuery** | Powers the "Recently Visited" widget on the Dashboard entirely through jQuery DOM manipulation and animated scroll arrows |
+| **File imports** | `.md` files imported via upload; content loaded as a new note with `#tags` parsed automatically |
+| **Containerization** | Docker + Docker Compose — frontend, backend, and seeder run as separate services |
 
 ---
 
-## Course Requirements
+## Setup
 
-| Requirement | How it is satisfied |
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+### 1. Extract the ZIP
+
+Unzip the submission and open a terminal in the project root (`web-dev-csci3230/`).
+
+### 2. Start the app
+
+```bash
+docker-compose up --build
+```
+
+| Service | URL |
 |---|---|
-| **AJAX communication** | Every backend call goes through `frontend/src/services/api.js` using the Fetch API with `Authorization: Bearer` headers. No page reloads — all data is loaded and updated asynchronously. |
-| **User authentication** | Session-cookie-based auth. Users register with a username and password (hashed server-side). A signed token is set as an `HttpOnly` cookie on login. All protected routes reject requests without a valid session. |
-| **Data persistence** | SQLite database stores users, notes, folders, tags, links, uploaded files, and the FTS5 search index. Migrations run automatically on startup. |
-| **Multiple pages / views** | Six distinct views: Login, Register, Dashboard, Editor, Graph, and Calendar — each with its own route and component tree. |
-| **Vue.js SPA** | Built entirely with Vue 3 (Composition API). Client-side routing via Vue Router with navigation guards that enforce auth. |
-| **D3.js visualizations** | Two separate D3 visualizations: (1) force-directed knowledge graph with multiple interaction modes, (2) GitHub-style activity calendar heatmap. |
-| **Additional web technology (web service)** | Google Gemini API — an external AI web service called server-side via `POST /api/notes/:id/analyze`. Given a note's content, Gemini returns 3–6 relevant tags drawn from the user's existing tag library. |
-| **File imports** | Users can import `.md` files directly into their note library. The file is parsed, its content loaded as a new note, and any `#tags` in the body are registered automatically. |
-| **jQuery** | Used in the Dashboard to render the "Recently Visited" notes widget entirely through jQuery DOM manipulation and animated scroll arrows. |
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:3000 |
+
+### 3. Seed sample data
+
+The seeder runs automatically as part of `docker-compose up`. It populates the database with ~110 sample notes across 4 folders, pre-linked and tagged. It is idempotent — restarting Docker skips already-existing notes.
+
+### 4. Create your account
+
+Open http://localhost:5173 and click **Register**. The seeder creates notes under a default test user (`testuser` / `password123`) — log in with those credentials to explore the pre-seeded graph immediately.
 
 ---
 
 ## User Guide
 
-### 1. Register and Log In
+### Writing Notes
 
-Navigate to `/register` to create an account with a username and password. On success you are redirected to the dashboard. Returning users log in at `/login`. Sessions persist via a secure cookie — you stay logged in across page refreshes until you log out.
+Click **Create Note** on the dashboard or the `+` button in the editor sidebar. Write in Markdown — headings (`#`), bold (`**text**`), italic (`*text*`), and `[[wiki links]]`. Notes are auto-saved as you type. Press the eye icon in the toolbar to switch to a fully rendered preview.
 
----
+### Organizing with Folders
 
-### 2. Writing Notes
+The left sidebar shows your folder and note tree. Create folders, rename or delete items, and move notes between folders. Export your entire workspace as a ZIP from the sidebar header.
 
-Click **Create Note** on the dashboard or the `+` button in the editor sidebar. Notes are written in Markdown with live syntax rendering inside the editor:
+### Tagging Notes
 
-- `#` / `##` / `###` render as headings
-- `**bold**` and `*italic*` render inline
-- `[[Note Title]]` creates a wiki-style link to another note (shows up as an edge in the graph)
-- `#tagname` anywhere in the body registers a tag on the note
+Type `#tagname` anywhere in the note body to add a tag. Tags must be alphanumeric and at most 30 characters. The **This Note** panel on the right shows the current note's tags. Click **Auto-tag** (sparkle icon) to let Gemini suggest tags from your existing library — they are appended to the note content automatically.
 
-The editor toolbar provides shortcuts for bold, italic, headings, and preview mode. Press the eye icon to toggle a fully rendered Markdown preview.
+### Importing and Exporting
 
-Notes are auto-saved as you type.
+**Import:** Use the **Import** panel (editor icon strip) to upload a `.md` file — it becomes a new note with any `#tags` parsed automatically.
 
----
+**Export a note:** Download as `.md` or rendered `.html` from the toolbar.
 
-### 3. Organizing with Folders
+**Export a folder:** Right-click a folder → **Export as ZIP**.
 
-The left sidebar shows your full folder and note tree. You can:
+### Knowledge Graph
 
-- Create a new folder with the folder-plus button
-- Rename or delete folders and notes via right-click context actions
-- Drag notes between folders (or move them via the move action)
-- Collapse the sidebar to maximize writing space
-
-The entire workspace can be exported as a ZIP file from the sidebar header.
-
----
-
-### 4. Tagging Notes Manually
-
-The **This Note** panel on the right side of the editor shows all tags currently on the active note. Tags are stored directly in the note content as `#hashtags`.
-
-To add a tag:
-1. Type in the tag input and press Enter (or select from the autocomplete dropdown)
-2. Or type `#tagname` directly in the note body
-
-Tags must be alphanumeric and at most 30 characters. Removing a tag from the panel removes the corresponding `#tag` from the note body.
-
-The **All Tags** section below lists every tag across your entire library — click one to add it to the current note.
-
----
-
-### 5. AI Auto-Tagging
-
-With a note open, click the **Auto-tag** button (sparkle icon) in the tag panel. This sends the note's content to the Gemini API, which analyzes it and returns 3–6 tags selected from your existing tag library. The suggested tags are appended to the note content automatically.
-
-Auto-tagging requires a `GEMINI_API_KEY` in the backend environment (see [Setup](#setup)).
-
----
-
-### 6. Importing and Exporting
-
-**Import:** Click the upload button in the **Import** panel (editor icon strip). Select a `.md` file — its content is loaded as a new note and any `#tags` in the body are parsed and registered automatically.
-
-**Export a note:** Use the toolbar export menu to download the current note as:
-- `.md` — raw Markdown source
-- `.html` — fully rendered HTML
-
-**Export a folder:** Right-click a folder in the sidebar and choose **Export as ZIP**. The ZIP contains all notes in that folder as `.md` files.
-
----
-
-### 7. Exploring the Knowledge Graph
-
-Navigate to **Graph** from the navbar. The force-directed graph shows every note as a node and every shared tag or wiki-link as an edge. Node size scales with the number of connections.
-
-**Interaction modes (toolbar buttons):**
+Navigate to **Graph**. Notes are nodes, shared tags and wiki-links are edges, node size reflects connection count. Use the toolbar to switch modes:
 
 | Mode | What it does |
 |---|---|
-| Default | Pan and zoom freely. Click a node to focus it and highlight its neighbours. |
-| Timeline | Arranges notes along the x-axis by creation date. Nodes spread vertically within each date column (beeswarm layout). Zoom rescales the time axis. |
-| Path | Click two notes to find and highlight the shortest path between them through shared tags. |
-| Select | Click multiple notes individually to highlight them as a group. |
+| Default | Pan, zoom, click a node to focus and highlight neighbours |
+| Timeline | Arranges notes by creation date on the x-axis; zoom rescales the time axis |
+| Path | Click two notes to highlight the shortest path between them |
+| Select | Click multiple notes to highlight them as a group |
 
-**Search:** Type in the search bar to run a full-text search (FTS5). Matching nodes are spotlighted; non-matching nodes dim. Results are ranked by BM25 score with title matches weighted 10× over content.
+Type in the search bar to spotlight matching notes (FTS5, title weighted 10×).
 
-**Appearance controls:** Adjust node size, repulsion, link distance, edge thickness, and label display from the settings panel.
+### Activity Calendar
 
----
-
-### 8. Viewing the Activity Calendar
-
-Navigate to **Calendar** from the navbar. The calendar heatmap shows how many notes you created on each day, styled like GitHub's contribution graph.
-
-- Darker cells = more notes written that day
-- Hover a cell to see the exact date and note count
-- Toggle between **Year** view (full 52-week grid) and **Month** view (day-of-week grid for a single month)
-- Use the year/month arrows to navigate history
-- Summary stats at the top show your current writing streak, total notes, and active days
-
----
-
-### 9. Searching Notes
-
-Use the search bar in the editor sidebar to find notes by title or content. Search is powered by SQLite FTS5:
-
-- **Prefix matching** — typing `prog` matches "programming", "progress", etc.
-- **Porter stemming** — "running" and "run" match the same notes
-- **Weighted ranking** — title matches rank above content matches (10× weight)
-
-Results update as you type. Clicking a result opens that note in the editor.
+Navigate to **Calendar**. The heatmap shows notes created per day — darker = more. Toggle **Year** / **Month** view, navigate with the arrows, and hover any cell for the exact count. Stats at the top show your streak, total notes, and active days.
 
 ---
 
@@ -196,7 +140,7 @@ Results update as you type. Clicking a result opens that note in the editor.
 
 | Feature | Detail |
 |---|---|
-| Markdown rendering | Live inline rendering of headings, bold, italic inside a `contenteditable` div |
+| Markdown editor | Write in plain Markdown; switch to preview mode for fully rendered output |
 | Wiki links | `[[Note Title]]` syntax creates cross-note links visible in the graph |
 | Tags in content | `#tagname` in the body is the source of truth for a note's tags |
 | Preview mode | Full rendered Markdown view via the toolbar |
@@ -244,50 +188,6 @@ All endpoints are prefixed with `/api`. Protected routes require a valid session
 | **Export** | Export a note as `.md` or `.html`; export a folder as ZIP |
 | **Search** | `POST /search/hybrid` — FTS5 search with BM25 ranking |
 | **AI** | `POST /notes/:id/analyze` — Gemini auto-tag suggestion |
-
----
-
-## Setup
-
-### Prerequisites
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/Sid-26/web-dev-csci3230.git
-cd web-dev-csci3230
-```
-
-### 2. Add your Gemini API key
-
-Create `backend/.env`:
-
-```
-GEMINI_API_KEY=your_key_here
-```
-
-Get a free key at https://aistudio.google.com. The app runs without it, but the Auto-tag feature will return an error.
-
-### 3. Start the app
-
-```bash
-docker-compose up --build
-```
-
-| Service | URL |
-|---|---|
-| Frontend | http://localhost:5173 |
-| Backend | http://localhost:3000 |
-
-### 4. Seed sample data (optional)
-
-The seeder runs automatically as part of `docker-compose up`. It populates the database with ~110 sample notes across 4 folders, pre-linked and tagged. It is idempotent — running it again skips already-existing notes.
-
-### 5. Create your account
-
-Open http://localhost:5173 and click **Register**. The seeder creates notes under a default test user (`testuser` / `password123`) — log in with those credentials to explore the pre-seeded graph immediately.
 
 ---
 

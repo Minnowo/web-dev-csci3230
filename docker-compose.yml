@@ -29,7 +29,6 @@ services:
       - ./backend/src:/app/src
       - ./backend/scripts:/app/scripts
       - ./backend/.env:/app/.env
-      - ./frontend/src/services/mockData.js:/frontend/src/services/mockData.js
     env_file:
       - ./backend/.env
     environment:
