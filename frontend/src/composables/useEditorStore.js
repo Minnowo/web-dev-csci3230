@@ -454,6 +454,28 @@ export function useEditorStore() {
     return state.items.filter(i => i.name.toLowerCase().includes(q))
   }
 
+  function searchByTag(tagName) {
+    const name = tagName.toLowerCase()
+    return state.items.filter(i => {
+      if (i.type !== 'file') return false
+      return (noteTagCache[i.id] ?? []).includes(name)
+    })
+  }
+
+  async function preloadNoteTags() {
+    const files = state.items.filter(i => i.type === 'file')
+    await Promise.all(files.map(async (item) => {
+      if (panelTagCache[item.id] !== undefined) return
+      try {
+        const tags = await fetchNoteTags(item.id)
+        const dbTagNames = tags.map(t => t.name)
+        contentTagCache[item.id] = []
+        panelTagCache[item.id]   = dbTagNames
+        noteTagCache[item.id]    = dbTagNames
+      } catch { /* ignore — tag search will just miss this note */ }
+    }))
+  }
+
   /** Returns the union of content + panel tags for a note. */
   function getNoteTags(noteId) {
     return noteTagCache[noteId] ?? []
@@ -527,6 +549,7 @@ export function useEditorStore() {
         const firstFile = state.items.find(i => i.type === 'file')
         if (firstFile) await setActiveFile(firstFile.id)
       }
+      preloadNoteTags() // fire-and-forget: populates tag cache for tag: search
     } catch (err) {
       console.warn('Failed to load notes from backend, using local data:', err.message)
     } finally {
@@ -550,6 +573,7 @@ export function useEditorStore() {
     fileCount,
     recentFiles,
     searchItems,
+    searchByTag,
     updateItemIcon,
     getLinkedNotes,
     syncNoteLinks,

@@ -105,7 +105,7 @@ const props = defineProps({
   livePreview: { type: Boolean, default: true },
 })
 
-const emit = defineEmits(['update', 'rename', 'createFirst'])
+const emit = defineEmits(['update', 'rename', 'createFirst', 'tag-click'])
 
 const { updateItemIcon, state, setActiveFile, createFile, syncNoteLinks, loading, globalTags, ensureGlobalTag } = useEditorStore()
 
@@ -1136,6 +1136,8 @@ async function handleWikiLinkClick(e) {
         })
       }
     }
+  } else if (e.target.classList.contains('tag-link')) {
+    emit('tag-click', e.target.dataset.tag)
   }
 }
 
@@ -1427,6 +1429,12 @@ defineExpose({ applyFormat })
   border-radius: 3px;
   padding: 1px 4px;
   font-weight: 500;
+  cursor: pointer;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+.editor-area :deep(.tag-link:hover) {
+  box-shadow: 0 0 6px 2px color-mix(in srgb, var(--tag-color) 60%, transparent);
+  background: color-mix(in srgb, var(--tag-bg) 80%, var(--tag-color) 20%);
 }
 
 /* Tag autocomplete dropdown */

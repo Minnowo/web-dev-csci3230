@@ -13,6 +13,9 @@
         :collapsed="sidebarCollapsed"
         :get-children="getChildren"
         :search-items="searchItems"
+      :search-by-tag="searchByTag"
+      :tag-query="tagQuery"
+      @tag-query-consumed="tagQuery = ''"
         @create-file="handleCreateFile"
         @create-folder="createFolder()"
         @select-file="setActiveFile"
@@ -92,6 +95,7 @@
             @update="handleContentUpdate"
             @rename="renameItem"
             @create-first="handleCreateFile"
+            @tag-click="tag => { sidebarView = 'files'; tagQuery = 'tag:' + tag }"
           />
 
           <EditorPreview
@@ -144,7 +148,7 @@ import EditorTagPanel from './EditorTagPanel.vue'
 const {
   activeFile, rootItems, fileCount,
   getChildren, setActiveFile, createFile, createFolder,
-  updateFileContent, renameItem, deleteItem, moveItem, searchItems,
+  updateFileContent, renameItem, deleteItem, moveItem, searchItems, searchByTag,
 } = useEditorStore()
 
 const contentStats = computed(() => {
@@ -158,6 +162,7 @@ const contentStats = computed(() => {
 const viewMode = ref('edit')
 const sidebarCollapsed = ref(false)
 const sidebarView = ref('files')
+const tagQuery = ref('')
 const toolbarVisible = ref(true)
 const menuOpen = ref(false)
 const menuRef = ref(null)
