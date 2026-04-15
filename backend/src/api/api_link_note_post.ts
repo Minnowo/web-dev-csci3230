@@ -20,8 +20,6 @@ export const ApiPostLinkNote = (
 
 	const { links } = req.body as LinkNoteRequestBody;
 
-	console.info("/api/notes/link", links);
-
 	if (links.length === 0) {
 		res.status(400).json({ message: "Expected non-empty title" });
 		return;

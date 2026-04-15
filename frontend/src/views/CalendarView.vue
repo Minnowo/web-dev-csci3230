@@ -1,7 +1,7 @@
 <template>
-  <SentimentCalendar />
+  <ActivityCalendar />
 </template>
 
 <script setup>
-import SentimentCalendar from "../components/visualizations/SentimentCalendar.vue";
+import ActivityCalendar from "../components/visualizations/ActivityCalendar.vue";
 </script>

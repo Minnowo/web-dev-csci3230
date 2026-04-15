@@ -51,7 +51,7 @@ onUnmounted(() => document.removeEventListener("click", handleClickOutside));
     <RouterLink
       to="/"
       class="font-semibold text-c-text mr-3 hover:opacity-80 transition-opacity cursor-pointer"
-      >GraphNotes</RouterLink
+      >Lapis</RouterLink
     >
 
     <RouterLink to="/editor" custom v-slot="{ navigate, isActive }">

@@ -621,23 +621,40 @@ function applyTimeline() {
     .domain([minDate, maxDate])
     .range([pad, width - pad]);
 
-  // Pin x by creation date, free y
-  simNodes.forEach((n) => {
-    if (n.type === "note" && n.created_at) {
-      n.fx = timelineScale(new Date(n.created_at));
-    }
+  // Hard-pin x by creation date; pre-distribute y per column so same-date notes start spread rather than piled
+  const dateGroups = new Map();
+  noteNodes.forEach((n) => {
+    const key = new Date(n.created_at).toDateString();
+    if (!dateGroups.has(key)) dateGroups.set(key, []);
+    dateGroups.get(key).push(n);
+    n.fx = timelineScale(new Date(n.created_at));
+  });
+  const yMin = 44,
+    yMax = height - 48;
+  dateGroups.forEach((group) => {
+    const step = (yMax - yMin) / (group.length + 1);
+    group.forEach((n, i) => {
+      n.y = yMin + step * (i + 1);
+    });
   });
 
-  // Remove link force so links don't pull nodes vertically — y has meaning now
   simulation
     .force(
       "link",
       d3.forceLink([]).id((d) => d.id),
     )
-    .force("gravityX", d3.forceX(width / 2).strength(0))
-    .force("gravityY", d3.forceY(height / 2).strength(0.02)) // weak — let collision spread nodes vertically
-    .alphaDecay(0.0228) // reset from any fast-decay set by zoom handler
-    .alpha(0.8)
+    .force("charge", d3.forceManyBody().strength(-20))
+    .force("gravityX", null)
+    .force("dateX", null)
+    .force("gravityY", d3.forceY(height / 2).strength(0.04))
+    .force(
+      "collision",
+      d3
+        .forceCollide()
+        .radius((d) => (d.type === "note" ? 12 : (d._radius ?? 8) + 4)),
+    )
+    .alphaDecay(0.0228)
+    .alpha(0.3)
     .restart();
 
   // Shrink nodes to a uniform small size — position carries meaning, not size
@@ -665,6 +682,13 @@ function clearTimeline() {
   simNodes.forEach((n) => {
     if (n.type === "note") delete n.fx;
   });
+  // Restore radius before updating forces so collision radius is accurate
+  simNodes.forEach((n) => {
+    if (n.type === "note" && n._radiusPrev != null) {
+      n._radius = n._radiusPrev;
+      delete n._radiusPrev;
+    }
+  });
   if (simulation) {
     const container = containerRef.value;
     const width = container?.clientWidth || 900;
@@ -677,18 +701,17 @@ function clearTimeline() {
           .id((d) => d.id)
           .distance(appearance.linkDistance),
       )
+      .force("charge", d3.forceManyBody().strength(-appearance.repulsion))
+      .force("dateX", null)
       .force("gravityX", d3.forceX(width / 2).strength(appearance.gravity))
       .force("gravityY", d3.forceY(height / 2).strength(appearance.gravity))
+      .force(
+        "collision",
+        d3.forceCollide().radius((d) => (d._radius ?? 5) + 6),
+      )
       .alpha(0.3)
       .restart();
   }
-  // Restore node size, colors and label opacity
-  simNodes.forEach((n) => {
-    if (n.type === "note" && n._radiusPrev != null) {
-      n._radius = n._radiusPrev;
-      delete n._radiusPrev;
-    }
-  });
   svg
     ?.selectAll(".note-nodes circle")
     .attr("r", (d) => d._radius)
@@ -925,13 +948,13 @@ function draw() {
           .domain(rescaled.domain())
           .range([pad, width - pad]);
 
-        // Repin all notes to new x positions — notes now spread to fill screen
-        simNodes.forEach((n) => {
-          if (n.type === "note" && n.created_at) {
-            n.fx = viewScale(new Date(n.created_at));
-            n.x = n.fx;
-          }
-        });
+      // Repin all notes to new x positions; snap x immediately for visual coherence
+      simNodes.forEach((n) => {
+        if (n.type === "note" && n.created_at) {
+          n.fx = viewScale(new Date(n.created_at));
+          n.x = n.fx;
+        }
+      });
 
         // Update overlay (bands, gridlines, axis)
         updateTimelineOverlay(e.transform, width, height);

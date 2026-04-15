@@ -1,9 +1,8 @@
 // ── analyze.ts (David) ────────────────────────────────────────────────────────
 // POST /api/notes/:id/analyze
 //
-// Accepts a note's title + content, calls Gemini to produce:
-//   - tags          : string[]   (3-6 short topic tags)
-//   - sentiment_score: number    (-1.0 very negative → 1.0 very positive)
+// Accepts a note's content and existing tags, calls Gemini to produce:
+//   - tags: string[]  (3-6 tags selected from the available tags list)
 //
 // Requires GEMINI_API_KEY in the environment.
 
@@ -15,7 +14,7 @@ const router = express.Router();
 router.post("/notes/:id/analyze", async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
-		const { title = "", content, tags: existingTags = [] } = req.body;
+		const { content, tags: existingTags = [] } = req.body;
 
 		// ── Validation ────────────────────────────────────────────────────────
 		if (!content || (content as string).trim().length === 0) {
@@ -30,16 +29,14 @@ router.post("/notes/:id/analyze", async (req: Request, res: Response) => {
 
 		const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-		// ── Step 1: Tags + Sentiment via gemini-2.5-flash ───────────────────
-		// We ask the model to return structured JSON so we can parse it reliably.
+		// ── Tag extraction via gemini-2.5-flash ───────────────────────────────
 		const tagList = (existingTags as string[]).join(", ");
 
 		const prompt = `
 You are an assistant that analyzes personal notes.
 
-Given the following note content and a list of available tags, return a JSON object with exactly these two fields:
+Given the following note content and a list of available tags, return a JSON object with exactly this field:
 1. "tags": an array of 3-6 tags selected ONLY from the available tags list below. Do not invent new tags.
-2. "sentiment_score": a float between -1.0 (very negative) and 1.0 (very positive) representing the emotional tone of the note
 
 Available tags: ${tagList}
 
@@ -57,7 +54,7 @@ ${content}
 		const result = await model.generateContent(prompt);
 		const text = result.response.text().trim();
 
-		let parsed: { tags: string[]; sentiment_score: number };
+		let parsed: { tags: string[] };
 		try {
 			parsed = JSON.parse(text);
 		} catch {
@@ -67,20 +64,16 @@ ${content}
 				.json({ error: "Failed to parse Gemini response", raw: text });
 		}
 
-		const { tags, sentiment_score } = parsed;
+		const { tags } = parsed;
 
-		if (!Array.isArray(tags) || typeof sentiment_score !== "number") {
+		if (!Array.isArray(tags)) {
 			return res.status(500).json({
 				error: "Unexpected response shape from Gemini",
 				raw: parsed,
 			});
 		}
 
-		return res.json({
-			id,
-			tags,
-			sentiment_score,
-		});
+		return res.json({ id, tags });
 	} catch (err) {
 		console.error("Analyze route error:", err);
 		return res.status(500).json({
