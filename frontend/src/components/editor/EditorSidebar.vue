@@ -13,6 +13,9 @@
         <button class="action-btn" title="New folder" @click="$emit('createFolder')">
           <FolderPlus class="w-4 h-4" />
         </button>
+        <button class="action-btn" title="Export workspace as ZIP" @click="handleWorkspaceExport">
+          <Download class="w-4 h-4" />
+        </button>
       </div>
     </div>
 
@@ -123,9 +126,9 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { Home, Plus, FolderPlus, Search, X } from 'lucide-vue-next'
+import { Home, Plus, FolderPlus, Search, X, Download } from 'lucide-vue-next'
 import TreeItem from './TreeItem.vue'
-import { hybridSearch } from '../../services/api.js'
+import { hybridSearch, exportFolderAsZip } from '../../services/api.js'
 
 const props = defineProps({
   items: { type: Array, required: true },
@@ -218,6 +221,10 @@ watch(searchQuery, (query) => {
     }
   }, 500)
 })
+
+async function handleWorkspaceExport() {
+  await exportFolderAsZip(null)
+}
 
 function selectHybridResult(result) {
   emit('selectFile', Number(result.id))

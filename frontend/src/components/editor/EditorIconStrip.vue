@@ -30,7 +30,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { FileText, Search, Star, Tags, Settings, LogOut } from 'lucide-vue-next'
+import { FileText, Search, Star, Tags, Settings, LogOut, Paperclip } from 'lucide-vue-next'
 import { useAuth } from '../../composables/useAuth.js'
 import { useRouter } from 'vue-router'
 
@@ -40,6 +40,7 @@ defineEmits(['set-view'])
 const topIcons = [
   { icon: FileText, label: 'Files', view: 'files' },
   { icon: Tags, label: 'Tags', view: 'tags' },
+  { icon: Paperclip, label: 'Assets', view: 'assets' },
 ]
 
 const { logout } = useAuth()
