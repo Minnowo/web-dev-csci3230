@@ -33,7 +33,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 
 <template>
   <nav class="flex items-center gap-1 px-4 h-12 bg-c-nav-bg border-b border-c-nav-border text-sm text-c-text-dim transition-colors">
-    <RouterLink to="/" class="font-semibold text-c-text mr-3 hover:opacity-80 transition-opacity cursor-pointer">GraphNotes</RouterLink>
+    <RouterLink to="/" class="font-semibold text-c-text mr-3 hover:opacity-80 transition-opacity cursor-pointer">Lapis</RouterLink>
 
     <RouterLink to="/editor" custom v-slot="{ navigate, isActive }">
       <button

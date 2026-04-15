@@ -350,8 +350,7 @@ export async function exportFolderAsZip(id = null, title = null) {
 // ─── Gemini Analysis ──────────────────────────────────────────────────────────
 
 /**
- * Analyze a note with Gemini — returns tags, sentiment_score.
- * Called after a note is saved.
+ * Analyze a note with Gemini — returns suggested tags from the existing tag pool.
  */
 export async function analyzeNote(id, content, existingTags = []) {
   const res = await fetch(`${API_BASE}/notes/${id}/analyze`, {
@@ -479,11 +478,11 @@ export function buildGraphData(notes, wikiLinks = []) {
   return { noteNodes, tagNodes, wikiEdges, tagEdges }
 }
 
-// ─── Sentiment Calendar Helpers ───────────────────────────────────────────────
+// ─── Activity Calendar Helpers ────────────────────────────────────────────────
 
 /**
- * Group notes by date for the sentiment calendar.
- * Returns: { "2026-03-01": { score: 0.75, notes: [...] }, ... }
+ * Group notes by date for the activity calendar.
+ * Returns: { "2026-03-01": { count: 3, notes: [...] }, ... }
  */
 export function buildCalendarData(notes) {
   const byDate = {}
@@ -501,55 +500,3 @@ export function buildCalendarData(notes) {
   return result
 }
 
-// ─── Activity Chart Helpers ───────────────────────────────────────────────────
-
-/**
- * Count notes created per day.
- * Returns: [{ date: "2026-03-01", count: 3 }] sorted by date.
- */
-export function buildActivityData(notes) {
-  const byDate = {}
-  notes.forEach(n => {
-    const date = n.created_at.slice(0, 10)
-    byDate[date] = (byDate[date] ?? 0) + 1
-  })
-  return Object.entries(byDate)
-    .map(([date, count]) => ({ date, count }))
-    .sort((a, b) => a.date.localeCompare(b.date))
-}
-
-// ─── Tag Matrix Helpers ───────────────────────────────────────────────────────
-
-/**
- * Build tag co-occurrence matrix data.
- * Returns: { tags: [...], matrix: [[count]] } where matrix[i][j] = notes sharing tags[i] and tags[j]
- */
-export function buildTagMatrixData(notes) {
-  // Collect all unique tags
-  const tagSet = new Set()
-  notes.forEach(n => n.tags.forEach(t => tagSet.add(t)))
-  const tags = Array.from(tagSet).sort()
-
-  // Build co-occurrence counts
-  const tagIndex = {}
-  tags.forEach((t, i) => tagIndex[t] = i)
-
-  const matrix = Array.from({ length: tags.length }, () =>
-    Array(tags.length).fill(0)
-  )
-
-  notes.forEach(n => {
-    for (let i = 0; i < n.tags.length; i++) {
-      for (let j = i; j < n.tags.length; j++) {
-        const a = tagIndex[n.tags[i]]
-        const b = tagIndex[n.tags[j]]
-        if (a !== undefined && b !== undefined) {
-          matrix[a][b]++
-          if (a !== b) matrix[b][a]++
-        }
-      }
-    }
-  })
-
-  return { tags, matrix }
-}

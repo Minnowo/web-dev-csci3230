@@ -3,7 +3,7 @@
 //
 // Full-text search using SQLite FTS5 with BM25 ranking and Porter stemming.
 // Each query term is prefix-matched (guitar* matches guitars, guitarist).
-// Field weights: title=10×, tags=5×, content=1×.
+// Field weights: title=10×, content=1×.
 // BM25 returns negative values — most negative = best match.
 // Scores are normalised to 0–1 before returning to the frontend.
 

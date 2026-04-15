@@ -60,7 +60,6 @@ ExpressApp.use("/api", noteBackdateRouter);
 
 ExpressApp.get("/", (req: Request, res: Response) => {
 	res.send("Hello from TypeScript + Express 🚀");
-	console.log("hello world");
 });
 
 // keep it simple, put literally all endpoints here so we can easily read them.

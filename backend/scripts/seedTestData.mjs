@@ -1042,6 +1042,98 @@ const NOTES = [
 	},
 ];
 
+// ─── Folders ─────────────────────────────────────────────────────────────────
+
+const FOLDERS = ["Engineering", "Work & Projects", "Health & Fitness", "Personal"];
+
+// Maps note title → folder name. Notes not listed here stay at root.
+const NOTE_FOLDERS = {
+	// Engineering
+	"Web Development Fundamentals":     "Engineering",
+	"Introduction to Databases":        "Engineering",
+	"Linux Command Line Basics":        "Engineering",
+	"Git and Version Control":          "Engineering",
+	"CSS Layout Deep Dive":             "Engineering",
+	"TypeScript Fundamentals":          "Engineering",
+	"Backend Architecture":             "Engineering",
+	"Database Design":                  "Engineering",
+	"API Design Patterns":              "Engineering",
+	"System Design Notes":              "Engineering",
+	"Vue 3 Composition API":            "Engineering",
+	"Docker and Containers":            "Engineering",
+	"Frontend Components":              "Engineering",
+	"Graph Visualization Notes":        "Engineering",
+	"Data Analysis Methods":            "Engineering",
+	"Performance Optimisation":         "Engineering",
+	"Security Fundamentals":            "Engineering",
+	"Machine Learning Basics":          "Engineering",
+	"Architecture Decision Records":    "Engineering",
+	"Observability and Logging":        "Engineering",
+	"Distributed Systems Notes":        "Engineering",
+	"Open Source Contributions":        "Engineering",
+	"JavaScript Closures":              "Engineering",
+	"CSS Custom Properties":            "Engineering",
+	"Code Review Checklist":            "Engineering",
+	"API Error Handling Patterns":      "Engineering",
+	"JavaScript Prototypes":            "Engineering",
+	"Flexbox Alignment Guide":          "Engineering",
+	"DDIA Reading Notes":               "Engineering",
+	"Kafka Fundamentals":               "Engineering",
+	"Kafka Consumer Groups":            "Engineering",
+	"Database Partitioning (DDIA)":     "Engineering",
+	"Graph View Improvements":          "Engineering",
+	"Firefox Pointer Fix":              "Engineering",
+	"LWC Lifecycle Hooks":              "Engineering",
+	"Apex Trigger Frameworks":          "Engineering",
+	"Thesis: Agentic Resilience":       "Engineering",
+	"Multi-Agent Logic Flow":           "Engineering",
+	"Agentforce Quote POC":             "Engineering",
+	"Dependency Audit":                 "Engineering",
+
+	// Work & Projects
+	"Q1 Planning Meeting":              "Work & Projects",
+	"Team Standup Notes":               "Work & Projects",
+	"Sprint Retrospective":             "Work & Projects",
+	"Testing Strategies":               "Work & Projects",
+	"Agile Ceremonies Overview":        "Work & Projects",
+	"PR Review: Auth Module":           "Work & Projects",
+	"Pair Programming Notes":           "Work & Projects",
+	"Daily Standup: Sprint 12":         "Work & Projects",
+	"Q1 Planning Meeting 2026":         "Work & Projects",
+	"Weekly Retrospective":             "Work & Projects",
+	"Week in Review":                   "Work & Projects",
+
+	// Health & Fitness
+	"Workout Plan":                     "Health & Fitness",
+	"Running Log":                      "Health & Fitness",
+	"Half Marathon Training":           "Health & Fitness",
+	"Half Marathon Race Day":           "Health & Fitness",
+	"Sub-2hr Training Block":           "Health & Fitness",
+
+	// Personal
+	"First Coding Project":             "Personal",
+	"Starting My Reading Journey":      "Personal",
+	"Personal Goals 2022":              "Personal",
+	"Cooking Basics":                   "Personal",
+	"Recipe Collection":                "Personal",
+	"Clean Code Review":                "Personal",
+	"Reading List":                     "Personal",
+	"Cooking Journal":                  "Personal",
+	"Personal Goals 2023":              "Personal",
+	"Meal Prep Routine":                "Personal",
+	"Year in Review 2024":              "Personal",
+	"Personal Goals 2025":              "Personal",
+	"Travel Plans":                     "Personal",
+	"Year in Review 2025":              "Personal",
+	"Learning Roadmap 2026":            "Personal",
+	"Personal Goals 2026":              "Personal",
+	"Reflections on Four Years of Notes": "Personal",
+	"Blog Post Draft":                  "Personal",
+	"Houseplant Care Log":              "Personal",
+	"Weekly Bullion Watch":             "Personal",
+	"Record Session: Jazz Night":       "Personal",
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function log(msg) {
@@ -1175,6 +1267,25 @@ async function main() {
 			tags: note.tags.join(" "),
 		});
 	}
+
+	// 8. Create folders (idempotent)
+	const existingFoldersRes = await get("/folders", token);
+	const folderIdByName = {};
+	for (const f of existingFoldersRes.data ?? []) folderIdByName[f.name] = f.id;
+	for (const name of FOLDERS) {
+		if (folderIdByName[name]) continue;
+		const r = await post("/folder", { title: name, parent_folder_id: null }, token);
+		if (r.ok && r.data?.id) folderIdByName[name] = r.data.id;
+	}
+
+	// 9. Move notes into folders
+	for (const [title, folderName] of Object.entries(NOTE_FOLDERS)) {
+		const noteId = noteIdByTitle[title];
+		const folderId = folderIdByName[folderName];
+		if (!noteId || !folderId) continue;
+		await post(`/notes/${noteId}/move`, { parent_folder_id: folderId }, token);
+	}
+
 	log(`Seed complete: ${created} created, ${NOTES.length - created} skipped, ${linkCount} links`);
 }
 
