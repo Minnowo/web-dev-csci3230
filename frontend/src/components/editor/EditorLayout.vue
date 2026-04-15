@@ -56,9 +56,9 @@
                 <component :is="toolbarVisible ? EyeOff : Eye" class="w-4 h-4" />
                 {{ toolbarVisible ? 'Hide Toolbar' : 'Show Toolbar' }}
               </button>
-              <button class="menu-item" @click="viewMode = 'split'; menuOpen = false">
+              <button class="menu-item" @click="toggleSplitViewMode();">
                 <Columns2 class="w-4 h-4" />
-                Split View
+                {{ viewMode !== 'split' ? 'Split View' : 'Inline' }}
               </button>
             </div>
           </div>
@@ -176,6 +176,11 @@ function handleFormat(command) {
 
 function toggleViewMode() {
   viewMode.value = viewMode.value === 'preview' ? 'edit' : 'preview'
+}
+
+function toggleSplitViewMode() {
+  viewMode.value = viewMode.value === 'split' ? 'edit' : 'split'
+  menuOpen.value = false;
 }
 
 function toggleToolbar() {
