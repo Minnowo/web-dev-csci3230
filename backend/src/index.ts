@@ -31,10 +31,12 @@ import { ApiPostNoteTags } from "./api/api_note_tags_post.js";
 import { ApiGetFilesList } from "./api/api_files_list_get.js";
 import { ApiPostFileUpload } from "./api/api_post_file_upload.js";
 import { runUploadThen } from "./middleware/multerUpload.js";
+import { ApiGetFileDownload } from "./api/api_file_download_get.js";
 import { ApiGetFolderChildren } from "./api/api_folder_children_get.js";
 import { ApiGetFolders } from "./api/api_folders_get.js";
 import { ApiGetFolderExport } from "./api/api_folder_export_get.js";
 import { ApiGetNoteExportMd } from "./api/api_note_export_md_get.js";
+import { ApiGetNoteExportHtml } from "./api/api_note_export_html_get.js";
 
 export const ExpressApp = express();
 const PORT = 3000;
@@ -87,6 +89,11 @@ ExpressApp.get(
 	MiddleWareAuthenticateToken,
 	ApiGetNoteExportMd,
 );
+ExpressApp.get(
+	"/api/notes/:id/export/html",
+	MiddleWareAuthenticateToken,
+	ApiGetNoteExportHtml,
+);
 ExpressApp.post(
 	"/api/notes/:id/update",
 	MiddleWareAuthenticateToken,
@@ -106,6 +113,11 @@ ExpressApp.post(
 	"/api/files/upload",
 	MiddleWareAuthenticateToken,
 	runUploadThen(ApiPostFileUpload),
+);
+ExpressApp.get(
+	"/api/files/:id/download",
+	MiddleWareAuthenticateToken,
+	ApiGetFileDownload,
 );
 
 ExpressApp.get("/api/folders", MiddleWareAuthenticateToken, ApiGetFolders);
