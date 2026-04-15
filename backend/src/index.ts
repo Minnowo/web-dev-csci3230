@@ -16,6 +16,7 @@ import { ApiPostDeleteNote } from "./api/api_delete_note_post.js";
 import analyzeRouter from "./routes/analyze.js";
 import hybridSearchRouter from "./routes/hybridSearch.js";
 import noteIndexRouter from "./routes/noteIndex.js";
+import noteBackdateRouter from "./routes/noteBackdate.js";
 import { ApiPostLinkNote } from "./api/api_link_note_post.js";
 import { ApiPostDeleteNoteLinks } from "./api/api_delete_link_note_post.js";
 import { ApiGetNoteLinks } from "./api/api_note_links_get.js";
@@ -43,6 +44,7 @@ ExpressApp.get("/api/health", (req: Request, res: Response) => {
 ExpressApp.use("/api", analyzeRouter);
 ExpressApp.use("/api", hybridSearchRouter);
 ExpressApp.use("/api", noteIndexRouter);
+ExpressApp.use("/api", noteBackdateRouter);
 
 ExpressApp.get("/", (req: Request, res: Response) => {
 	res.send("Hello from TypeScript + Express 🚀");

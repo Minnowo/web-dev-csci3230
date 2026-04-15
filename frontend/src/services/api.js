@@ -357,23 +357,16 @@ export function buildGraphData(notes, wikiLinks = []) {
  */
 export function buildCalendarData(notes) {
   const byDate = {}
-  notes
-    .filter(n => n.sentiment_score !== null && n.sentiment_score !== undefined)
-    .forEach(n => {
-      const date = n.created_at.slice(0, 10) // "YYYY-MM-DD"
-      if (!byDate[date]) byDate[date] = { scores: [], notes: [] }
-      byDate[date].scores.push(n.sentiment_score)
-      byDate[date].notes.push({ id: n.id, title: n.title, score: n.sentiment_score })
-    })
-
-  // Average score per day
+  notes.forEach(n => {
+    const dateStr = n.created_at || n.updated_at
+    if (!dateStr) return
+    const date = dateStr.slice(0, 10) // "YYYY-MM-DD"
+    if (!byDate[date]) byDate[date] = { notes: [] }
+    byDate[date].notes.push({ id: n.id, title: n.title })
+  })
   const result = {}
-  Object.entries(byDate).forEach(([date, { scores, notes }]) => {
-    result[date] = {
-      score: scores.reduce((a, b) => a + b, 0) / scores.length,
-      count: notes.length,
-      notes
-    }
+  Object.entries(byDate).forEach(([date, { notes }]) => {
+    result[date] = { count: notes.length, notes }
   })
   return result
 }

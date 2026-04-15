@@ -4,7 +4,7 @@ import * as d3 from 'd3'
 import { useRouter } from 'vue-router'
 import { getNotes, fetchAllLinks, buildGraphData, hybridSearch } from '../../services/api.js'
 import { useEditorStore } from '../../composables/useEditorStore.js'
-import { ChevronUp, ChevronDown, Tag, Link2, BarChart2, Sliders, Lasso, Route } from 'lucide-vue-next'
+import { ChevronUp, ChevronDown, Tag, Link2, BarChart2, Sliders, Lasso, Route, CalendarDays } from 'lucide-vue-next'
 
 const router = useRouter()
 const { setActiveFile } = useEditorStore()
@@ -53,7 +53,7 @@ const containerRef = ref(null)
 const loading      = ref(true)
 const error        = ref(null)
 const drawerOpen   = ref(false)
-const activeTab    = ref('stats')  // 'stats' | 'appearance'
+const statsOpen    = ref(true)
 
 const searchQuery   = ref('')
 const searchResults = ref([])
@@ -73,14 +73,27 @@ const pathMode   = ref(false)
 const pathFrom   = ref(null)   // source node
 const pathResult = ref(null)   // { nodeIds: Set, edgeKeys: Set, steps: number } | { steps: -1 }
 
+// ─── Timeline mode ────────────────────────────────────────────────────────────
+const timelineMode = ref(false)
+
 watch(selectionMode, on => {
-  if (on) { focusedCluster.value = null; focusedNode.value = null; pathMode.value = false }
+  if (on) { focusedCluster.value = null; focusedNode.value = null; pathMode.value = false; timelineMode.value = false }
   else    { customSelection.value = new Set() }
 })
 
 watch(pathMode, on => {
-  if (on) { selectionMode.value = false; focusedCluster.value = null; focusedNode.value = null }
+  if (on) { selectionMode.value = false; focusedCluster.value = null; focusedNode.value = null; timelineMode.value = false }
   pathFrom.value = null; pathResult.value = null
+})
+
+watch(timelineMode, on => {
+  if (on) {
+    selectionMode.value = false; pathMode.value = false
+    focusedCluster.value = null; focusedNode.value = null
+    applyTimeline()
+  } else {
+    clearTimeline()
+  }
 })
 
 // ─── Shortest path (BFS on undirected wiki-links) ─────────────────────────────
@@ -145,9 +158,12 @@ let simulation    = null
 let svg              = null
 let zoomBehavior     = null
 let gZoom            = null   // zoom layer — needed for path overlay
-let pathOverlayGroup = null   // amber path edge overlay
-let initialFitDone   = false
-const positionCache  = new Map()
+let pathOverlayGroup  = null   // amber path edge overlay
+let timelineAxisGroup = null   // date axis overlay (timeline mode)
+let timelineScale     = null   // d3.scaleTime used for timeline x pinning
+let currentSimLinks   = []     // stored for restoring link force after timeline
+let initialFitDone    = false
+const positionCache   = new Map()
 
 // ─── Active node/link arrays (rebuilt when toggles change) ────────────────────
 let allNodes = []
@@ -366,13 +382,33 @@ const effectiveVisibleIds = computed(() => {
   return new Set([...matchedIds, ...neighborIds].filter(id => base.has(id)))
 })
 
-const statsNodes = computed(() => effectiveVisibleIds.value.size)
-const statsLinks = computed(() => {
-  void showTagNodes.value
+const statsNoteCount = computed(() => {
+  const visibleIds = effectiveVisibleIds.value
+  return allNodes.filter(n => n.type === 'note' && visibleIds.has(n.id)).length
+})
+const statsTagCount = computed(() => {
+  const visibleIds = effectiveVisibleIds.value
+  return allNodes.filter(n => n.type === 'tag' && visibleIds.has(n.id)).length
+})
+const statsNoteLinkCount = computed(() => {
   void showWikiLinks.value
   const visibleIds = effectiveVisibleIds.value
   const matchedIds = effectiveMatchedIds.value
   return allLinks.filter(l => {
+    if (l.type !== 'wiki') return false
+    const s = l.source?.id ?? l.source
+    const t = l.target?.id ?? l.target
+    if (!visibleIds.has(s) || !visibleIds.has(t)) return false
+    if (matchedIds && !matchedIds.has(s) && !matchedIds.has(t)) return false
+    return true
+  }).length
+})
+const statsTagLinkCount = computed(() => {
+  void showTagNodes.value
+  const visibleIds = effectiveVisibleIds.value
+  const matchedIds = effectiveMatchedIds.value
+  return allLinks.filter(l => {
+    if (l.type !== 'tag') return false
     const s = l.source?.id ?? l.source
     const t = l.target?.id ?? l.target
     if (!visibleIds.has(s) || !visibleIds.has(t)) return false
@@ -450,6 +486,213 @@ async function loadAndDraw() {
   }
 }
 
+// ─── Timeline ─────────────────────────────────────────────────────────────────
+
+const YEAR_COLORS = ['#94a3b8', '#60a5fa', '#34d399', '#f59e0b', '#c084fc', '#f87171']
+
+function yearColor(dateStr) {
+  if (!dateStr) return appearance.nodeColor
+  const year = new Date(dateStr).getFullYear()
+  const noteNodes = simNodes.filter(n => n.type === 'note' && n.created_at)
+  const years = [...new Set(noteNodes.map(n => new Date(n.created_at).getFullYear()))].sort()
+  const idx = years.indexOf(year)
+  return YEAR_COLORS[idx % YEAR_COLORS.length]
+}
+
+function applyTimeline() {
+  if (!svg || !simulation) return
+  const container = containerRef.value
+  const width  = container.clientWidth  || 900
+  const height = container.clientHeight || 600
+  const pad = 80
+
+  const noteNodes = simNodes.filter(n => n.type === 'note' && n.created_at)
+  if (!noteNodes.length) return
+
+  const dateExtent = d3.extent(noteNodes, n => new Date(n.created_at))
+  const minDate = d3.timeYear.floor(dateExtent[0])
+  const maxDate = d3.timeYear.ceil(dateExtent[1])
+
+  timelineScale = d3.scaleTime()
+    .domain([minDate, maxDate])
+    .range([pad, width - pad])
+
+  // Pin x by creation date, free y
+  simNodes.forEach(n => {
+    if (n.type === 'note' && n.created_at) {
+      n.fx = timelineScale(new Date(n.created_at))
+    }
+  })
+
+  // Remove link force so links don't pull nodes vertically — y has meaning now
+  simulation
+    .force('link', d3.forceLink([]).id(d => d.id))
+    .force('gravityX', d3.forceX(width / 2).strength(0))
+    .force('gravityY', d3.forceY(height / 2).strength(0.02))  // weak — let collision spread nodes vertically
+    .alphaDecay(0.0228)   // reset from any fast-decay set by zoom handler
+    .alpha(0.8).restart()
+
+  // Shrink nodes to a uniform small size — position carries meaning, not size
+  const tlRadius = 5
+  simNodes.forEach(n => { if (n.type === 'note') { n._radiusPrev = n._radius; n._radius = tlRadius } })
+  svg.selectAll('.note-nodes circle').attr('r', tlRadius)
+
+  // Color nodes by year and force labels visible
+  svg.selectAll('.note-nodes circle')
+    .attr('fill', d => yearColor(d.created_at))
+    .attr('stroke', d => lightenHex(yearColor(d.created_at), 30))
+  svg.selectAll('.labels .note-label').attr('opacity', 1)
+
+  // Draw overlay (bands + gridlines + axis)
+  drawTimelineOverlay(width, height)
+}
+
+function clearTimeline() {
+  simNodes.forEach(n => { if (n.type === 'note') delete n.fx })
+  if (simulation) {
+    const container = containerRef.value
+    const width  = container?.clientWidth  || 900
+    const height = container?.clientHeight || 600
+    simulation
+      .force('link', d3.forceLink(currentSimLinks).id(d => d.id).distance(appearance.linkDistance))
+      .force('gravityX', d3.forceX(width / 2).strength(appearance.gravity))
+      .force('gravityY', d3.forceY(height / 2).strength(appearance.gravity))
+      .alpha(0.3).restart()
+  }
+  // Restore node size, colors and label opacity
+  simNodes.forEach(n => { if (n.type === 'note' && n._radiusPrev != null) { n._radius = n._radiusPrev; delete n._radiusPrev } })
+  svg?.selectAll('.note-nodes circle')
+    .attr('r', d => d._radius)
+    .attr('fill', appearance.nodeColor)
+    .attr('stroke', lightenHex(appearance.nodeColor, 40))
+  if (timelineAxisGroup) { timelineAxisGroup.remove(); timelineAxisGroup = null }
+  timelineScale = null
+}
+
+function drawTimelineOverlay(width, height) {
+  svg.selectAll('.timeline-overlay').remove()
+  timelineAxisGroup = svg.append('g').attr('class', 'timeline-overlay')
+    .style('pointer-events', 'none')  // let mouse events pass through to nodes
+  timelineAxisGroup.append('g').attr('class', 'tl-bands')
+  timelineAxisGroup.append('g').attr('class', 'tl-gridlines')
+  timelineAxisGroup.append('g').attr('class', 'tl-top-labels')
+  timelineAxisGroup.append('g').attr('class', 'tl-axis')
+    .attr('transform', `translate(0,${height - 28})`)
+  updateTimelineOverlay(d3.zoomTransform(svg.node()), width, height)
+}
+
+function updateTimelineOverlay(transform, width, height) {
+  if (!timelineAxisGroup || !timelineScale) return
+  const k = transform.k
+  const rescaled = transform.rescaleX(timelineScale)
+  const [d0, d1] = rescaled.domain()
+  const axisH = height - 28
+  const allYears = d3.timeYear.range(timelineScale.domain()[0], timelineScale.domain()[1])
+  const noteNodes = simNodes.filter(n => n.type === 'note' && n.created_at)
+  const sortedYears = [...new Set(noteNodes.map(n => new Date(n.created_at).getFullYear()))].sort()
+
+  // ── Year bands ──
+  const bandColors = ['rgba(255,255,255,0.025)', 'rgba(255,255,255,0.055)']
+  timelineAxisGroup.select('.tl-bands').selectAll('rect').data(allYears).join('rect')
+    .attr('x', d => rescaled(d))
+    .attr('y', 0)
+    .attr('width', d => Math.max(0, rescaled(d3.timeYear.offset(d, 1)) - rescaled(d)))
+    .attr('height', axisH)
+    .attr('fill', (d, i) => bandColors[i % 2])
+
+  // Year labels at top of each band
+  timelineAxisGroup.select('.tl-top-labels').selectAll('.yr-label').data(allYears).join('text')
+    .attr('class', 'yr-label')
+    .attr('x', d => (rescaled(d) + rescaled(d3.timeYear.offset(d, 1))) / 2)
+    .attr('y', 16)
+    .attr('text-anchor', 'middle')
+    .style('fill', d => { const idx = sortedYears.indexOf(d.getFullYear()); return YEAR_COLORS[idx % YEAR_COLORS.length] })
+    .style('font-size', '11px')
+    .style('font-weight', '700')
+    .style('letter-spacing', '1px')
+    .style('font-family', 'ui-sans-serif, system-ui, sans-serif')
+    .style('opacity', 0.8)
+    .text(d => d.getFullYear())
+
+  // ── Adaptive gridlines ──
+  const gridG = timelineAxisGroup.select('.tl-gridlines')
+  gridG.selectAll('*').remove()
+
+  // Month gridlines (visible when zoomed in enough)
+  if (k >= 0.35) {
+    const months = d3.timeMonth.range(d3.timeMonth.floor(d0), d3.timeMonth.ceil(d1))
+      .filter(m => m > timelineScale.domain()[0] && m < timelineScale.domain()[1])
+
+    gridG.selectAll('.tl-month-line').data(months).join('line')
+      .attr('class', 'tl-month-line')
+      .attr('x1', d => rescaled(d)).attr('x2', d => rescaled(d))
+      .attr('y1', 22).attr('y2', axisH)
+      .attr('stroke', 'var(--border)')
+      .attr('stroke-opacity', 0.6)
+
+    if (k >= 0.7) {
+      gridG.selectAll('.tl-month-label').data(months).join('text')
+        .attr('class', 'tl-month-label')
+        .attr('x', d => rescaled(d) + 3).attr('y', 32)
+        .style('fill', 'var(--text-muted)')
+        .style('font-size', '9px')
+        .style('font-family', 'ui-sans-serif, system-ui, sans-serif')
+        .text(d => d3.timeFormat('%b')(d))
+    }
+  }
+
+  // Day gridlines — only when visible range spans ≤ 90 days
+  const visibleDays = (d1 - d0) / 86400000
+  if (k >= 1.8 && visibleDays <= 90) {
+    const days = d3.timeDay.range(d3.timeDay.floor(d0), d3.timeDay.ceil(d1))
+      .filter(d => d > timelineScale.domain()[0] && d < timelineScale.domain()[1])
+
+    gridG.selectAll('.tl-day-line').data(days).join('line')
+      .attr('class', 'tl-day-line')
+      .attr('x1', d => rescaled(d)).attr('x2', d => rescaled(d))
+      .attr('y1', 22).attr('y2', axisH)
+      .attr('stroke', 'var(--border)')
+      .attr('stroke-opacity', 0.3)
+      .attr('stroke-dasharray', '2,3')
+
+    if (visibleDays <= 60) {
+      gridG.selectAll('.tl-day-label').data(days).join('text')
+        .attr('class', 'tl-day-label')
+        .attr('x', d => rescaled(d) + 2).attr('y', 44)
+        .style('fill', 'var(--text-muted)')
+        .style('font-size', '8px')
+        .style('font-family', 'ui-sans-serif, system-ui, sans-serif')
+        .text(d => d.getDate())
+    }
+  }
+
+  // ── Bottom axis (adaptive tick density) ──
+  let tickInterval, tickFmt
+  if (visibleDays <= 90) {
+    tickInterval = d3.timeDay.every(Math.max(1, Math.round(visibleDays / 10)))
+    tickFmt = d3.timeFormat('%b %d')
+  } else if (k >= 0.35) {
+    const visibleMonths = (d1 - d0) / (30 * 86400000)
+    tickInterval = d3.timeMonth.every(Math.max(1, Math.round(visibleMonths / 8)))
+    tickFmt = d3.timeFormat('%b %Y')
+  } else {
+    tickInterval = d3.timeYear.every(1)
+    tickFmt = d3.timeFormat('%Y')
+  }
+
+  const axisFn = d3.axisBottom(rescaled).ticks(tickInterval).tickFormat(tickFmt)
+  timelineAxisGroup.select('.tl-axis').call(axisFn)
+  styleAxis(timelineAxisGroup.select('.tl-axis'))
+}
+
+function styleAxis(axisG) {
+  axisG.selectAll('path, line').attr('stroke', 'var(--border)')
+  axisG.selectAll('text')
+    .style('fill', 'var(--text-muted)')
+    .style('font-size', '10px')
+    .style('font-family', 'ui-sans-serif, system-ui, sans-serif')
+}
+
 function draw() {
   if (!svgRef.value) return
   const container = containerRef.value
@@ -473,7 +716,41 @@ function draw() {
   gZoom = svg.append('g').attr('class', 'zoom-layer')
   const g = gZoom
 
-  zoomBehavior = d3.zoom().scaleExtent([0.1, 4]).on('zoom', e => g.attr('transform', e.transform))
+  zoomBehavior = d3.zoom().scaleExtent([0.1, 8]).on('zoom', e => {
+    if (timelineMode.value && timelineScale) {
+      // ── Semantic timeline zoom ──────────────────────────────────────────────
+      // Instead of visually scaling the graph layer, narrow/shift the visible
+      // date range and reposition notes to fill the screen width accordingly.
+      const container = containerRef.value
+      const width  = container?.clientWidth  || 900
+      const height = container?.clientHeight || 600
+      const pad = 80
+
+      // Derive the visible date range from the zoom transform
+      const rescaled = e.transform.rescaleX(timelineScale)
+      const viewScale = d3.scaleTime()
+        .domain(rescaled.domain())
+        .range([pad, width - pad])
+
+      // Repin all notes to new x positions — notes now spread to fill screen
+      simNodes.forEach(n => {
+        if (n.type === 'note' && n.created_at) {
+          n.fx = viewScale(new Date(n.created_at))
+          n.x  = n.fx
+        }
+      })
+
+      // Update overlay (bands, gridlines, axis)
+      updateTimelineOverlay(e.transform, width, height)
+
+      // Settle y positions for new layout (fast decay so it's not jarring)
+      simulation?.alphaDecay(0.25).alpha(0.15).restart()
+
+      // Do NOT apply zoom transform to the node layer — x is handled via fx
+    } else {
+      g.attr('transform', e.transform)
+    }
+  })
   svg.call(zoomBehavior)
 
   // Seed positions from cache
@@ -498,6 +775,7 @@ function draw() {
 
   const visibleSimNodes = simNodeData.filter(n => visibleNodeIds.value.has(n.id))
   simNodes = visibleSimNodes
+  currentSimLinks = simLinks
 
   const maxConn = d3.max(visibleSimNodes.filter(n => n.type === 'note'), d => d.connectionCount) || 1
   const radiusScale = d3.scaleSqrt()
@@ -536,8 +814,8 @@ function draw() {
     .selectAll('line')
     .data(simLinks.filter(l => l.type === 'tag'))
     .join('line')
-    .attr('stroke', '#7c3aed')
-    .attr('stroke-opacity', appearance.edgeOpacity * 0.45)
+    .attr('stroke', '#a855f7')
+    .attr('stroke-opacity', appearance.edgeOpacity * 0.75)
     .attr('stroke-width', Math.max(appearance.edgeThickness * 0.5, 0.8))
     .attr('stroke-dasharray', '3,3')
 
@@ -612,6 +890,17 @@ function draw() {
   })
 
   simulation.on('tick', () => {
+    // Keep nodes within the visible area in timeline mode (dynamic, not hardcoded)
+    if (timelineMode.value && containerRef.value) {
+      const h    = containerRef.value.clientHeight
+      const yMin = 36        // below year labels at top
+      const yMax = h - 40   // above the axis bar at bottom
+      simNodes.forEach(n => {
+        if (n.y < yMin) { n.y = yMin; if (n.vy < 0) n.vy *= -0.1 }
+        if (n.y > yMax) { n.y = yMax; if (n.vy > 0) n.vy *= -0.1 }
+      })
+    }
+
     const matchedIds = effectiveMatchedIds.value
 
     // Update path overlay positions as nodes move
@@ -683,10 +972,16 @@ function onHover(event, d) {
   hoveredNode.value = d
 
   // Project node centre to screen space using zoom transform + SVG bounding rect
-  const transform    = d3.zoomTransform(svg.node())
-  const [sx, sy]     = transform.apply([d.x, d.y])
-  const rect         = svgRef.value.getBoundingClientRect()
-  const screenR      = (d._radius ?? 10) * transform.k  // node radius in screen px
+  // In timeline mode gZoom has no transform — nodes sit at raw simulation coords
+  const transform = d3.zoomTransform(svg.node())
+  const rect      = svgRef.value.getBoundingClientRect()
+  let sx, sy, screenR
+  if (timelineMode.value) {
+    sx = d.x; sy = d.y; screenR = d._radius ?? 10
+  } else {
+    ;[sx, sy] = transform.apply([d.x, d.y])
+    screenR = (d._radius ?? 10) * transform.k
+  }
   const cardW        = 224  // w-56 = 14rem
   const gap          = 12
 
@@ -830,9 +1125,20 @@ function panToNode(node) {
 
 function dragBehavior() {
   return d3.drag()
-    .on('start', (event, d) => { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y })
-    .on('drag',  (event, d) => { d.fx = event.x; d.fy = event.y })
-    .on('end',   (event, d) => { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null })
+    .on('start', (event, d) => {
+      if (!event.active) simulation.alphaTarget(0.3).restart()
+      if (!timelineMode.value) d.fx = d.x
+      d.fy = d.y
+    })
+    .on('drag',  (event, d) => {
+      if (!timelineMode.value) d.fx = event.x
+      d.fy = event.y
+    })
+    .on('end',   (event, d) => {
+      if (!event.active) simulation.alphaTarget(0)
+      if (!timelineMode.value) d.fx = null
+      d.fy = null
+    })
 }
 
 function resetZoom() {
@@ -938,7 +1244,7 @@ watch(pathFrom,        () => updateOpacity())
 watch(pathResult,      () => { drawPathOverlay(); updateOpacity() })
 
 onMounted(() => { loadAndDraw() })
-onUnmounted(() => { if (simulation) simulation.stop() })
+onUnmounted(() => { if (simulation) simulation.stop(); if (timelineAxisGroup) timelineAxisGroup.remove() })
 </script>
 
 <template>
@@ -980,6 +1286,14 @@ onUnmounted(() => { if (simulation) simulation.stop() })
       >
         <Route class="w-3.5 h-3.5" />
         Path
+      </button>
+      <button
+        class="toggle-btn" :class="{ active: timelineMode }"
+        title="Arrange notes by creation date"
+        @click="timelineMode = !timelineMode"
+      >
+        <CalendarDays class="w-3.5 h-3.5" />
+        Timeline
       </button>
 
       <div class="w-px h-4 bg-c-border" />
@@ -1049,78 +1363,36 @@ onUnmounted(() => { if (simulation) simulation.stop() })
       </button>
     </div>
 
-    <!-- ── Graph area ──────────────────────────────────────────────────────── -->
-    <div ref="containerRef" class="relative flex-1 overflow-hidden">
-      <div v-if="loading" class="absolute inset-0 flex items-center justify-center text-c-text-muted text-sm">
-        Loading graph…
-      </div>
-      <div v-else-if="error" class="absolute inset-0 flex items-center justify-center text-red-400 text-sm">
-        {{ error }}
-      </div>
-      <svg ref="svgRef" class="w-full h-full" />
+    <!-- ── Middle: stats panel + graph ──────────────────────────────────── -->
+    <div class="flex flex-1 overflow-hidden">
 
-    </div>
-
-    <!-- ── Hover card ────────────────────────────────────────────────────────── -->
-    <Teleport to="body">
-      <Transition name="card-fade">
-        <div v-if="hoveredNode"
-          class="fixed z-50 bg-c-surface border border-c-border rounded-xl shadow-2xl p-3 text-sm w-56 backdrop-blur-sm"
-          :style="{ left: tooltipX + 'px', top: tooltipY + 'px' }"
-          @mouseenter="onCardEnter" @mouseleave="onCardLeave">
-          <template v-if="hoveredNode.type === 'note'">
-            <p class="font-semibold text-c-text mb-1 truncate">{{ hoveredNode.title }}</p>
-            <div class="flex flex-wrap gap-1 mb-2">
-              <span v-for="tag in hoveredNode.tags" :key="tag" class="tag-chip">#{{ tag }}</span>
-            </div>
-            <p class="text-c-text-muted text-xs">{{ hoveredNode.connectionCount }} connection{{ hoveredNode.connectionCount !== 1 ? 's' : '' }}</p>
-            <p v-if="hoveredNode.updated_at" class="text-c-text-muted text-xs mb-2">Updated {{ new Date(hoveredNode.updated_at).toLocaleDateString() }}</p>
-            <button @click="navigateToNote(hoveredNode.id)"
-              class="w-full text-xs py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition">
-              Open in editor →
-            </button>
-          </template>
-          <template v-else>
-            <p class="font-semibold text-purple-300 mb-1">#{{ hoveredNode.name }}</p>
-            <p class="text-c-text-muted text-xs">{{ hoveredNode.noteCount }} note{{ hoveredNode.noteCount !== 1 ? 's' : '' }}</p>
-          </template>
-        </div>
-      </Transition>
-    </Teleport>
-
-    <!-- ── Drawer ──────────────────────────────────────────────────────────── -->
-    <div class="drawer" :class="{ open: drawerOpen }">
-
-      <!-- Drawer handle / tab bar -->
-      <div class="drawer-handle" @click="drawerOpen = !drawerOpen">
-        <div class="flex items-center gap-1">
-          <button class="drawer-tab" :class="{ active: activeTab === 'stats' }"
-            @click.stop="activeTab = 'stats'; drawerOpen = true">
-            <BarChart2 class="w-3.5 h-3.5" /> Stats
-          </button>
-          <button class="drawer-tab" :class="{ active: activeTab === 'appearance' }"
-            @click.stop="activeTab = 'appearance'; drawerOpen = true">
-            <Sliders class="w-3.5 h-3.5" /> Appearance
-          </button>
-        </div>
-        <component :is="drawerOpen ? ChevronDown : ChevronUp" class="w-4 h-4 text-c-text-muted ml-auto" />
+      <!-- Vertical stats handle -->
+      <div class="stats-handle" @click="statsOpen = !statsOpen" :title="statsOpen ? 'Hide stats' : 'Show stats'">
+        <component :is="statsOpen ? ChevronDown : ChevronUp" class="stats-handle-chevron" />
+        <span class="stats-handle-label">Stats</span>
       </div>
 
-      <!-- Drawer content -->
-      <div v-show="drawerOpen" class="drawer-body">
-
-        <!-- ── Stats tab ──────────────────────────────────────────────────── -->
-        <div v-if="activeTab === 'stats'" class="stats-grid">
+      <!-- Left stats panel -->
+      <div class="stats-panel" :class="{ open: statsOpen }">
+        <div class="stats-panel-body">
 
           <div class="stat-section">
             <div class="stat-section-title">Viewing</div>
             <div class="stat-row">
-              <span class="stat-label" title="Notes and tag nodes currently visible in the graph">Nodes</span>
-              <span class="stat-value">{{ statsNodes }} <span class="text-c-text-muted">/ {{ totalNoteCount }}</span></span>
+              <span class="stat-label" title="Note nodes currently visible in the graph">Notes</span>
+              <span class="stat-value">{{ statsNoteCount }} <span class="text-c-text-muted">/ {{ totalNoteCount }}</span></span>
             </div>
-            <div class="stat-row">
-              <span class="stat-label" title="Connections between visible nodes (note links and tag edges)">Links</span>
-              <span class="stat-value">{{ statsLinks }}</span>
+            <div class="stat-row" v-if="showTagNodes">
+              <span class="stat-label" title="Tag nodes currently visible in the graph">Tags</span>
+              <span class="stat-value">{{ statsTagCount }}</span>
+            </div>
+            <div class="stat-row" v-if="showWikiLinks">
+              <span class="stat-label" title="Direct note-to-note links visible in the graph">Note links</span>
+              <span class="stat-value">{{ statsNoteLinkCount }}</span>
+            </div>
+            <div class="stat-row" v-if="showTagNodes">
+              <span class="stat-label" title="Note-to-tag connections visible in the graph">Tag links</span>
+              <span class="stat-value">{{ statsTagLinkCount }}</span>
             </div>
             <div class="stat-row clickable" @click="lastUpdatedNote && focusOnNote(lastUpdatedNote)">
               <span class="stat-label" title="Most recently edited note in the current view — click to focus it">Last updated</span>
@@ -1138,7 +1410,7 @@ onUnmounted(() => { if (simulation) simulation.stop() })
             </div>
           </div>
 
-          <div class="app-divider" />
+          <div class="stat-divider" />
 
           <div class="stat-section">
             <div class="stat-section-title">Network</div>
@@ -1180,7 +1452,7 @@ onUnmounted(() => { if (simulation) simulation.stop() })
                 <span class="stat-label" title="Tags that appear on only one note — niche or specific topics">Unique tags</span>
                 <span class="stat-value">{{ nicheTags.length || '—' }}</span>
               </div>
-              <div v-if="nicheTags.length" class="flex flex-wrap gap-1 mt-1 px-1 max-h-20 overflow-y-auto">
+              <div v-if="nicheTags.length" class="flex flex-wrap gap-1 mt-1 max-h-20 overflow-y-auto">
                 <span v-for="t in nicheTags" :key="t" class="tag-chip">#{{ t }}</span>
               </div>
             </div>
@@ -1196,9 +1468,66 @@ onUnmounted(() => { if (simulation) simulation.stop() })
           </div>
 
         </div>
+      </div>
 
-        <!-- ── Appearance tab ─────────────────────────────────────────────── -->
-        <div v-if="activeTab === 'appearance'" class="appearance-grid">
+      <!-- Graph area -->
+      <div ref="containerRef" class="relative flex-1 overflow-hidden">
+        <div v-if="loading" class="absolute inset-0 flex items-center justify-center text-c-text-muted text-sm">
+          Loading graph…
+        </div>
+        <div v-else-if="error" class="absolute inset-0 flex items-center justify-center text-red-400 text-sm">
+          {{ error }}
+        </div>
+        <svg ref="svgRef" class="w-full h-full" />
+      </div>
+
+    </div>
+
+    <!-- ── Hover card ────────────────────────────────────────────────────────── -->
+    <Teleport to="body">
+      <Transition name="card-fade">
+        <div v-if="hoveredNode"
+          class="fixed z-50 bg-c-surface border border-c-border rounded-xl shadow-2xl p-3 text-sm w-56 backdrop-blur-sm"
+          :style="{ left: tooltipX + 'px', top: tooltipY + 'px' }"
+          @mouseenter="onCardEnter" @mouseleave="onCardLeave">
+          <template v-if="hoveredNode.type === 'note'">
+            <p class="font-semibold text-c-text mb-1 truncate">{{ hoveredNode.title }}</p>
+            <div class="flex flex-wrap gap-1 mb-2">
+              <span v-for="tag in hoveredNode.tags" :key="tag" class="tag-chip">#{{ tag }}</span>
+            </div>
+            <p class="text-c-text-muted text-xs">{{ hoveredNode.connectionCount }} connection{{ hoveredNode.connectionCount !== 1 ? 's' : '' }}</p>
+            <p v-if="timelineMode && hoveredNode.created_at" class="text-c-text-muted text-xs">
+              Created {{ new Date(hoveredNode.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) }}
+            </p>
+            <p v-else-if="hoveredNode.updated_at" class="text-c-text-muted text-xs mb-2">Updated {{ new Date(hoveredNode.updated_at).toLocaleDateString() }}</p>
+            <button @click="navigateToNote(hoveredNode.id)"
+              class="w-full text-xs py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition">
+              Open in editor →
+            </button>
+          </template>
+          <template v-else>
+            <p class="font-semibold text-purple-300 mb-1">#{{ hoveredNode.name }}</p>
+            <p class="text-c-text-muted text-xs">{{ hoveredNode.noteCount }} note{{ hoveredNode.noteCount !== 1 ? 's' : '' }}</p>
+          </template>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- ── Drawer (Appearance) ───────────────────────────────────────────── -->
+    <div class="drawer" :class="{ open: drawerOpen }">
+
+      <!-- Drawer handle -->
+      <div class="drawer-handle" @click="drawerOpen = !drawerOpen">
+        <Sliders class="w-3.5 h-3.5 text-c-text-muted" />
+        <span class="drawer-label">Appearance</span>
+        <component :is="drawerOpen ? ChevronDown : ChevronUp" class="w-4 h-4 text-c-text-muted ml-auto" />
+      </div>
+
+      <!-- Drawer content -->
+      <div class="drawer-body">
+
+        <!-- ── Appearance ─────────────────────────────────────────────────── -->
+        <div class="appearance-grid">
 
           <div class="app-section">
             <div class="stat-section-title">Physics</div>
@@ -1311,55 +1640,67 @@ onUnmounted(() => { if (simulation) simulation.stop() })
 .toggle-btn:hover { border-color: var(--border-hover); color: var(--text); }
 .toggle-btn.active { border-color: #a855f7; color: #c084fc; background: rgba(168,85,247,0.12); }
 
-/* ── Drawer ─────────────────────────────────────────────────────────────────── */
-.drawer {
+/* ── Stats handle (vertical strip) ─────────────────────────────────────────── */
+.stats-handle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 20px;
   flex-shrink: 0;
-  border-top: 1px solid var(--border);
   background: var(--bg);
-  transition: none;
-}
-.drawer-handle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
+  border-right: 1px solid var(--border);
   cursor: pointer;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.12s;
+  transition: background 0.12s;
+  user-select: none;
 }
-.drawer.open .drawer-handle { border-color: var(--border); }
-.drawer-tab {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 5px;
-  border: none;
-  background: none;
+.stats-handle:hover { background: var(--surface-hover); }
+.stats-handle-chevron {
+  width: 12px;
+  height: 12px;
   color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: color 0.12s, background 0.12s;
+  transform: rotate(-90deg);
+  flex-shrink: 0;
 }
-.drawer-tab:hover { color: var(--text-dim); background: var(--surface-hover); }
-.drawer-tab.active { color: var(--text); }
-.drawer-body {
-  overflow-x: auto;
-  max-height: 220px;
-  overflow-y: hidden;
+.stats-handle-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
 
-/* ── Stats grid ─────────────────────────────────────────────────────────────── */
-.stats-grid {
-  display: flex;
-  gap: 0;
-  padding: 10px 16px;
-  min-width: 600px;
+/* ── Stats panel (left side) ────────────────────────────────────────────────── */
+.stats-panel {
+  width: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-right: 0px solid var(--border);
+  background: var(--bg);
+  transition: width 0.2s ease, border-width 0.2s ease;
 }
-.stat-section { flex: 1; min-width: 200px; }
+.stats-panel.open {
+  width: 240px;
+  border-right-width: 1px;
+}
+.stats-panel-body {
+  width: 240px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-sizing: border-box;
+}
+.stats-panel-body::-webkit-scrollbar { width: 4px; }
+.stats-panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── Stats content ───────────────────────────────────────────────────────────── */
+.stat-section { margin-bottom: 4px; }
 .stat-section-title {
   font-size: 10px;
   font-weight: 700;
@@ -1386,7 +1727,42 @@ onUnmounted(() => { if (simulation) simulation.stop() })
 .stat-block { padding: 3px 0; }
 .stat-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
 .stat-value { font-size: 11px; color: var(--text); font-weight: 500; text-align: right; }
-.stat-divider { width: 1px; background: var(--border); margin: 0 20px; flex-shrink: 0; }
+.stat-divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+/* ── Drawer ─────────────────────────────────────────────────────────────────── */
+.drawer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  overflow: hidden;
+  max-height: 32px;       /* closed: just the handle */
+  transition: max-height 0.2s ease;
+}
+.drawer.open {
+  max-height: 280px;      /* open: handle + body */
+}
+.drawer-handle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.12s;
+}
+.drawer.open .drawer-handle { border-color: var(--border); }
+.drawer-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.drawer-body {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-height: 220px;
+}
 
 /* ── Appearance grid ────────────────────────────────────────────────────────── */
 .appearance-grid {

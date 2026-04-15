@@ -7,18 +7,15 @@ const svgRef = ref(null)
 const containerRef = ref(null)
 const loading = ref(true)
 const error = ref(null)
-const viewMode = ref('year')       // 'year' | 'month'
-const dataMode = ref('sentiment')  // 'sentiment' | 'activity'
+const viewMode = ref('year')
 const selectedYear = ref(new Date().getFullYear())
 const selectedMonth = ref(new Date().getMonth())
 const hoveredDay = ref(null)
 const tooltipX = ref(0)
 const tooltipY = ref(0)
 
-// Stats
 const streakCount = ref(0)
 const totalNotes = ref(0)
-const avgSentiment = ref(0)
 const activeDays = ref(0)
 const maxPerDay = ref(0)
 
@@ -35,10 +32,6 @@ function getCellSize() {
   return Math.max(12, Math.min(computed, 28))
 }
 
-// Sentiment: diverging red → grey → green
-const sentimentScale = d3.scaleDiverging(d3.interpolateRdYlGn).domain([-1, 0, 1])
-
-// Activity: sequential light → dark blue
 const activityScale = computed(() =>
   d3.scaleSequential(d3.interpolateBlues).domain([0, maxActivityCount])
 )
@@ -47,7 +40,6 @@ const emptyColor = '#1e293b'
 
 function getCellColor(key) {
   if (!calendarData[key]) return emptyColor
-  if (dataMode.value === 'sentiment') return sentimentScale(calendarData[key].score)
   return activityScale.value(calendarData[key].count)
 }
 
@@ -60,7 +52,7 @@ async function loadAndDraw() {
     activeDays.value = Object.keys(calendarData).length
     maxActivityCount = Math.max(...Object.values(calendarData).map(d => d.count), 1)
     maxPerDay.value = maxActivityCount
-    computeStats(notes)
+    computeStreak()
     loading.value = false
     await nextTick()
     draw()
@@ -70,12 +62,7 @@ async function loadAndDraw() {
   }
 }
 
-function computeStats(notes) {
-  const scores = notes.filter(n => n.sentiment_score != null).map(n => n.sentiment_score)
-  avgSentiment.value = scores.length
-    ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)
-    : 0
-
+function computeStreak() {
   const dates = Object.keys(calendarData).sort()
   let maxStreak = 0, curr = 0
   for (let i = 0; i < dates.length; i++) {
@@ -188,8 +175,7 @@ function drawMonth() {
 
 const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
-// Redraw when view, year, month, or data mode changes
-watch([viewMode, selectedYear, selectedMonth, dataMode], () => draw())
+watch([viewMode, selectedYear, selectedMonth], () => draw())
 onMounted(() => loadAndDraw())
 </script>
 
@@ -198,23 +184,7 @@ onMounted(() => loadAndDraw())
 
     <!-- Header -->
     <div class="flex flex-wrap items-center gap-4 mb-6">
-      <h2 class="text-lg font-semibold text-white">
-        {{ dataMode === 'sentiment' ? 'Sentiment Calendar' : 'Writing Activity' }}
-      </h2>
-
-      <!-- Data mode toggle -->
-      <div class="flex rounded-lg overflow-hidden border border-gray-700">
-        <button
-          @click="dataMode = 'sentiment'"
-          :class="dataMode === 'sentiment' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'"
-          class="px-3 py-1.5 text-sm transition"
-        >Sentiment</button>
-        <button
-          @click="dataMode = 'activity'"
-          :class="dataMode === 'activity' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'"
-          class="px-3 py-1.5 text-sm transition"
-        >Activity</button>
-      </div>
+      <h2 class="text-lg font-semibold text-white">Writing Activity</h2>
 
       <!-- View toggle -->
       <div class="flex rounded-lg overflow-hidden border border-gray-700">
@@ -246,16 +216,10 @@ onMounted(() => loadAndDraw())
 
       <!-- Stats -->
       <div class="ml-auto flex gap-6 text-sm text-gray-400">
-        <template v-if="dataMode === 'sentiment'">
-          <div>Longest streak <span class="text-white font-semibold">{{ streakCount }}d</span></div>
-          <div>Avg sentiment <span class="font-semibold" :class="avgSentiment > 0 ? 'text-green-400' : 'text-red-400'">{{ avgSentiment }}</span></div>
-          <div>Total notes <span class="text-white font-semibold">{{ totalNotes }}</span></div>
-        </template>
-        <template v-else>
-          <div>Active days <span class="text-white font-semibold">{{ activeDays }}</span></div>
-          <div>Max per day <span class="text-blue-400 font-semibold">{{ maxPerDay }}</span></div>
-          <div>Total notes <span class="text-white font-semibold">{{ totalNotes }}</span></div>
-        </template>
+        <div>Longest streak <span class="text-white font-semibold">{{ streakCount }}d</span></div>
+        <div>Active days <span class="text-white font-semibold">{{ activeDays }}</span></div>
+        <div>Max per day <span class="text-blue-400 font-semibold">{{ maxPerDay }}</span></div>
+        <div>Total notes <span class="text-white font-semibold">{{ totalNotes }}</span></div>
       </div>
     </div>
 
@@ -268,26 +232,14 @@ onMounted(() => loadAndDraw())
 
     <!-- Legend -->
     <div class="flex items-center gap-3 mt-4 text-xs text-gray-500">
-      <template v-if="dataMode === 'sentiment'">
-        <span>Negative</span>
-        <div class="flex gap-0.5">
-          <div v-for="v in [-1, -0.5, 0, 0.5, 1]" :key="v"
-            class="w-5 h-3 rounded-sm"
-            :style="{ background: sentimentScale(v) }"
-          />
-        </div>
-        <span>Positive</span>
-      </template>
-      <template v-else>
-        <span>Less</span>
-        <div class="flex gap-0.5">
-          <div v-for="v in [0, 0.25, 0.5, 0.75, 1]" :key="v"
-            class="w-5 h-3 rounded-sm"
-            :style="{ background: activityScale(v * maxPerDay) }"
-          />
-        </div>
-        <span>More</span>
-      </template>
+      <span>Less</span>
+      <div class="flex gap-0.5">
+        <div v-for="v in [0, 0.25, 0.5, 0.75, 1]" :key="v"
+          class="w-5 h-3 rounded-sm"
+          :style="{ background: activityScale(v * maxPerDay) }"
+        />
+      </div>
+      <span>More</span>
       <div class="ml-4 w-5 h-3 rounded-sm" :style="{ background: emptyColor }" />
       <span>No notes</span>
     </div>
@@ -300,26 +252,10 @@ onMounted(() => loadAndDraw())
         :style="{ left: tooltipX + 'px', top: tooltipY + 'px' }"
       >
         <p class="font-semibold text-white mb-2">{{ hoveredDay.date }}</p>
-        <template v-if="dataMode === 'sentiment'">
-          <p class="text-gray-400 text-xs mb-2">
-            Avg sentiment:
-            <span :class="hoveredDay.score > 0 ? 'text-green-400' : 'text-red-400'" class="font-semibold">
-              {{ hoveredDay.score.toFixed(2) }}
-            </span>
-          </p>
-          <ul class="text-gray-400 text-xs space-y-1">
-            <li v-for="n in hoveredDay.notes" :key="n.id">
-              {{ n.title }}
-              <span :class="n.score > 0 ? 'text-green-400' : 'text-red-400'">({{ n.score > 0 ? '+' : '' }}{{ n.score }})</span>
-            </li>
-          </ul>
-        </template>
-        <template v-else>
-          <p class="text-blue-400 text-xs font-semibold mb-2">{{ hoveredDay.count }} note{{ hoveredDay.count > 1 ? 's' : '' }}</p>
-          <ul class="text-gray-400 text-xs space-y-1">
-            <li v-for="n in hoveredDay.notes" :key="n.id">{{ n.title }}</li>
-          </ul>
-        </template>
+        <p class="text-blue-400 text-xs font-semibold mb-2">{{ hoveredDay.count }} note{{ hoveredDay.count > 1 ? 's' : '' }}</p>
+        <ul class="text-gray-400 text-xs space-y-1">
+          <li v-for="n in hoveredDay.notes" :key="n.id">{{ n.title }}</li>
+        </ul>
       </div>
     </Teleport>
   </div>
