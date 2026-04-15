@@ -112,6 +112,10 @@ async function createNewTag() {
     error.value = 'Tag must be alphanumeric and at most 30 characters'
     return
   }
+  if (globalTags.some(t => t.name === name.toLowerCase())) {
+    error.value = 'Tag already exists'
+    return
+  }
   error.value = ''
   try {
     await createTag(name)
