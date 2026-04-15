@@ -1,22 +1,30 @@
 <template>
   <div class="editor-layout">
     <!-- Icon Strip -->
-    <EditorIconStrip />
+    <EditorIconStrip :active-view="sidebarView" @set-view="sidebarView = $event" />
 
-    <!-- Sidebar -->
-    <EditorSidebar
-      :items="rootItems"
-      :active-file-id="activeFile?.id"
-      :file-count="fileCount"
-      :collapsed="sidebarCollapsed"
-      :get-children="getChildren"
-      :search-items="searchItems"
-      @create-file="handleCreateFile"
-      @create-folder="createFolder()"
-      @select-file="setActiveFile"
-      @delete-item="deleteItem"
-      @rename-item="renameItem"
-    />
+    <!-- Left panel (sidebar or tag panel) -->
+    <div class="left-panel" :class="{ collapsed: sidebarCollapsed }">
+      <EditorSidebar
+        v-if="sidebarView === 'files'"
+        :items="rootItems"
+        :active-file-id="activeFile?.id"
+        :file-count="fileCount"
+        :collapsed="sidebarCollapsed"
+        :get-children="getChildren"
+        :search-items="searchItems"
+      :search-by-tag="searchByTag"
+      :tag-query="tagQuery"
+      @tag-query-consumed="tagQuery = ''"
+        @create-file="handleCreateFile"
+        @create-folder="createFolder()"
+        @select-file="setActiveFile"
+        @delete-item="deleteItem"
+        @rename-item="renameItem"
+        @move-item="moveItem"
+      />
+      <EditorTagPanel v-else-if="sidebarView === 'tags'" />
+    </div>
 
     <!-- Main editor area -->
     <div class="editor-main">
@@ -43,11 +51,6 @@
             <Pencil v-if="viewMode === 'preview'" class="w-3.5 h-3.5" />
             <Eye v-else class="w-3.5 h-3.5" />
             {{ viewMode === 'preview' ? 'Edit' : 'Preview' }}
-          </button>
-
-          <!-- Tag panel toggle -->
-          <button class="topbar-btn" :class="{ active: tagPanelOpen }" title="Toggle tag panel" @click="tagPanelOpen = !tagPanelOpen">
-            <Tags class="w-4 h-4" />
           </button>
 
           <!-- Options menu -->
@@ -88,9 +91,11 @@
             v-if="viewMode !== 'preview'"
             ref="editorContentRef"
             :file="activeFile"
+            :livePreview="viewMode !== 'split'"
             @update="handleContentUpdate"
             @rename="renameItem"
             @create-first="handleCreateFile"
+            @tag-click="tag => { sidebarView = 'files'; tagQuery = 'tag:' + tag }"
           />
 
           <EditorPreview
@@ -114,17 +119,8 @@
         <span class="status-stat">{{ contentStats.chars }} chars</span>
         <span class="status-sep">·</span>
         <span class="status-stat">{{ contentStats.lines }} lines</span>
-        <div class="status-right">
-          <span class="status-online">
-            <span class="online-dot" />
-            Online
-          </span>
-        </div>
       </div>
     </div>
-
-    <!-- Tag panel -->
-    <EditorTagPanel v-if="tagPanelOpen" />
 
   </div>
 </template>
@@ -133,7 +129,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import {
   PanelLeftClose, PanelLeftOpen, FileText, Pencil,
-  Columns2, Eye, EyeOff, MoreHorizontal, Tags
+  Columns2, Eye, EyeOff, MoreHorizontal
 } from 'lucide-vue-next'
 import { useEditorStore } from '../../composables/useEditorStore'
 import EditorIconStrip from './EditorIconStrip.vue'
@@ -146,7 +142,7 @@ import EditorTagPanel from './EditorTagPanel.vue'
 const {
   activeFile, rootItems, fileCount,
   getChildren, setActiveFile, createFile, createFolder,
-  updateFileContent, renameItem, deleteItem, searchItems,
+  updateFileContent, renameItem, deleteItem, moveItem, searchItems, searchByTag,
 } = useEditorStore()
 
 const contentStats = computed(() => {
@@ -159,7 +155,8 @@ const contentStats = computed(() => {
 
 const viewMode = ref('edit')
 const sidebarCollapsed = ref(false)
-const tagPanelOpen = ref(false)
+const sidebarView = ref('files')
+const tagQuery = ref('')
 const toolbarVisible = ref(true)
 const menuOpen = ref(false)
 const menuRef = ref(null)
@@ -208,6 +205,16 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   height: 100vh;
   background: var(--bg);
   overflow: hidden;
+}
+
+.left-panel {
+  display: flex;
+  overflow: hidden;
+  transition: width 0.2s, min-width 0.2s;
+}
+.left-panel.collapsed {
+  width: 0;
+  min-width: 0;
 }
 
 .editor-main {

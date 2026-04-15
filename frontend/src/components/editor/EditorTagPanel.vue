@@ -47,6 +47,8 @@
           v-model="newTagName"
           class="new-tag-input"
           placeholder="New tag..."
+          maxlength="30"
+          @input="sanitizeTagInput"
           @keydown.enter="createNewTag"
           @keydown.escape="newTagName = ''"
         />
@@ -54,6 +56,9 @@
           <Plus class="w-3.5 h-3.5" />
         </button>
       </div>
+      <span v-if="newTagName.length > 20" class="char-count" :class="{ 'at-limit': newTagName.length === 30 }">
+        {{ newTagName.length }}/30
+      </span>
     </div>
 
     <div class="tag-list">
@@ -96,9 +101,21 @@ async function refreshTags() {
   if (activeFile.value) await reloadNoteTags(activeFile.value.id)
 }
 
+function sanitizeTagInput() {
+  newTagName.value = newTagName.value.replace(/[^a-zA-Z0-9]/g, '')
+}
+
 async function createNewTag() {
   const name = newTagName.value.trim()
   if (!name) return
+  if (!/^[a-zA-Z0-9]{1,30}$/.test(name)) {
+    error.value = 'Tag must be alphanumeric and at most 30 characters'
+    return
+  }
+  if (globalTags.some(t => t.name === name.toLowerCase())) {
+    error.value = 'Tag already exists'
+    return
+  }
   error.value = ''
   try {
     await createTag(name)
@@ -149,12 +166,12 @@ async function deleteGlobalTag(tag) {
 
 <style scoped>
 .tag-panel {
-  width: 220px;
-  min-width: 220px;
+  width: 240px;
+  min-width: 240px;
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   overflow: hidden;
 }
 
@@ -206,6 +223,16 @@ async function deleteGlobalTag(tag) {
   display: flex;
   gap: 6px;
   align-items: center;
+}
+.char-count {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 3px;
+}
+.char-count.at-limit {
+  color: #f87171;
 }
 
 .new-tag-input {

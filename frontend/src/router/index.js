@@ -7,11 +7,8 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 
 const routes = [
-  // ── Auth (guest-only — redirect to / if already logged in) ──────────────────
   { path: '/login',    component: LoginView,    meta: { guestOnly: true,    hideNavbar: true } },
   { path: '/register', component: RegisterView, meta: { guestOnly: true,    hideNavbar: true } },
-
-  // ── App (require authentication) ────────────────────────────────────────────
   { path: '/',         component: Dashboard,    meta: { requiresAuth: true } },
   { path: '/graph',    component: GraphView,    meta: { requiresAuth: true } },
   { path: '/calendar', component: CalendarView, meta: { requiresAuth: true } },
@@ -23,7 +20,6 @@ const router = createRouter({
   routes,
 })
 
-// ── Navigation guard ─────────────────────────────────────────────────────────
 function getSessionCookie() {
   return document.cookie.split('; ').reduce((r, v) => {
     const parts = v.split('=')
@@ -34,12 +30,10 @@ function getSessionCookie() {
 router.beforeEach((to) => {
   const token = getSessionCookie()
 
-  // Protected route — not logged in → send to login
   if (to.meta.requiresAuth && !token) {
     return { path: '/login' }
   }
 
-  // Guest-only route — already logged in → send to dashboard
   if (to.meta.guestOnly && token) {
     return { path: '/' }
   }

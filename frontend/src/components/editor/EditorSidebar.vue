@@ -24,30 +24,62 @@
         type="text"
         placeholder="Search notes..."
         class="search-input"
-        @focus="showDropdown = hybridResults.length > 0"
-        @blur="closeDropdown"
+        :class="{ 'has-clear': searchQuery }"
       />
       <span v-if="searchLoading" class="search-loading">searching...</span>
+      <button v-if="searchQuery && !searchLoading" class="search-clear" title="Clear" @click="searchQuery = ''">
+        <X class="w-3 h-3" />
+      </button>
+    </div>
 
-      <!-- Hybrid search dropdown -->
-      <div
-        v-if="showDropdown && hybridResults.length > 0"
-        class="search-dropdown"
-      >
+    <!-- File tree -->
+    <div
+      v-if="!collapsed"
+      class="tree-container"
+      :class="{ 'root-drop-target': isRootDragOver }"
+      @dragover.prevent="onRootDragOver"
+      @dragleave="onRootDragLeave"
+      @drop="onRootDrop"
+    >
+      <!-- Tag search results (instant, client-side) -->
+      <template v-if="isTagSearch">
+        <button
+          v-for="item in tagSearchResults"
+          :key="item.id"
+          class="search-result"
+          :class="{ active: activeFileId === item.id }"
+          @click="$emit('selectFile', item.id); searchQuery = ''"
+        >
+          <span class="result-title">{{ item.name }}</span>
+        </button>
+        <div v-if="!tagSearchResults.length && tagName" class="search-status">
+          No notes tagged "{{ tagName }}"
+        </div>
+        <div v-else-if="!tagName" class="search-status">
+          Type a tag name…
+        </div>
+      </template>
+
+      <!-- Loading state -->
+      <div v-else-if="searchQuery && searchLoading" class="search-status">
+        Searching...
+      </div>
+
+      <!-- Hybrid results -->
+      <template v-else-if="!isTagSearch && searchQuery && hybridResults.length">
         <button
           v-for="result in hybridResults"
           :key="result.id"
           class="search-result"
-          @mousedown.prevent="selectHybridResult(result)"
+          :class="{ active: activeFileId === result.id }"
+          @click="selectHybridResult(result)"
         >
           <span class="result-title">{{ result.title }}</span>
         </button>
-      </div>
-    </div>
+      </template>
 
-    <!-- File tree -->
-    <div v-if="!collapsed" class="tree-container">
-      <template v-if="searchQuery">
+      <!-- Fallback to local title filter if hybrid failed -->
+      <template v-else-if="!isTagSearch && searchQuery && hybridFailed">
         <TreeItem
           v-for="item in searchResults"
           :key="item.id"
@@ -56,9 +88,17 @@
           :get-children="getChildren"
           @select="$emit('selectFile', $event)"
           @delete="$emit('deleteItem', $event)"
-          @rename="(id, name) => $emit('renameItem', id, name)"
+          @rename="(id, name, type) => $emit('renameItem', id, name, type)"
+          @move="(id, type, targetId) => $emit('moveItem', id, type, targetId)"
         />
       </template>
+
+      <!-- No results -->
+      <div v-else-if="!isTagSearch && searchQuery" class="search-status">
+        No results found
+      </div>
+
+      <!-- Default full tree -->
       <template v-else>
         <TreeItem
           v-for="item in items"
@@ -68,7 +108,8 @@
           :get-children="getChildren"
           @select="$emit('selectFile', $event)"
           @delete="$emit('deleteItem', $event)"
-          @rename="(id, name) => $emit('renameItem', id, name)"
+          @rename="(id, name, type) => $emit('renameItem', id, name, type)"
+          @move="(id, type, targetId) => $emit('moveItem', id, type, targetId)"
         />
       </template>
     </div>
@@ -82,7 +123,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { Home, Plus, FolderPlus, Search } from 'lucide-vue-next'
+import { Home, Plus, FolderPlus, Search, X } from 'lucide-vue-next'
 import TreeItem from './TreeItem.vue'
 import { hybridSearch } from '../../services/api.js'
 
@@ -93,11 +134,47 @@ const props = defineProps({
   collapsed: { type: Boolean, default: false },
   getChildren: { type: Function, required: true },
   searchItems: { type: Function, required: true },
+  searchByTag: { type: Function, required: true },
+  tagQuery: { type: String, default: '' },
 })
 
-const emit = defineEmits(['createFile', 'createFolder', 'selectFile', 'deleteItem', 'renameItem'])
+const emit = defineEmits(['createFile', 'createFolder', 'selectFile', 'deleteItem', 'renameItem', 'moveItem', 'tag-query-consumed'])
 
 const searchQuery = ref('')
+
+watch(() => props.tagQuery, (q) => {
+  if (q) {
+    searchQuery.value = q
+    emit('tag-query-consumed')
+  }
+})
+const isRootDragOver = ref(false)
+
+function onRootDragOver() {
+  isRootDragOver.value = true
+}
+
+function onRootDragLeave(e) {
+  // Only clear if leaving the container itself, not entering a child
+  if (!e.currentTarget.contains(e.relatedTarget)) {
+    isRootDragOver.value = false
+  }
+}
+
+function onRootDrop(e) {
+  isRootDragOver.value = false
+  const draggedId = e.dataTransfer.getData('text/plain')
+  const draggedType = e.dataTransfer.getData('text/itemtype')
+  if (draggedId && draggedType) emit('moveItem', draggedId, draggedType, null)
+}
+
+// ─── Tag search (instant, client-side) ───────────────────────────────────────
+const isTagSearch = computed(() => searchQuery.value.startsWith('tag:'))
+const tagName = computed(() => searchQuery.value.slice(4).trim())
+const tagSearchResults = computed(() => {
+  if (!isTagSearch.value || !tagName.value) return []
+  return props.searchByTag(tagName.value)
+})
 
 // ─── Local name-only filter (instant, existing behavior) ─────────────────────
 const searchResults = computed(() => {
@@ -107,29 +184,35 @@ const searchResults = computed(() => {
 
 // ─── Hybrid search (debounced backend call, same pattern as GraphView) ───────
 const hybridResults = ref([])
-const showDropdown = ref(false)
 const searchLoading = ref(false)
+const hybridFailed = ref(false)
 let searchDebounce = null
 
 watch(searchQuery, (query) => {
   if (searchDebounce) clearTimeout(searchDebounce)
+  hybridResults.value = []
+  hybridFailed.value = false
 
   if (!query || query.trim().length === 0) {
-    hybridResults.value = []
-    showDropdown.value = false
+    searchLoading.value = false
     return
   }
 
+  // Tag search is instant — skip hybrid entirely
+  if (query.startsWith('tag:')) {
+    searchLoading.value = false
+    return
+  }
+
+  searchLoading.value = true
+
   searchDebounce = setTimeout(async () => {
-    searchLoading.value = true
     try {
       const res = await hybridSearch(query.trim(), 8)
       hybridResults.value = res.results
-      showDropdown.value = hybridResults.value.length > 0
     } catch (err) {
       console.warn('Hybrid search unavailable, using local filter:', err.message)
-      hybridResults.value = []
-      showDropdown.value = false
+      hybridFailed.value = true
     } finally {
       searchLoading.value = false
     }
@@ -140,11 +223,6 @@ function selectHybridResult(result) {
   emit('selectFile', Number(result.id))
   searchQuery.value = ''
   hybridResults.value = []
-  showDropdown.value = false
-}
-
-function closeDropdown() {
-  setTimeout(() => { showDropdown.value = false }, 200)
 }
 </script>
 
@@ -235,8 +313,33 @@ function closeDropdown() {
 .search-input::placeholder {
   color: var(--text-muted);
 }
+.search-input.has-clear {
+  padding-right: 26px;
+}
 .search-input:focus {
   border-color: var(--label-to);
+}
+.search-clear {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-top: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 3px;
+  transition: color 0.12s;
+}
+.search-clear:hover {
+  color: var(--text);
 }
 .tree-container {
   flex: 1;
@@ -249,6 +352,12 @@ function closeDropdown() {
 .tree-container::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 2px;
+}
+.tree-container.root-drop-target {
+  background: color-mix(in srgb, var(--label-to) 8%, transparent);
+  outline: 1px dashed var(--label-to);
+  outline-offset: -2px;
+  border-radius: 4px;
 }
 .sidebar-footer {
   padding: 8px 12px;
@@ -270,39 +379,28 @@ function closeDropdown() {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
-.search-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 12px;
-  right: 12px;
-  margin-top: 2px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  z-index: 50;
-  max-height: 240px;
-  overflow-y: auto;
+.search-status {
+  padding: 16px 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
 }
 .search-result {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   width: 100%;
-  padding: 8px 12px;
+  padding: 6px 8px;
   border: none;
+  border-radius: 4px;
   background: none;
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
   text-align: left;
-  border-bottom: 1px solid var(--border);
   transition: background 0.12s, color 0.12s;
 }
-.search-result:last-child {
-  border-bottom: none;
-}
-.search-result:hover {
+.search-result:hover,
+.search-result.active {
   background: var(--surface-hover);
   color: var(--text);
 }
@@ -311,11 +409,5 @@ function closeDropdown() {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.result-score {
-  flex-shrink: 0;
-  margin-left: 8px;
-  font-size: 11px;
-  color: var(--text-muted);
 }
 </style>

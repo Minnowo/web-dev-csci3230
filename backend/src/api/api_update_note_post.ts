@@ -1,10 +1,12 @@
 import { type Response } from "express";
 import { DB } from "../db/db.js";
+import { parseIconForUpdateBody } from "./note_icon.js";
 import type { AuthenticatedRequest } from "../types/user.js";
 
 interface UpdateNoteRequestBody {
 	title: string;
 	content: string;
+	icon?: string | null;
 }
 
 export const ApiPostUpdateNote = (
@@ -24,8 +26,9 @@ export const ApiPostUpdateNote = (
 		return;
 	}
 
-	const { title, content } = req.body as UpdateNoteRequestBody;
-
+	const body = req.body as UpdateNoteRequestBody;
+	const { title, content } = body;
+	
 	if (typeof title !== "string" || typeof content !== "string") {
 		res.status(400).json({
 			message: "Invalid data types, need to be strings",
@@ -40,8 +43,24 @@ export const ApiPostUpdateNote = (
 		return;
 	}
 
+	const safeIcon = parseIconForUpdateBody(body);
+	if (
+		typeof safeIcon === "object" &&
+		safeIcon !== null &&
+		"error" in safeIcon
+	) {
+		res.status(400).json({ message: safeIcon.error });
+		return;
+	}
+
 	const db = DB.Instance();
-	const result = db.UpdateNote(noteId, req.user.ID, cleanTitle, content);
+	const result = db.UpdateNote(
+		noteId,
+		req.user.ID,
+		cleanTitle,
+		content,
+		safeIcon,
+	);
 
 	if (result.error !== null) {
 		console.error(`error updating note: ${result.error}`);

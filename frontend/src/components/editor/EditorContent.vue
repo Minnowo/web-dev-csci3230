@@ -10,7 +10,7 @@
         <input
           class="note-title"
           :value="file.name"
-          @input="$emit('rename', file.id, $event.target.value)"
+          @input="$emit('rename', file.id, $event.target.value, 'file')"
           @keydown.enter.prevent="focusEditor"
         />
       </div>
@@ -102,9 +102,10 @@ import IconPicker from './IconPicker.vue'
 
 const props = defineProps({
   file: { type: Object, default: null },
+  livePreview: { type: Boolean, default: true },
 })
 
-const emit = defineEmits(['update', 'rename', 'createFirst'])
+const emit = defineEmits(['update', 'rename', 'createFirst', 'tag-click'])
 
 const { updateItemIcon, state, setActiveFile, createFile, syncNoteLinks, loading, globalTags, ensureGlobalTag } = useEditorStore()
 
@@ -140,7 +141,7 @@ function formatDate(dateStr) {
 }
 
 // When active file changes, load its content into the editor
-watch(() => props.file?.id, () => {
+watch([() => props.file?.id, () => props.livePreview], () => {
   if (props.file && editorRef.value) {
     isUpdatingFromProp = true
     editorRef.value.innerHTML = contentToHtml(props.file.content)
@@ -182,9 +183,11 @@ function processLineContent(text) {
   text = text.replace(/#([\w-]+)/g, (_, name) =>
     `<span class="tag-link" contenteditable="false" data-tag="${name}">#${name}</span>`)
 
-  // 7. Wiki-links
-  text = text.replace(/\[\[([^\]]+)\]\]/g, (_, name) =>
-    `<span class="wiki-link" contenteditable="false" data-name="${name}">${name}</span>`)
+  // 7. Wiki-links (skip self-references)
+  text = text.replace(/\[\[([^\]]+)\]\]/g, (_, name) => {
+    if (name.toLowerCase() === props.file?.name?.toLowerCase()) return `[[${name}]]`
+    return `<span class="wiki-link" contenteditable="false" data-name="${name}">${name}</span>`
+  })
 
   return text
 }
@@ -198,6 +201,15 @@ function contentToHtml(content) {
   while (i < lines.length) {
     const line = lines[i]
 
+    if (!props.livePreview) {
+        i++;
+        if (line === "") {
+            result.push(`<p class="font-mono"><br></p>`);
+        } else {
+            result.push(`<p class="font-mono">${line}</p>`);
+        }
+        continue;
+    }
     // GFM table: collect consecutive pipe-delimited rows
     if (/^\|.+\|$/.test(line.trim())) {
       const tableLines = []
@@ -424,6 +436,13 @@ function renderWikiLinksInDOM() {
         }
         lastInserted = t
       }
+      // Skip self-reference — leave as plain text
+      if (match[1].toLowerCase() === props.file?.name?.toLowerCase()) {
+        frag.appendChild(document.createTextNode(match[0]))
+        lastInserted = frag.lastChild
+        last = regex.lastIndex
+        continue
+      }
       const span = document.createElement('span')
       span.className = 'wiki-link'
       span.setAttribute('contenteditable', 'false')
@@ -471,8 +490,10 @@ function renderWikiLinksInDOM() {
 
 function handleInput() {
   if (isUpdatingFromProp) return
-  applyLiveMarkdown()
-  checkAndRenderInlinePattern()
+  if (props.livePreview) {
+      applyLiveMarkdown()
+      checkAndRenderInlinePattern()
+  }
   const html = editorRef.value?.innerHTML || ''
   const markdown = htmlToContent(html)
   emit('update', markdown)
@@ -736,7 +757,7 @@ const INLINE_PATTERNS = [
   // Strikethrough: ~~text~~
   { regex: /~~([^~\n]+)~~$/, open: '~~', close: '~~', tag: 's', innerTag: null },
   // Inline code: `text`
-  { regex: /`([^`\n]+)`$/, open: '`', close: '`', tag: 'code', innerTag: null },
+  { regex: /`([^\`\n]+)`$/, open: '`', close: '`', tag: 'code', innerTag: null },
 ]
 
 function checkAndRenderInlinePattern() {
@@ -1056,7 +1077,7 @@ function checkWikiAutocomplete() {
 
   const term = match[1].toLowerCase()
   const results = state.items
-    .filter(i => i.type === 'file' && i.name.toLowerCase().includes(term))
+    .filter(i => i.type === 'file' && i.id !== props.file?.id && i.name.toLowerCase().includes(term))
     .slice(0, 8)
   if (results.length === 0) { closeWikiAutocomplete(); return }
 
@@ -1112,7 +1133,7 @@ async function handleWikiLinkClick(e) {
   if (e.target.classList.contains('wiki-link')) {
     const noteName = e.target.dataset.name
     const item = state.items.find(i => i.type === 'file' && i.name === noteName)
-    if (item) {
+    if (item && item.id !== props.file?.id) {
       setActiveFile(item.id)
     } else {
       // Note doesn't exist — create it, then immediately sync the link
@@ -1124,6 +1145,8 @@ async function handleWikiLinkClick(e) {
         })
       }
     }
+  } else if (e.target.classList.contains('tag-link')) {
+    emit('tag-click', e.target.dataset.tag)
   }
 }
 
@@ -1415,6 +1438,12 @@ defineExpose({ applyFormat })
   border-radius: 3px;
   padding: 1px 4px;
   font-weight: 500;
+  cursor: pointer;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+.editor-area :deep(.tag-link:hover) {
+  box-shadow: 0 0 6px 2px color-mix(in srgb, var(--tag-color) 60%, transparent);
+  background: color-mix(in srgb, var(--tag-bg) 80%, var(--tag-color) 20%);
 }
 
 /* Tag autocomplete dropdown */
