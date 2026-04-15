@@ -274,6 +274,79 @@ export async function apiMoveFolder(folder_id, parent_folder_id) {
   if (!res.ok) throw new Error(`Failed to move folder ${folder_id}`)
 }
 
+export async function apiRenameFolder(folder_id, name) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/folder/rename`, {
+    method: 'POST',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder_id, name }),
+  })
+  if (!res.ok) throw new Error(`Failed to rename folder ${folder_id}`)
+}
+
+// ─── File & Export ────────────────────────────────────────────────────────────
+
+async function triggerAuthenticatedDownload(url, fallbackName) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(url, { headers: authHeaders() })
+  if (!res.ok) throw new Error(`Download failed: ${res.status}`)
+  const blob = await res.blob()
+  const disposition = res.headers.get('Content-Disposition') || ''
+  const match = disposition.match(/filename="([^"]+)"/)
+  const name = match ? match[1] : fallbackName
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = name
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(a.href)
+}
+
+/** Download a note as a .md file. */
+export async function exportNoteAsMd(id, title = `note-${id}`) {
+  return triggerAuthenticatedDownload(`${API_BASE}/notes/${id}/export`, `${title}.md`)
+}
+
+/** Download a note rendered as .html. */
+export async function exportNoteAsHtml(id, title = `note-${id}`) {
+  return triggerAuthenticatedDownload(`${API_BASE}/notes/${id}/export/html`, `${title}.html`)
+}
+
+/** Upload a file asset (md, png, jpg, jpeg, gif, pdf). Returns FileAsset. */
+export async function uploadFile(file) {
+  const { authHeaders } = useAuth()
+  const formData = new FormData()
+  formData.append('file', file)
+  const res = await fetch(`${API_BASE}/files/upload`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: formData,
+  })
+  if (!res.ok) throw new Error('Upload failed')
+  return res.json()
+}
+
+/** List all uploaded file assets for the logged-in user. */
+export async function listFiles() {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/files`, { headers: authHeaders() })
+  if (!res.ok) throw new Error('Failed to list files')
+  return res.json()
+}
+
+/** Download a file asset by ID. */
+export async function downloadFile(id) {
+  return triggerAuthenticatedDownload(`${API_BASE}/files/${id}/download`, `file-${id}`)
+}
+
+/** Export a folder as ZIP. Pass null for the full workspace. */
+export async function exportFolderAsZip(id = null, title = null) {
+  const url = id == null ? `${API_BASE}/folders/export` : `${API_BASE}/folder/${id}/export`
+  const fallback = id == null ? 'workspace.zip' : `${title ?? `folder-${id}`}.zip`
+  return triggerAuthenticatedDownload(url, fallback)
+}
+
 // ─── Gemini Analysis ──────────────────────────────────────────────────────────
 
 /**

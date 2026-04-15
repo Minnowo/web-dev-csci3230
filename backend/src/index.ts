@@ -25,6 +25,7 @@ import { ApiPostCreateFolder } from "./api/api_create_folder_post.js";
 import { ApiPostDeleteFolder } from "./api/api_delete_folder_post.js";
 import { ApiPostMoveNote } from "./api/api_move_note_post.js";
 import { ApiPostMoveFolder } from "./api/api_move_folder_post.js";
+import { ApiPostRenameFolder } from "./api/api_rename_folder_post.js";
 import { ApiGetTags } from "./api/api_tags_get.js";
 import { ApiPostTag } from "./api/api_tag_post.js";
 import { ApiPostDeleteTag } from "./api/api_tag_delete.js";
@@ -155,6 +156,11 @@ ExpressApp.post(
 	"/api/folder/move",
 	MiddleWareAuthenticateToken,
 	ApiPostMoveFolder,
+);
+ExpressApp.post(
+	"/api/folder/rename",
+	MiddleWareAuthenticateToken,
+	ApiPostRenameFolder,
 );
 
 // ── Tag endpoints (David) ─────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import { reactive, computed } from 'vue'
-import {apiCreateFolder, apiMoveNote, apiMoveFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks, fetchTags, fetchNoteTags, syncNoteTags, createTag } from '../services/api.js'
+import {apiCreateFolder, apiGetFolders, apiMoveNote, apiMoveFolder, apiRenameFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks, fetchTags, fetchNoteTags, syncNoteTags, createTag } from '../services/api.js'
 
 let indexDebounceTimer = null
 const INDEX_DEBOUNCE_MS = 1000
@@ -52,9 +52,9 @@ function noteToItem(note) {
     id:            note.id,
     name:          note.title,
     content:       note.content ?? null,
-    parentId:      null,
+    parentId:      note.folder_id ?? null,
     type:          'file',
-    icon:          'FileText',
+    icon:          note.icon ?? 'FileText',
     updatedAt:     note.updated_at,
     lastVisitedAt: null,
   }
@@ -150,13 +150,18 @@ export function useEditorStore() {
     state.items.find(i => i.id === state.activeFileId && i.type === 'file') || null
   )
 
+  function foldersFirst(a, b) {
+    if (a.type === b.type) return 0
+    return a.type === 'folder' ? -1 : 1
+  }
+
   /** All top-level items (files and folders with no parent). */
   const rootItems = computed(() =>
-    state.items.filter(i => i.parentId === null)
+    state.items.filter(i => i.parentId === null).sort(foldersFirst)
   )
 
   function getChildren(parentId) {
-    return state.items.filter(i => i.parentId === parentId)
+    return state.items.filter(i => i.parentId === parentId).sort(foldersFirst)
   }
 
   async function setActiveFile(id) {
@@ -229,6 +234,26 @@ export function useEditorStore() {
     return id
   }
 
+  async function importNote(title, content, parentId = null) {
+    const { id } = await createNote(title, content)
+    const item = {
+      id,
+      name:          title,
+      content:       content,
+      parentId:      parentId,
+      type:          'file',
+      icon:          'FileText',
+      updatedAt:     new Date().toISOString(),
+      lastVisitedAt: null,
+    }
+    state.items.push(item)
+    state.activeFileId = id
+    indexNote(id, { title, content }).catch(err => {
+      console.warn('Failed to index imported note:', err.message)
+    })
+    return id
+  }
+
   async function createFolder(parentId = null) {
 
     const res = await apiCreateFolder(parentId, "New Folder");
@@ -271,6 +296,10 @@ export function useEditorStore() {
           console.warn(`Failed to rename note ${id}:`, err.message)
         })
         debouncedIndexNote(id, newName, item.content || '')
+      } else if (item.type === 'folder') {
+        apiRenameFolder(item.id, newName).catch(err => {
+          console.warn(`Failed to rename folder ${id}:`, err.message)
+        })
       }
     }
   }
@@ -414,11 +443,17 @@ export function useEditorStore() {
     if (state.items.length > 0) return
     state.loading = true
     try {
-      const [notes, tags] = await Promise.all([fetchNotes(), fetchTags()])
+      const [notes, tags, backendFolders] = await Promise.all([fetchNotes(), fetchTags(), apiGetFolders()])
       globalTags.splice(0, globalTags.length, ...tags)
-      const folders = state.items.filter(i => i.type === 'folder')
+      const folderItems = backendFolders.map(f => ({
+        id:        f.id,
+        name:      f.name,
+        parentId:  f.parent_folder_id ?? null,
+        type:      'folder',
+        updatedAt: null,
+      }))
       const backendFiles = notes.map(noteToItem)
-      state.items.splice(0, state.items.length, ...folders, ...backendFiles)
+      state.items.splice(0, state.items.length, ...folderItems, ...backendFiles)
       if (!state.items.find(i => i.id === state.activeFileId)) {
         const firstFile = state.items.find(i => i.type === 'file')
         if (firstFile) await setActiveFile(firstFile.id)
@@ -439,6 +474,7 @@ export function useEditorStore() {
     getChildren,
     setActiveFile,
     createFile,
+    importNote,
     createFolder,
     updateFileContent,
     renameItem,

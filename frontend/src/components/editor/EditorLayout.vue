@@ -24,6 +24,7 @@
         @move-item="moveItem"
       />
       <EditorTagPanel v-else-if="sidebarView === 'tags'" />
+      <EditorAssetsPanel v-else-if="sidebarView === 'assets'" />
     </div>
 
     <!-- Main editor area -->
@@ -67,6 +68,17 @@
                 <Columns2 class="w-4 h-4" />
                 Split View
               </button>
+              <template v-if="activeFile">
+                <div class="menu-divider" />
+                <button class="menu-item" @click="handleExportMd">
+                  <Download class="w-4 h-4" />
+                  Export as Markdown
+                </button>
+                <button class="menu-item" @click="handleExportHtml">
+                  <Download class="w-4 h-4" />
+                  Export as HTML
+                </button>
+              </template>
             </div>
           </div>
         </div>
@@ -129,7 +141,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import {
   PanelLeftClose, PanelLeftOpen, FileText, Pencil,
-  Columns2, Eye, EyeOff, MoreHorizontal
+  Columns2, Eye, EyeOff, MoreHorizontal, Download
 } from 'lucide-vue-next'
 import { useEditorStore } from '../../composables/useEditorStore'
 import EditorIconStrip from './EditorIconStrip.vue'
@@ -138,6 +150,8 @@ import EditorToolbar from './EditorToolbar.vue'
 import EditorContent from './EditorContent.vue'
 import EditorPreview from './EditorPreview.vue'
 import EditorTagPanel from './EditorTagPanel.vue'
+import EditorAssetsPanel from './EditorAssetsPanel.vue'
+import { exportNoteAsMd, exportNoteAsHtml } from '../../services/api.js'
 
 const {
   activeFile, rootItems, fileCount,
@@ -187,6 +201,18 @@ function toggleViewMode() {
 function toggleToolbar() {
   toolbarVisible.value = !toolbarVisible.value
   menuOpen.value = false
+}
+
+async function handleExportMd() {
+  menuOpen.value = false
+  if (!activeFile.value) return
+  await exportNoteAsMd(activeFile.value.id, activeFile.value.name)
+}
+
+async function handleExportHtml() {
+  menuOpen.value = false
+  if (!activeFile.value) return
+  await exportNoteAsHtml(activeFile.value.id, activeFile.value.name)
 }
 
 function handleClickOutside(e) {
@@ -325,6 +351,11 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 .menu-item:hover {
   background: var(--surface-hover);
   color: var(--text);
+}
+.menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
 }
 
 /* Content area */
