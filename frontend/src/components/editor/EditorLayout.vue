@@ -206,13 +206,13 @@ function toggleToolbar() {
 async function handleExportMd() {
   menuOpen.value = false
   if (!activeFile.value) return
-  await exportNoteAsMd(activeFile.value.id)
+  await exportNoteAsMd(activeFile.value.id, activeFile.value.name)
 }
 
 async function handleExportHtml() {
   menuOpen.value = false
   if (!activeFile.value) return
-  await exportNoteAsHtml(activeFile.value.id)
+  await exportNoteAsHtml(activeFile.value.id, activeFile.value.name)
 }
 
 function handleClickOutside(e) {

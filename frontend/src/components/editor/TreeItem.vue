@@ -168,9 +168,9 @@ function cancelRename() {
 
 async function handleDownload() {
   if (props.item.type === 'folder') {
-    await exportFolderAsZip(props.item.id)
+    await exportFolderAsZip(props.item.id, props.item.name)
   } else {
-    await exportNoteAsMd(props.item.id)
+    await exportNoteAsMd(props.item.id, props.item.name)
   }
 }
 

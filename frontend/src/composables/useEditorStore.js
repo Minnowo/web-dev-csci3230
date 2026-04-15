@@ -1,5 +1,5 @@
 import { reactive, computed } from 'vue'
-import {apiCreateFolder, apiMoveNote, apiMoveFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks, fetchTags, fetchNoteTags, syncNoteTags, createTag } from '../services/api.js'
+import {apiCreateFolder, apiGetFolders, apiMoveNote, apiMoveFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks, fetchTags, fetchNoteTags, syncNoteTags, createTag } from '../services/api.js'
 
 let indexDebounceTimer = null
 const INDEX_DEBOUNCE_MS = 1000
@@ -52,9 +52,9 @@ function noteToItem(note) {
     id:            note.id,
     name:          note.title,
     content:       note.content ?? null,
-    parentId:      null,
+    parentId:      note.folder_id ?? null,
     type:          'file',
-    icon:          'FileText',
+    icon:          note.icon ?? 'FileText',
     updatedAt:     note.updated_at,
     lastVisitedAt: null,
   }
@@ -414,11 +414,17 @@ export function useEditorStore() {
     if (state.items.length > 0) return
     state.loading = true
     try {
-      const [notes, tags] = await Promise.all([fetchNotes(), fetchTags()])
+      const [notes, tags, backendFolders] = await Promise.all([fetchNotes(), fetchTags(), apiGetFolders()])
       globalTags.splice(0, globalTags.length, ...tags)
-      const folders = state.items.filter(i => i.type === 'folder')
+      const folderItems = backendFolders.map(f => ({
+        id:        f.id,
+        name:      f.name,
+        parentId:  f.parent_folder_id ?? null,
+        type:      'folder',
+        updatedAt: null,
+      }))
       const backendFiles = notes.map(noteToItem)
-      state.items.splice(0, state.items.length, ...folders, ...backendFiles)
+      state.items.splice(0, state.items.length, ...folderItems, ...backendFiles)
       if (!state.items.find(i => i.id === state.activeFileId)) {
         const firstFile = state.items.find(i => i.type === 'file')
         if (firstFile) await setActiveFile(firstFile.id)

@@ -294,13 +294,13 @@ async function triggerAuthenticatedDownload(url, fallbackName) {
 }
 
 /** Download a note as a .md file. */
-export async function exportNoteAsMd(id) {
-  return triggerAuthenticatedDownload(`${API_BASE}/notes/${id}/export`, `note-${id}.md`)
+export async function exportNoteAsMd(id, title = `note-${id}`) {
+  return triggerAuthenticatedDownload(`${API_BASE}/notes/${id}/export`, `${title}.md`)
 }
 
 /** Download a note rendered as .html. */
-export async function exportNoteAsHtml(id) {
-  return triggerAuthenticatedDownload(`${API_BASE}/notes/${id}/export/html`, `note-${id}.html`)
+export async function exportNoteAsHtml(id, title = `note-${id}`) {
+  return triggerAuthenticatedDownload(`${API_BASE}/notes/${id}/export/html`, `${title}.html`)
 }
 
 /** Upload a file asset (md, png, jpg, jpeg, gif, pdf). Returns FileAsset. */
@@ -331,9 +331,10 @@ export async function downloadFile(id) {
 }
 
 /** Export a folder as ZIP. Pass null for the full workspace. */
-export async function exportFolderAsZip(id = null) {
+export async function exportFolderAsZip(id = null, title = null) {
   const url = id == null ? `${API_BASE}/folders/export` : `${API_BASE}/folder/${id}/export`
-  return triggerAuthenticatedDownload(url, id == null ? 'workspace.zip' : `folder-${id}.zip`)
+  const fallback = id == null ? 'workspace.zip' : `${title ?? `folder-${id}`}.zip`
+  return triggerAuthenticatedDownload(url, fallback)
 }
 
 // ─── Gemini Analysis ──────────────────────────────────────────────────────────
