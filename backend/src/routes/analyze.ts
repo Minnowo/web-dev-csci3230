@@ -32,12 +32,18 @@ router.post("/notes/:id/analyze", async (req: Request, res: Response) => {
 
 		// ── Step 1: Tags + Sentiment via gemini-2.5-flash ───────────────────
 		// We ask the model to return structured JSON so we can parse it reliably.
+		const tagList = (existingTags as string[]).join(", ");
+
 		const prompt = `
 You are an assistant that analyzes personal notes.
 
-Given the following note content, return a JSON object with exactly these two fields:
-1. "tags": an array of 3-6 short, lowercase topic tags (e.g. ["work", "planning", "ideas"])
+Given the following note content and a list of available tags, return a JSON object with exactly these two fields:
+1. "tags": an array of 3-6 tags selected ONLY from the available tags list below. Do not invent new tags.
 2. "sentiment_score": a float between -1.0 (very negative) and 1.0 (very positive) representing the emotional tone of the note
+
+Available tags: ${tagList}
+
+If none of the available tags are relevant, return an empty array for "tags".
 
 Return ONLY valid JSON. No explanation. No markdown. No code blocks.
 

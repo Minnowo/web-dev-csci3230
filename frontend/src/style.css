@@ -31,6 +31,8 @@
   --nav-border:     rgba(255,255,255,0.1);
   --label-from:     #ffffff;
   --label-to:       #7dd3fc;
+  --tag-color:      #c084fc;
+  --tag-bg:         rgba(192, 132, 252, 0.15);
 }
 
 :root.light {
@@ -46,6 +48,8 @@
   --nav-border:     rgba(0,0,0,0.1);
   --label-from:     #1a1a2e;
   --label-to:       #0369a1;
+  --tag-color:      #9333ea;
+  --tag-bg:         rgba(147, 51, 234, 0.12);
 }
 
 body {

@@ -149,6 +149,14 @@ backend/uploads/
 # Personal planning notes (not for repo)
 _planning/
 
+# Backend TypeScript build artifacts
+backend/**/*.d.ts
+backend/**/*.d.ts.map
+backend/**/*.js.map
+
+# IDE settings
+.vscode/
+
 # Claude Code artifacts
 .claude/
 .sfdx/

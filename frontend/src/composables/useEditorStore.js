@@ -1,27 +1,6 @@
-/**
- * useEditorStore.js — Client-side data store for the GraphNotes editor.
- *
- * State is loaded from the backend on mount (via init()) and kept in sync
- * through individual API calls on create, update, rename, and delete.
- * Folders are client-side only until PARENT_ID is added to DB_NOTES.
- *
- * ITEM SHAPE:
- * {
- *   id:            number        — server-assigned integer ID (folders use a temp client ID)
- *   name:          string        — display name (maps to backend `title`)
- *   content:       string | null — null = not yet lazy-loaded
- *   parentId:      number | null — folder parent (client-side only for now)
- *   type:          "file" | "folder"
- *   icon:          string        — Lucide icon name
- *   updatedAt:     string        — ISO 8601 timestamp
- *   lastVisitedAt: string | null — ISO 8601 timestamp, local only
- * }
- */
-
 import { reactive, computed } from 'vue'
-import {apiCreateFolder, apiMoveNote, apiMoveFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks } from '../services/api.js'
+import {apiCreateFolder, apiGetFolders, apiMoveNote, apiMoveFolder, apiRenameFolder, indexNote, deleteNoteIndex, fetchNotes, fetchNote, createNote, updateNote, linkNotes, deleteNote,getNoteLinks,deleteNoteLinks, fetchTags, fetchNoteTags, syncNoteTags, createTag } from '../services/api.js'
 
-// ─── FTS index sync (debounced to avoid firing on every keystroke) ────────────
 let indexDebounceTimer = null
 const INDEX_DEBOUNCE_MS = 1000
 
@@ -34,7 +13,6 @@ function debouncedIndexNote(id, name, content) {
   }, INDEX_DEBOUNCE_MS)
 }
 
-// ─── Save debounce (backend) ──────────────────────────────────────────────────
 let saveDebounceTimer = null
 
 function debouncedSaveNote(id, title, content) {
@@ -61,25 +39,27 @@ function debouncedSaveNote(id, title, content) {
     syncNoteLinks(id, content).catch(err => {
       console.warn('Failed to sync note links:', err.message)
     })
+    syncContentTags(id, content).catch(err => {
+      console.warn('Failed to sync note tags:', err.message)
+    })
   }, INDEX_DEBOUNCE_MS)
 }
 
-// ─── Backend → editor item transform ─────────────────────────────────────────
+
 
 function noteToItem(note) {
   return {
     id:            note.id,
     name:          note.title,
     content:       note.content ?? null,
-    parentId:      null,
+    parentId:      note.folder_id ?? null,
     type:          'file',
-    icon:          'FileText',
+    icon:          note.icon ?? 'FileText',
     updatedAt:     note.updated_at,
     lastVisitedAt: null,
   }
 }
 
-// ─── Reactive state (module-level singleton so all components share one store) ─
 
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
@@ -87,10 +67,49 @@ function generateId() {
 
 const state = reactive({ items: [], activeFileId: null, loading: true })
 
-// ─── Note link cache (noteId → { outbound: Set<id>, inbound: Set<id> }) ────────
 const noteLinkCache = reactive({})
+const noteTagCache    = reactive({}) 
+const contentTagCache = reactive({}) 
+const panelTagCache   = reactive({}) 
+const globalTags      = reactive([]) 
 
-// Parses [[Note Name]] patterns from content and syncs links to the backend.
+function parseContentTags(content) {
+  const tagRegex = /#([a-zA-Z0-9]+)/g
+  const found = new Set()
+  let match
+  while ((match = tagRegex.exec(content)) !== null) {
+    if (match[1].length <= 30) found.add(match[1].toLowerCase())
+  }
+  return [...found]
+}
+
+function rebuildNoteTagCache(noteId) {
+  const union = new Set([
+    ...(contentTagCache[noteId] ?? []),
+    ...(panelTagCache[noteId]   ?? []),
+  ])
+  noteTagCache[noteId] = [...union]
+}
+
+async function syncContentTags(noteId, content) {
+  const allContentTags = parseContentTags(content)
+  const existingNames = new Set(globalTags.map(t => t.name))
+  contentTagCache[noteId] = allContentTags.filter(t => existingNames.has(t))
+  rebuildNoteTagCache(noteId)
+  const { tags: saved } = await syncNoteTags(noteId, noteTagCache[noteId])
+  noteTagCache[noteId] = saved.map(t => t.name)
+}
+
+
+async function ensureGlobalTag(name) {
+  if (!/^[a-zA-Z0-9]{1,30}$/.test(name)) return
+  if (globalTags.find(t => t.name === name)) return
+  try {
+    const result = await createTag(name)
+    globalTags.push({ id: result.id, name, note_count: 0 })
+  } catch { /* ignore tag may have been created concurrently */ }
+}
+
 async function syncNoteLinks(noteId, content) {
   const wikiLinkRegex = /\[\[([^\]]+)\]\]/g
   const linkedNames = new Set()
@@ -125,41 +144,34 @@ async function syncNoteLinks(noteId, content) {
   noteLinkCache[noteId].outbound = newLinkedSet
 }
 
-// ─── Composable ───────────────────────────────────────────────────────────────
+
 
 export function useEditorStore() {
 
-  /** The currently open file object, or null if none is selected. */
+  /** The currently open file object or null if none is selected. */
   const activeFile = computed(() =>
     state.items.find(i => i.id === state.activeFileId && i.type === 'file') || null
   )
 
-  /** All top-level items (files and folders with no parent). */
-  const rootItems = computed(() =>
-    state.items.filter(i => i.parentId === null)
-  )
-
-  /**
-   * Returns the direct children of a given folder.
-   * Used by the sidebar tree to render nested items recursively.
-   */
-  function getChildren(parentId) {
-    return state.items.filter(i => i.parentId === parentId)
+  function foldersFirst(a, b) {
+    if (a.type === b.type) return 0
+    return a.type === 'folder' ? -1 : 1
   }
 
-  /**
-   * Sets the currently active/open file by ID and stamps its lastVisitedAt time.
-   * Lazy-loads full content from GET /api/notes/:id on first open.
-   *
-   * TODO — Backend (optional): PATCH /api/notes/:id
-   * Request body: { lastVisitedAt: string } — useful if you want cross-device
-   * "recently visited" to sync. Otherwise keep client-side only.
-   */
+  /** All top-level items (files and folders with no parent). */
+  const rootItems = computed(() =>
+    state.items.filter(i => i.parentId === null).sort(foldersFirst)
+  )
+
+  function getChildren(parentId) {
+    return state.items.filter(i => i.parentId === parentId).sort(foldersFirst)
+  }
+
   async function setActiveFile(id) {
     const item = state.items.find(i => i.id === id && i.type === 'file')
     if (item) {
       item.lastVisitedAt = new Date().toISOString()
-      // Lazy-load content on first open
+      // Lazyload content on first open
       if (item.content === null) {
         try {
           const note = await fetchNote(id)
@@ -169,8 +181,22 @@ export function useEditorStore() {
           item.content = ''
         }
       }
-      // Set active ID only after content is ready so the editor watch fires with real content
+      // set active id only after content is ready so the editor watch fires with real content
       state.activeFileId = id
+      if (panelTagCache[id] === undefined) {
+        try {
+          const tags = await fetchNoteTags(id)
+          const dbTagNames = tags.map(t => t.name)
+          const contentTags = new Set(parseContentTags(item.content ?? ''))
+          contentTagCache[id] = [...contentTags]
+          panelTagCache[id]   = dbTagNames.filter(name => !contentTags.has(name))
+          noteTagCache[id]    = dbTagNames
+        } catch {
+          contentTagCache[id] = []
+          panelTagCache[id]   = []
+          noteTagCache[id]    = []
+        }
+      }
       // Load note links if not yet cached
       if (!noteLinkCache[id]) {
         try {
@@ -187,12 +213,6 @@ export function useEditorStore() {
     }
   }
 
-  /**
-   * The 8 most recently visited files, sorted newest-first.
-   * Falls back to updatedAt for files that have never been explicitly opened
-   * (e.g. created before this field existed, or via the backend).
-   * Used by the Dashboard "Recently visited" section.
-   */
   const recentFiles = computed(() =>
     state.items
       .filter(i => i.type === 'file')
@@ -205,13 +225,6 @@ export function useEditorStore() {
       .slice(0, 8)
   )
 
-  /**
-   * Creates a new empty note and opens it in the editor.
-   *
-   * Backend: POST /api/notes
-   * Request body:  { title: string, content: string }
-   * Expected response: { id: number }
-   */
   async function createFile(parentId = null, title = 'Untitled') {
     const { id } = await createNote(title, '')
     const item = noteToItem({ id, title, content: '', updated_at: new Date().toISOString() })
@@ -224,14 +237,34 @@ export function useEditorStore() {
     return id
   }
 
-  /**
-   * Creates a new folder in the sidebar tree (client-side only).
-   *
-   * TODO — Backend: POST /api/notes
-   * Request body:  { title: string, parentId: number | null, type: "folder" }
-   * Expected response: the created item (including server-generated id)
-   * Requires PARENT_ID column in DB_NOTES.
-   */
+  async function importNote(title, content, parentId = null) {
+    const { id } = await createNote(title, content)
+    const item = {
+      id,
+      name:          title,
+      content:       content,
+      parentId:      parentId,
+      type:          'file',
+      icon:          'FileText',
+      updatedAt:     new Date().toISOString(),
+      lastVisitedAt: null,
+    }
+    state.items.push(item)
+    state.activeFileId = id
+    indexNote(id, { title, content }).catch(err => {
+      console.warn('Failed to index imported note:', err.message)
+    })
+    // Register any #hashtags found in imported content as global tags and sync to note
+    const contentTags = parseContentTags(content)
+    if (contentTags.length) {
+      await Promise.all(contentTags.map(t => ensureGlobalTag(t)))
+      const fresh = await fetchTags()
+      globalTags.splice(0, globalTags.length, ...fresh)
+      await syncContentTags(id, content)
+    }
+    return id
+  }
+
   async function createFolder(parentId = null) {
 
     const res = await apiCreateFolder(parentId, "New Folder");
@@ -244,13 +277,6 @@ export function useEditorStore() {
     return id
   }
 
-  /**
-   * Saves the markdown content of a note. Debounced 1s to avoid hammering the server.
-   *
-   * Backend: POST /api/notes/:id/update
-   * Request body:  { title: string, content: string }
-   * Expected response: { id, title, content, created_at, updated_at }
-   */
   function updateFileContent(id, content) {
     const item = state.items.find(i => i.id === id)
     if (item && item.type === 'file') {
@@ -261,13 +287,6 @@ export function useEditorStore() {
     }
   }
 
-  /**
-   * Updates the icon of a file. Called when the user picks from the IconPicker.
-   *
-   * TODO — Backend: PATCH /api/notes/:id
-   * Request body:  { icon: string }  (icon name key, e.g. "Lightbulb")
-   * Expected response: { updatedAt: string }
-   */
   function updateItemIcon(id, iconName) {
     const item = state.items.find(i => i.id === id)
     if (item) {
@@ -276,14 +295,6 @@ export function useEditorStore() {
     }
   }
 
-  /**
-   * Renames a file or folder. Triggered by double-clicking an item in the sidebar.
-   *
-   * TODO — Backend: PATCH /api/notes/:id
-   * Request body:  { name: string }
-   * Expected response: { updatedAt: string }
-   * On success: update item.name and item.updatedAt
-   */
   function renameItem(id, newName, type = null) {
     const item = type
       ? state.items.find(i => String(i.id) === String(id) && i.type === type)
@@ -296,21 +307,14 @@ export function useEditorStore() {
           console.warn(`Failed to rename note ${id}:`, err.message)
         })
         debouncedIndexNote(id, newName, item.content || '')
+      } else if (item.type === 'folder') {
+        apiRenameFolder(item.id, newName).catch(err => {
+          console.warn(`Failed to rename folder ${id}:`, err.message)
+        })
       }
     }
   }
 
-  /**
-   * Deletes a file or folder. If a folder is deleted, all of its children are
-   * deleted recursively first (handled client-side here; the backend may handle
-   * cascading deletes at the database level instead).
-   *
-   * TODO — Backend: DELETE /api/notes/:id
-   * No request body needed.
-   * The backend should cascade-delete all children if the item is a folder.
-   * On success: remove the item (and its children) from state.items
-   * If the deleted item was the active file, open the next available file.
-   */
   function deleteItem(id) {
     const item = state.items.find(i => i.id === id)
     if (item && item.type === 'file') {
@@ -331,27 +335,9 @@ export function useEditorStore() {
     }
   }
 
-  /** Total number of notes (files only) in the vault. Shown in the sidebar footer. */
   const fileCount = computed(() => state.items.filter(i => i.type === 'file').length)
 
-  /**
-   * Searches notes and folders by name (client-side, case-insensitive).
-   *
-   * TODO — Backend (optional): GET /api/notes/search?q=:query
-   * If full-text search across note *content* is needed, this should hit the
-   * backend. For name-only search the current client-side filter is sufficient.
-   * Expected response: Item[]
-   */
-  /**
-   * Moves a file or folder to a new parent (or root if newParentId is null).
-   * Includes a cycle guard: a folder cannot be moved into itself or any of its
-   * own descendants.
-   *
-   * TODO — Backend:
-   *   Files:   POST /api/notes/:id/move    body: { parent_folder_id: number | null }
-   *   Folders: POST /api/folder/move       body: { folder_id: number, parent_folder_id: number | null }
-   * On success: update item.parentId in state (already done optimistically here).
-   */
+
   function moveItem(itemId, itemType, newParentId) {
     const item = state.items.find(i => String(i.id) === String(itemId) && i.type === itemType)
     if (!item) return
@@ -389,7 +375,91 @@ export function useEditorStore() {
     return state.items.filter(i => i.name.toLowerCase().includes(q))
   }
 
-  /** Returns notes that the given note links to (outbound) and notes that link to it (inbound). */
+  function searchByTag(tagName) {
+    const name = tagName.toLowerCase()
+    return state.items.filter(i => {
+      if (i.type !== 'file') return false
+      return (noteTagCache[i.id] ?? []).includes(name)
+    })
+  }
+
+  async function preloadNoteTags() {
+    const files = state.items.filter(i => i.type === 'file')
+    await Promise.all(files.map(async (item) => {
+      if (panelTagCache[item.id] !== undefined) return
+      try {
+        const tags = await fetchNoteTags(item.id)
+        const dbTagNames = tags.map(t => t.name)
+        contentTagCache[item.id] = []
+        panelTagCache[item.id]   = dbTagNames
+        noteTagCache[item.id]    = dbTagNames
+      } catch { /* ignore tag search will just miss this note */ }
+    }))
+  }
+
+  function getNoteTags(noteId) {
+    return noteTagCache[noteId] ?? []
+  }
+
+  function getContentTags(noteId) {
+    return contentTagCache[noteId] ?? []
+  }
+
+  function getPanelTags(noteId) {
+    return panelTagCache[noteId] ?? []
+  }
+
+  async function setNoteTags(noteId, tags) {
+    const merged = new Set([...(panelTagCache[noteId] ?? []), ...tags])
+    panelTagCache[noteId] = [...merged]
+    rebuildNoteTagCache(noteId)
+    const { tags: saved } = await syncNoteTags(noteId, noteTagCache[noteId])
+    noteTagCache[noteId] = saved.map(t => t.name)
+    const fresh = await fetchTags()
+    globalTags.splice(0, globalTags.length, ...fresh)
+  }
+
+  async function reloadNoteTags(noteId) {
+    const item = state.items.find(i => i.id === noteId)
+    if (!item) return
+    try {
+      const tags = await fetchNoteTags(noteId)
+      const dbTagNames = tags.map(t => t.name)
+      const existingNames = new Set(globalTags.map(g => g.name))
+      const contentTags = new Set(parseContentTags(item.content ?? '').filter(t => existingNames.has(t)))
+      contentTagCache[noteId] = [...contentTags]
+      panelTagCache[noteId]   = dbTagNames.filter(name => !contentTags.has(name))
+      noteTagCache[noteId]    = dbTagNames
+    } catch { /* keep existing cache on error */ }
+  }
+
+  async function deletePanelTag(noteId, tagName) {
+    panelTagCache[noteId] = (panelTagCache[noteId] ?? []).filter(t => t !== tagName)
+    rebuildNoteTagCache(noteId)
+    const { tags: saved } = await syncNoteTags(noteId, noteTagCache[noteId])
+    noteTagCache[noteId] = saved.map(t => t.name)
+    const fresh = await fetchTags()
+    globalTags.splice(0, globalTags.length, ...fresh)
+  }
+
+  function addTagsToContent(noteId, tagNames) {
+    const item = state.items.find(i => i.id === noteId && i.type === 'file')
+    if (!item) return
+    const existing = new Set(parseContentTags(item.content ?? ''))
+    const toAdd = tagNames.filter(t => !existing.has(t.toLowerCase()))
+    if (!toAdd.length) return
+    const newContent = (item.content ?? '').trimEnd() + '\n' + toAdd.map(t => `#${t}`).join(' ')
+    updateFileContent(noteId, newContent)
+  }
+
+  function removeTagFromContent(noteId, tagName) {
+    const item = state.items.find(i => i.id === noteId && i.type === 'file')
+    if (!item) return
+    const pattern = new RegExp(`\\s*#${tagName}(?=[\\s,;.!?\\n]|$)`, 'gi')
+    const newContent = (item.content ?? '').replace(pattern, '').replace(/\n{3,}/g, '\n\n').trimEnd()
+    updateFileContent(noteId, newContent)
+  }
+
   function getLinkedNotes(noteId) {
     const cache = noteLinkCache[noteId]
     if (!cache) return { outbound: [], inbound: [] }
@@ -402,14 +472,22 @@ export function useEditorStore() {
     if (state.items.length > 0) return
     state.loading = true
     try {
-      const notes = await fetchNotes()
-      const folders = state.items.filter(i => i.type === 'folder')
+      const [notes, tags, backendFolders] = await Promise.all([fetchNotes(), fetchTags(), apiGetFolders()])
+      globalTags.splice(0, globalTags.length, ...tags)
+      const folderItems = backendFolders.map(f => ({
+        id:        f.id,
+        name:      f.name,
+        parentId:  f.parent_folder_id ?? null,
+        type:      'folder',
+        updatedAt: null,
+      }))
       const backendFiles = notes.map(noteToItem)
-      state.items.splice(0, state.items.length, ...folders, ...backendFiles)
+      state.items.splice(0, state.items.length, ...folderItems, ...backendFiles)
       if (!state.items.find(i => i.id === state.activeFileId)) {
         const firstFile = state.items.find(i => i.type === 'file')
         if (firstFile) await setActiveFile(firstFile.id)
       }
+      preloadNoteTags() // fire-and-forget: populates tag cache for tag: search
     } catch (err) {
       console.warn('Failed to load notes from backend, using local data:', err.message)
     } finally {
@@ -425,6 +503,7 @@ export function useEditorStore() {
     getChildren,
     setActiveFile,
     createFile,
+    importNote,
     createFolder,
     updateFileContent,
     renameItem,
@@ -433,9 +512,21 @@ export function useEditorStore() {
     fileCount,
     recentFiles,
     searchItems,
+    searchByTag,
     updateItemIcon,
     getLinkedNotes,
     syncNoteLinks,
+    globalTags,
+    getNoteTags,
+    getContentTags,
+    getPanelTags,
+    setNoteTags,
+    deletePanelTag,
+    reloadNoteTags,
+    ensureGlobalTag,
+    addTagsToContent,
+    removeTagFromContent,
+    parseContentTags,
     init,
   }
 }

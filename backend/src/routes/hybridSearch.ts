@@ -38,7 +38,6 @@ router.post("/search/hybrid", (req: Request, res: Response) => {
 		type FtsRow = {
 			note_id: string;
 			title: string;
-			tags: string;
 			rank: number;
 		};
 
@@ -47,8 +46,7 @@ router.post("/search/hybrid", (req: Request, res: Response) => {
 				`SELECT
 					note_id,
 					title,
-					tags,
-					bm25(notes_fts, 0, 10, 5, 1) AS rank
+					bm25(notes_fts, 0, 10, 1) AS rank
 				FROM notes_fts
 				WHERE notes_fts MATCH ?
 				ORDER BY rank
@@ -71,7 +69,6 @@ router.post("/search/hybrid", (req: Request, res: Response) => {
 		const results = rows.map((r) => ({
 			id: r.note_id,
 			title: r.title,
-			tags: r.tags.split(" ").filter((t) => t.length > 0),
 			score: (maxScore - r.rank) / range,
 		}));
 

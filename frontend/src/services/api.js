@@ -1,33 +1,22 @@
-import { mockNotes } from './mockData.js'
 import { useAuth } from '../composables/useAuth.js'
 
-// Controls whether visualization functions (getNotes, getNote) use mock data.
-// Keep true until DB_NOTES has tags and sentiment_score columns — the real
-// backend notes lack these fields and would break the visualization components.
-const USE_MOCK = true
 const API_BASE = 'http://localhost:3000/api'
 
-// ─── Notes ────────────────────────────────────────────────────────────────────
+// ─── Notes (Visualizations) ───────────────────────────────────────────────────
 
 /**
- * Fetch all notes.
- * Returns: [{ id, title, content, tags, sentiment_score, created_at, updated_at }]
+ * Fetch all notes for visualizations (authenticated).
+ * Returns: [{ id, folder_id, title, created_at, updated_at, tags: string[] }]
  */
 export async function getNotes() {
-  if (USE_MOCK) return mockNotes
-  const res = await fetch(`${API_BASE}/notes`)
-  if (!res.ok) throw new Error('Failed to fetch notes')
-  return res.json()
+  return fetchNotes()
 }
 
 /**
- * Fetch a single note by ID.
+ * Fetch a single note by ID for visualizations (authenticated).
  */
 export async function getNote(id) {
-  if (USE_MOCK) return mockNotes.find(n => n.id === id) ?? null
-  const res = await fetch(`${API_BASE}/notes/${id}`)
-  if (!res.ok) throw new Error(`Failed to fetch note ${id}`)
-  return res.json()
+  return fetchNote(id)
 }
 
 // ─── Note CRUD (David) ───────────────────────────────────────────────────────
@@ -82,6 +71,67 @@ export async function deleteNote(id) {
     headers: authHeaders(),
   })
   if (!res.ok) throw new Error(`Failed to delete note ${id}`)
+  return res.json()
+}
+
+
+/** Fetch all tags for the logged-in user. Returns: [{ id, name, note_count }] */
+export async function fetchTags() {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/tags`, { headers: authHeaders() })
+  if (!res.ok) throw new Error('Failed to fetch tags')
+  const { tags } = await res.json()
+  return tags ?? []
+}
+
+/** Create a new global tag. Returns: { id, name } */
+export async function createTag(name) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/tags`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ name }),
+  })
+  if (!res.ok) throw new Error('Failed to create tag')
+  return res.json()
+}
+
+/** Delete a global tag by ID. */
+export async function deleteTag(tagId) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/tags/${tagId}/delete`, {
+    method: 'POST',
+    headers: authHeaders(),
+  })
+  if (!res.ok) throw new Error(`Failed to delete tag ${tagId}`)
+}
+
+/** Fetch tags for a specific note. Returns: [{ id, name }] */
+export async function fetchNoteTags(noteId) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/${noteId}/tags`, { headers: authHeaders() })
+  if (!res.ok) throw new Error(`Failed to fetch tags for note ${noteId}`)
+  const { tags } = await res.json()
+  return tags ?? []
+}
+
+/** Fetch all wiki-links for the logged-in user. Returns: [{ from_note_id, to_note_id }] */
+export async function fetchAllLinks() {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/links`, { headers: authHeaders() })
+  if (!res.ok) throw new Error('Failed to fetch all note links')
+  return res.json()
+}
+
+/** Replace all tags on a note. Returns: { tags: [{ id, name }] } */
+export async function syncNoteTags(noteId, tags) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/notes/${noteId}/tags`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ tags }),
+  })
+  if (!res.ok) throw new Error(`Failed to sync tags for note ${noteId}`)
   return res.json()
 }
 
@@ -224,24 +274,90 @@ export async function apiMoveFolder(folder_id, parent_folder_id) {
   if (!res.ok) throw new Error(`Failed to move folder ${folder_id}`)
 }
 
+export async function apiRenameFolder(folder_id, name) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/folder/rename`, {
+    method: 'POST',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder_id, name }),
+  })
+  if (!res.ok) throw new Error(`Failed to rename folder ${folder_id}`)
+}
+
+// ─── File & Export ────────────────────────────────────────────────────────────
+
+async function triggerAuthenticatedDownload(url, fallbackName) {
+  const { authHeaders } = useAuth()
+  const res = await fetch(url, { headers: authHeaders() })
+  if (!res.ok) throw new Error(`Download failed: ${res.status}`)
+  const blob = await res.blob()
+  const disposition = res.headers.get('Content-Disposition') || ''
+  const match = disposition.match(/filename="([^"]+)"/)
+  const name = match ? match[1] : fallbackName
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = name
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(a.href)
+}
+
+/** Download a note as a .md file. */
+export async function exportNoteAsMd(id, title = `note-${id}`) {
+  return triggerAuthenticatedDownload(`${API_BASE}/notes/${id}/export`, `${title}.md`)
+}
+
+/** Download a note rendered as .html. */
+export async function exportNoteAsHtml(id, title = `note-${id}`) {
+  return triggerAuthenticatedDownload(`${API_BASE}/notes/${id}/export/html`, `${title}.html`)
+}
+
+/** Upload a file asset (md, png, jpg, jpeg, gif, pdf). Returns FileAsset. */
+export async function uploadFile(file) {
+  const { authHeaders } = useAuth()
+  const formData = new FormData()
+  formData.append('file', file)
+  const res = await fetch(`${API_BASE}/files/upload`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: formData,
+  })
+  if (!res.ok) throw new Error('Upload failed')
+  return res.json()
+}
+
+/** List all uploaded file assets for the logged-in user. */
+export async function listFiles() {
+  const { authHeaders } = useAuth()
+  const res = await fetch(`${API_BASE}/files`, { headers: authHeaders() })
+  if (!res.ok) throw new Error('Failed to list files')
+  return res.json()
+}
+
+/** Download a file asset by ID. */
+export async function downloadFile(id) {
+  return triggerAuthenticatedDownload(`${API_BASE}/files/${id}/download`, `file-${id}`)
+}
+
+/** Export a folder as ZIP. Pass null for the full workspace. */
+export async function exportFolderAsZip(id = null, title = null) {
+  const url = id == null ? `${API_BASE}/folders/export` : `${API_BASE}/folder/${id}/export`
+  const fallback = id == null ? 'workspace.zip' : `${title ?? `folder-${id}`}.zip`
+  return triggerAuthenticatedDownload(url, fallback)
+}
+
 // ─── Gemini Analysis ──────────────────────────────────────────────────────────
 
 /**
  * Analyze a note with Gemini — returns tags, sentiment_score.
  * Called after a note is saved.
  */
-export async function analyzeNote(id, content) {
-  if (USE_MOCK) {
-    await new Promise(r => setTimeout(r, 500))
-    return {
-      tags: ['work', 'planning'],
-      sentiment_score: 0.6,
-    }
-  }
+export async function analyzeNote(id, content, existingTags = []) {
   const res = await fetch(`${API_BASE}/notes/${id}/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content })
+    body: JSON.stringify({ content, tags: existingTags })
   })
   if (!res.ok) throw new Error('Failed to analyze note')
   return res.json()
@@ -298,51 +414,69 @@ export async function deleteNoteIndex(id) {
 // ─── Graph Helpers ────────────────────────────────────────────────────────────
 
 /**
- * Compute links between notes that share at least one tag.
- * Returns: [{ source: id, target: id, sharedTags: [...] }]
+ * Build graph data from notes and wiki-links.
+ *
+ * Returns four separate collections so GraphView can combine them based on toggles:
+ *   noteNodes  — one node per note
+ *   tagNodes   — one node per unique tag (id = "tag-{name}")
+ *   wikiEdges  — explicit note↔note links from [[wiki-links]] (DB_NOTES_LINKS)
+ *   tagEdges   — note↔tag edges derived from each note's tags array
+ *
+ * connectionCount on noteNodes counts all edges (wiki + tag) so node sizing
+ * reflects total connectivity regardless of which toggles are active.
  */
-export function computeLinks(notes) {
-  const links = []
-  for (let i = 0; i < notes.length; i++) {
-    for (let j = i + 1; j < notes.length; j++) {
-      const shared = notes[i].tags.filter(t => notes[j].tags.includes(t))
-      if (shared.length) {
-        links.push({
-          source: notes[i].id,
-          target: notes[j].id,
-          sharedTags: shared
-        })
+export function buildGraphData(notes, wikiLinks = []) {
+  // Build tag nodes from all unique tags across notes
+  const tagMap = new Map()
+  notes.forEach(n => {
+    ;(n.tags ?? []).forEach(tag => {
+      if (!tagMap.has(tag)) {
+        tagMap.set(tag, { id: `tag-${tag}`, name: tag, noteCount: 0, type: 'tag' })
       }
-    }
-  }
-  return links
-}
+      tagMap.get(tag).noteCount++
+    })
+  })
+  const tagNodes = [...tagMap.values()]
 
-/**
- * Build graph data (nodes + links) from a notes array.
- * Nodes include a connectionCount for sizing.
- */
-export function buildGraphData(notes) {
-  const links = computeLinks(notes)
-
-  // Count connections per note
-  const connectionCount = {}
-  notes.forEach(n => connectionCount[n.id] = 0)
-  links.forEach(l => {
-    connectionCount[l.source]++
-    connectionCount[l.target]++
+  // Build tag edges (note → tag node)
+  const tagEdges = []
+  notes.forEach(n => {
+    ;(n.tags ?? []).forEach(tag => {
+      if (tagMap.has(tag)) {
+        tagEdges.push({ source: n.id, target: `tag-${tag}`, type: 'tag' })
+      }
+    })
   })
 
-  const nodes = notes.map(n => ({
-    id: n.id,
-    title: n.title,
-    tags: n.tags,
-    updated_at: n.updated_at,
-    connectionCount: connectionCount[n.id],
-    dominantTag: n.tags[0] ?? 'untagged'
+  // Normalise wiki-links from backend shape { from_note_id, to_note_id }
+  const wikiEdges = wikiLinks.map(l => ({
+    source: l.from_note_id,
+    target: l.to_note_id,
+    type: 'wiki'
   }))
 
-  return { nodes, links }
+  // Connection count per note — sum of wiki edges + tag edges
+  const connectionCount = {}
+  notes.forEach(n => { connectionCount[n.id] = 0 })
+  wikiEdges.forEach(l => {
+    if (connectionCount[l.source] !== undefined) connectionCount[l.source]++
+    if (connectionCount[l.target] !== undefined) connectionCount[l.target]++
+  })
+  tagEdges.forEach(l => {
+    if (connectionCount[l.source] !== undefined) connectionCount[l.source]++
+  })
+
+  const noteNodes = notes.map(n => ({
+    id: n.id,
+    title: n.title,
+    tags: n.tags ?? [],
+    created_at: n.created_at,
+    updated_at: n.updated_at,
+    connectionCount: connectionCount[n.id] ?? 0,
+    type: 'note'
+  }))
+
+  return { noteNodes, tagNodes, wikiEdges, tagEdges }
 }
 
 // ─── Sentiment Calendar Helpers ───────────────────────────────────────────────
@@ -353,23 +487,16 @@ export function buildGraphData(notes) {
  */
 export function buildCalendarData(notes) {
   const byDate = {}
-  notes
-    .filter(n => n.sentiment_score !== null && n.sentiment_score !== undefined)
-    .forEach(n => {
-      const date = n.created_at.slice(0, 10) // "YYYY-MM-DD"
-      if (!byDate[date]) byDate[date] = { scores: [], notes: [] }
-      byDate[date].scores.push(n.sentiment_score)
-      byDate[date].notes.push({ id: n.id, title: n.title, score: n.sentiment_score })
-    })
-
-  // Average score per day
+  notes.forEach(n => {
+    const dateStr = n.created_at || n.updated_at
+    if (!dateStr) return
+    const date = dateStr.slice(0, 10) // "YYYY-MM-DD"
+    if (!byDate[date]) byDate[date] = { notes: [] }
+    byDate[date].notes.push({ id: n.id, title: n.title })
+  })
   const result = {}
-  Object.entries(byDate).forEach(([date, { scores, notes }]) => {
-    result[date] = {
-      score: scores.reduce((a, b) => a + b, 0) / scores.length,
-      count: notes.length,
-      notes
-    }
+  Object.entries(byDate).forEach(([date, { notes }]) => {
+    result[date] = { count: notes.length, notes }
   })
   return result
 }

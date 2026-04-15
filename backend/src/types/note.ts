@@ -13,6 +13,7 @@ export type NoteListItem = {
 	folder_id: number | null;
 	title: string;
 	icon: string | null;
+	created_at: string;
 	updated_at: string;
 	tags: string[];
 };

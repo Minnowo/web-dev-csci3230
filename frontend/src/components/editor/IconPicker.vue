@@ -60,7 +60,6 @@ import { ICON_GROUPS, ICON_MAP, resolveIcon } from './iconMap.js'
 
 const props = defineProps({
   current: { type: String, default: 'FileText' },
-  /** { top, left } in px relative to the viewport — set by the parent */
   position: { type: Object, default: () => ({ top: 0, left: 0 }) },
 })
 

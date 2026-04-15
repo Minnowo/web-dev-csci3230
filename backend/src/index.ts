@@ -16,13 +16,16 @@ import { ApiPostDeleteNote } from "./api/api_delete_note_post.js";
 import analyzeRouter from "./routes/analyze.js";
 import hybridSearchRouter from "./routes/hybridSearch.js";
 import noteIndexRouter from "./routes/noteIndex.js";
+import noteBackdateRouter from "./routes/noteBackdate.js";
 import { ApiPostLinkNote } from "./api/api_link_note_post.js";
 import { ApiPostDeleteNoteLinks } from "./api/api_delete_link_note_post.js";
 import { ApiGetNoteLinks } from "./api/api_note_links_get.js";
+import { ApiGetAllNoteLinks } from "./api/api_note_links_all_get.js";
 import { ApiPostCreateFolder } from "./api/api_create_folder_post.js";
 import { ApiPostDeleteFolder } from "./api/api_delete_folder_post.js";
 import { ApiPostMoveNote } from "./api/api_move_note_post.js";
 import { ApiPostMoveFolder } from "./api/api_move_folder_post.js";
+import { ApiPostRenameFolder } from "./api/api_rename_folder_post.js";
 import { ApiGetTags } from "./api/api_tags_get.js";
 import { ApiPostTag } from "./api/api_tag_post.js";
 import { ApiPostDeleteTag } from "./api/api_tag_delete.js";
@@ -31,8 +34,12 @@ import { ApiPostNoteTags } from "./api/api_note_tags_post.js";
 import { ApiGetFilesList } from "./api/api_files_list_get.js";
 import { ApiPostFileUpload } from "./api/api_post_file_upload.js";
 import { runUploadThen } from "./middleware/multerUpload.js";
+import { ApiGetFileDownload } from "./api/api_file_download_get.js";
 import { ApiGetFolderChildren } from "./api/api_folder_children_get.js";
 import { ApiGetFolders } from "./api/api_folders_get.js";
+import { ApiGetFolderExport } from "./api/api_folder_export_get.js";
+import { ApiGetNoteExportMd } from "./api/api_note_export_md_get.js";
+import { ApiGetNoteExportHtml } from "./api/api_note_export_html_get.js";
 
 export const ExpressApp = express();
 const PORT = 3000;
@@ -49,6 +56,7 @@ ExpressApp.get("/api/health", (req: Request, res: Response) => {
 ExpressApp.use("/api", analyzeRouter);
 ExpressApp.use("/api", hybridSearchRouter);
 ExpressApp.use("/api", noteIndexRouter);
+ExpressApp.use("/api", noteBackdateRouter);
 
 ExpressApp.get("/", (req: Request, res: Response) => {
 	res.send("Hello from TypeScript + Express 🚀");
@@ -62,6 +70,7 @@ ExpressApp.get("/api/whoami", MiddleWareAuthenticateToken, ApiGetWhoAmI);
 
 // API endpoints for notes
 ExpressApp.get("/api/notes", MiddleWareAuthenticateToken, ApiGetNotesList);
+ExpressApp.get("/api/notes/links", MiddleWareAuthenticateToken, ApiGetAllNoteLinks);
 ExpressApp.post("/api/notes", MiddleWareAuthenticateToken, ApiPostCreateNote);
 ExpressApp.post(
 	"/api/notes/link",
@@ -79,6 +88,16 @@ ExpressApp.get(
 	"/api/notes/:id/links",
 	MiddleWareAuthenticateToken,
 	ApiGetNoteLinks,
+);
+ExpressApp.get(
+	"/api/notes/:id/export",
+	MiddleWareAuthenticateToken,
+	ApiGetNoteExportMd,
+);
+ExpressApp.get(
+	"/api/notes/:id/export/html",
+	MiddleWareAuthenticateToken,
+	ApiGetNoteExportHtml,
 );
 ExpressApp.post(
 	"/api/notes/:id/update",
@@ -100,12 +119,23 @@ ExpressApp.post(
 	MiddleWareAuthenticateToken,
 	runUploadThen(ApiPostFileUpload),
 );
+ExpressApp.get(
+	"/api/files/:id/download",
+	MiddleWareAuthenticateToken,
+	ApiGetFileDownload,
+);
 
 ExpressApp.get("/api/folders", MiddleWareAuthenticateToken, ApiGetFolders);
+ExpressApp.get("/api/folders/export", MiddleWareAuthenticateToken, ApiGetFolderExport);
 ExpressApp.get(
 	"/api/folder/:id",
 	MiddleWareAuthenticateToken,
 	ApiGetFolderChildren,
+);
+ExpressApp.get(
+	"/api/folder/:id/export",
+	MiddleWareAuthenticateToken,
+	ApiGetFolderExport,
 );
 ExpressApp.post(
 	"/api/folder",
@@ -126,6 +156,11 @@ ExpressApp.post(
 	"/api/folder/move",
 	MiddleWareAuthenticateToken,
 	ApiPostMoveFolder,
+);
+ExpressApp.post(
+	"/api/folder/rename",
+	MiddleWareAuthenticateToken,
+	ApiPostRenameFolder,
 );
 
 // ── Tag endpoints (David) ─────────────────────────────────────────────────────

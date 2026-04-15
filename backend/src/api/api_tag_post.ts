@@ -10,8 +10,8 @@ export const ApiPostTag = (req: AuthenticatedRequest, res: Response): void => {
 
 	const { name } = req.body as { name?: string };
 
-	if (!name || name.trim().length === 0) {
-		res.status(400).json({ message: "Tag name is required" });
+	if (!name || !/^[a-zA-Z0-9]{1,30}$/.test(name.trim())) {
+		res.status(400).json({ message: "Tag name must be alphanumeric and at most 30 characters" });
 		return;
 	}
 
