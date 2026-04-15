@@ -183,9 +183,11 @@ function processLineContent(text) {
   text = text.replace(/#([\w-]+)/g, (_, name) =>
     `<span class="tag-link" contenteditable="false" data-tag="${name}">#${name}</span>`)
 
-  // 7. Wiki-links
-  text = text.replace(/\[\[([^\]]+)\]\]/g, (_, name) =>
-    `<span class="wiki-link" contenteditable="false" data-name="${name}">${name}</span>`)
+  // 7. Wiki-links (skip self-references)
+  text = text.replace(/\[\[([^\]]+)\]\]/g, (_, name) => {
+    if (name.toLowerCase() === props.file?.name?.toLowerCase()) return `[[${name}]]`
+    return `<span class="wiki-link" contenteditable="false" data-name="${name}">${name}</span>`
+  })
 
   return text
 }
@@ -433,6 +435,13 @@ function renderWikiLinksInDOM() {
           restoreTo = { node: t, offset: anchorOffset - last }
         }
         lastInserted = t
+      }
+      // Skip self-reference — leave as plain text
+      if (match[1].toLowerCase() === props.file?.name?.toLowerCase()) {
+        frag.appendChild(document.createTextNode(match[0]))
+        lastInserted = frag.lastChild
+        last = regex.lastIndex
+        continue
       }
       const span = document.createElement('span')
       span.className = 'wiki-link'
@@ -1068,7 +1077,7 @@ function checkWikiAutocomplete() {
 
   const term = match[1].toLowerCase()
   const results = state.items
-    .filter(i => i.type === 'file' && i.name.toLowerCase().includes(term))
+    .filter(i => i.type === 'file' && i.id !== props.file?.id && i.name.toLowerCase().includes(term))
     .slice(0, 8)
   if (results.length === 0) { closeWikiAutocomplete(); return }
 
@@ -1124,7 +1133,7 @@ async function handleWikiLinkClick(e) {
   if (e.target.classList.contains('wiki-link')) {
     const noteName = e.target.dataset.name
     const item = state.items.find(i => i.type === 'file' && i.name === noteName)
-    if (item) {
+    if (item && item.id !== props.file?.id) {
       setActiveFile(item.id)
     } else {
       // Note doesn't exist — create it, then immediately sync the link
