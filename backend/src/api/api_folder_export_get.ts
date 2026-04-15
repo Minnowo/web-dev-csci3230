@@ -1,6 +1,9 @@
+import fs from "node:fs";
+import path from "node:path";
 import type { Response } from "express";
 import archiver from "archiver";
 import { DB } from "../db/db.js";
+import { UPLOAD_DIR_NAME } from "../constants/upload.js";
 import type { AuthenticatedRequest } from "../types/user.js";
 import type { Folder } from "../types/folder.js";
 import type { Note } from "../types/note.js";
@@ -132,6 +135,19 @@ export const ApiGetFolderExport = (
 		usedPaths.add(fullPath);
 
 		archive.append(note.content, { name: fullPath });
+	}
+
+	if (folderId === null) {
+		const filesResult = db.ListFileAssetsForUser(userId);
+		if (filesResult.error === null) {
+			for (const file of filesResult.data) {
+				const diskPath = path.join(process.cwd(), UPLOAD_DIR_NAME, file.storage_path);
+				if (fs.existsSync(diskPath)) {
+					const zipPath = "assets/" + safeName(file.original_name);
+					archive.file(diskPath, { name: zipPath });
+				}
+			}
+		}
 	}
 
 	archive.finalize();
