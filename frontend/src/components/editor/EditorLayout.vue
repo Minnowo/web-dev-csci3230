@@ -119,12 +119,6 @@
         <span class="status-stat">{{ contentStats.chars }} chars</span>
         <span class="status-sep">·</span>
         <span class="status-stat">{{ contentStats.lines }} lines</span>
-        <div class="status-right">
-          <span class="status-online">
-            <span class="online-dot" />
-            Online
-          </span>
-        </div>
       </div>
     </div>
 
