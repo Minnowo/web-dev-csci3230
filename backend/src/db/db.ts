@@ -116,6 +116,7 @@ export class DB {
 					n.PARENT_ID AS folder_id,
 					n.TITLE     AS title,
 					n.ICON      AS icon,
+					n.CREATED   AS created_at,
 					n.UPDATED   AS updated_at,
 					GROUP_CONCAT(t.NAME) AS tags
 				FROM DB_NOTES n
@@ -384,6 +385,21 @@ export class DB {
 			return { data: null, error: DBError.from(err) };
 		}
 	}
+	public GetAllNoteLinks(userId: number): Result<Array<NoteLink>> {
+		try {
+			const stmt = this.db.prepare(
+				`SELECT nl.FROM_NOTE_ID as from_note_id, nl.TO_NOTE_ID as to_note_id
+				FROM DB_NOTES_LINKS nl
+				JOIN DB_NOTES n ON n.ID = nl.FROM_NOTE_ID
+				WHERE n.USER_ID = ?`,
+			);
+			const rows = stmt.all(userId) as Array<NoteLink>;
+			return { data: rows, error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
 	public GetNoteLinks(noteId: number): Result<Array<NoteLink>> {
 		try {
 			const stmt = this.db.prepare(
@@ -454,6 +470,21 @@ export class DB {
 			);
 
 			const info = stmt.run(user_id, folder_id);
+
+			return { data: Number(info.changes), error: null };
+		} catch (err) {
+			console.info(err);
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public RenameFolder(user_id: number, folder_id: number, name: string): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				"UPDATE DB_FOLDER SET NAME = ? WHERE ID = ? AND USER_ID = ?",
+			);
+
+			const info = stmt.run(name, folder_id, user_id);
 
 			return { data: Number(info.changes), error: null };
 		} catch (err) {

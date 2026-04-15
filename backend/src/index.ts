@@ -16,13 +16,16 @@ import { ApiPostDeleteNote } from "./api/api_delete_note_post.js";
 import analyzeRouter from "./routes/analyze.js";
 import hybridSearchRouter from "./routes/hybridSearch.js";
 import noteIndexRouter from "./routes/noteIndex.js";
+import noteBackdateRouter from "./routes/noteBackdate.js";
 import { ApiPostLinkNote } from "./api/api_link_note_post.js";
 import { ApiPostDeleteNoteLinks } from "./api/api_delete_link_note_post.js";
 import { ApiGetNoteLinks } from "./api/api_note_links_get.js";
+import { ApiGetAllNoteLinks } from "./api/api_note_links_all_get.js";
 import { ApiPostCreateFolder } from "./api/api_create_folder_post.js";
 import { ApiPostDeleteFolder } from "./api/api_delete_folder_post.js";
 import { ApiPostMoveNote } from "./api/api_move_note_post.js";
 import { ApiPostMoveFolder } from "./api/api_move_folder_post.js";
+import { ApiPostRenameFolder } from "./api/api_rename_folder_post.js";
 import { ApiGetTags } from "./api/api_tags_get.js";
 import { ApiPostTag } from "./api/api_tag_post.js";
 import { ApiPostDeleteTag } from "./api/api_tag_delete.js";
@@ -53,6 +56,7 @@ ExpressApp.get("/api/health", (req: Request, res: Response) => {
 ExpressApp.use("/api", analyzeRouter);
 ExpressApp.use("/api", hybridSearchRouter);
 ExpressApp.use("/api", noteIndexRouter);
+ExpressApp.use("/api", noteBackdateRouter);
 
 ExpressApp.get("/", (req: Request, res: Response) => {
 	res.send("Hello from TypeScript + Express 🚀");
@@ -66,6 +70,7 @@ ExpressApp.get("/api/whoami", MiddleWareAuthenticateToken, ApiGetWhoAmI);
 
 // API endpoints for notes
 ExpressApp.get("/api/notes", MiddleWareAuthenticateToken, ApiGetNotesList);
+ExpressApp.get("/api/notes/links", MiddleWareAuthenticateToken, ApiGetAllNoteLinks);
 ExpressApp.post("/api/notes", MiddleWareAuthenticateToken, ApiPostCreateNote);
 ExpressApp.post(
 	"/api/notes/link",
@@ -151,6 +156,11 @@ ExpressApp.post(
 	"/api/folder/move",
 	MiddleWareAuthenticateToken,
 	ApiPostMoveFolder,
+);
+ExpressApp.post(
+	"/api/folder/rename",
+	MiddleWareAuthenticateToken,
+	ApiPostRenameFolder,
 );
 
 // ── Tag endpoints (David) ─────────────────────────────────────────────────────

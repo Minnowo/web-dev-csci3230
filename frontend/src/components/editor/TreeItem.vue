@@ -52,6 +52,13 @@
       />
       <span v-else class="item-name">{{ item.name }}</span>
 
+      <button
+        class="dl-btn"
+        :title="item.type === 'folder' ? 'Export as ZIP' : 'Download as Markdown'"
+        @click.stop="handleDownload"
+      >
+        <Download class="w-3 h-3" />
+      </button>
       <button class="delete-btn" title="Delete" @click.stop="$emit('delete', item.id)">
         <Trash2 class="w-3 h-3" />
       </button>
@@ -88,10 +95,11 @@
 
 <script setup>
 import { ref, computed, nextTick } from 'vue'
-import { ChevronRight, Folder, FolderOpen, Trash2 } from 'lucide-vue-next'
+import { ChevronRight, Folder, FolderOpen, Trash2, Download } from 'lucide-vue-next'
 import { resolveIcon } from './iconMap.js'
 import { useEditorStore } from '../../composables/useEditorStore.js'
 import IconPicker from './IconPicker.vue'
+import { exportFolderAsZip, exportNoteAsMd } from '../../services/api.js'
 
 const props = defineProps({
   item: { type: Object, required: true },
@@ -156,6 +164,14 @@ function finishRename() {
 
 function cancelRename() {
   isRenaming.value = false
+}
+
+async function handleDownload() {
+  if (props.item.type === 'folder') {
+    await exportFolderAsZip(props.item.id, props.item.name)
+  } else {
+    await exportNoteAsMd(props.item.id, props.item.name)
+  }
 }
 
 function onDragStart(e) {
@@ -266,6 +282,25 @@ function onDrop(e) {
   font-size: 13px;
   padding: 1px 4px;
   outline: none;
+}
+.dl-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.dl-btn:hover {
+  color: var(--label-to);
+  background: color-mix(in srgb, var(--label-to) 10%, transparent);
+}
+.tree-item:hover .dl-btn {
+  display: flex;
 }
 .delete-btn {
   display: none;

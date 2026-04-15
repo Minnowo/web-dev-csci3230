@@ -1,23 +1,31 @@
 <template>
   <div class="editor-layout">
     <!-- Icon Strip -->
-    <EditorIconStrip />
+    <EditorIconStrip :active-view="sidebarView" @set-view="sidebarView = $event" />
 
-    <!-- Sidebar -->
-    <EditorSidebar
-      :items="rootItems"
-      :active-file-id="activeFile?.id"
-      :file-count="fileCount"
-      :collapsed="sidebarCollapsed"
-      :get-children="getChildren"
-      :search-items="searchItems"
-      @create-file="handleCreateFile"
-      @create-folder="createFolder()"
-      @select-file="setActiveFile"
-      @delete-item="deleteItem"
-      @rename-item="renameItem"
-      @move-item="moveItem"
-    />
+    <!-- Left panel (sidebar or tag panel) -->
+    <div class="left-panel" :class="{ collapsed: sidebarCollapsed }">
+      <EditorSidebar
+        v-if="sidebarView === 'files'"
+        :items="rootItems"
+        :active-file-id="activeFile?.id"
+        :file-count="fileCount"
+        :collapsed="sidebarCollapsed"
+        :get-children="getChildren"
+        :search-items="searchItems"
+      :search-by-tag="searchByTag"
+      :tag-query="tagQuery"
+      @tag-query-consumed="tagQuery = ''"
+        @create-file="handleCreateFile"
+        @create-folder="createFolder()"
+        @select-file="setActiveFile"
+        @delete-item="deleteItem"
+        @rename-item="renameItem"
+        @move-item="moveItem"
+      />
+      <EditorTagPanel v-else-if="sidebarView === 'tags'" />
+      <EditorAssetsPanel v-else-if="sidebarView === 'assets'" />
+    </div>
 
     <!-- Main editor area -->
     <div class="editor-main">
@@ -60,6 +68,17 @@
                 <Columns2 class="w-4 h-4" />
                 Split View
               </button>
+              <template v-if="activeFile">
+                <div class="menu-divider" />
+                <button class="menu-item" @click="handleExportMd">
+                  <Download class="w-4 h-4" />
+                  Export as Markdown
+                </button>
+                <button class="menu-item" @click="handleExportHtml">
+                  <Download class="w-4 h-4" />
+                  Export as HTML
+                </button>
+              </template>
             </div>
           </div>
         </div>
@@ -88,6 +107,7 @@
             @update="handleContentUpdate"
             @rename="renameItem"
             @create-first="handleCreateFile"
+            @tag-click="tag => { sidebarView = 'files'; tagQuery = 'tag:' + tag }"
           />
 
           <EditorPreview
@@ -111,14 +131,9 @@
         <span class="status-stat">{{ contentStats.chars }} chars</span>
         <span class="status-sep">·</span>
         <span class="status-stat">{{ contentStats.lines }} lines</span>
-        <div class="status-right">
-          <span class="status-online">
-            <span class="online-dot" />
-            Online
-          </span>
-        </div>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -126,7 +141,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import {
   PanelLeftClose, PanelLeftOpen, FileText, Pencil,
-  Columns2, Eye, EyeOff, MoreHorizontal
+  Columns2, Eye, EyeOff, MoreHorizontal, Download
 } from 'lucide-vue-next'
 import { useEditorStore } from '../../composables/useEditorStore'
 import EditorIconStrip from './EditorIconStrip.vue'
@@ -134,11 +149,14 @@ import EditorSidebar from './EditorSidebar.vue'
 import EditorToolbar from './EditorToolbar.vue'
 import EditorContent from './EditorContent.vue'
 import EditorPreview from './EditorPreview.vue'
+import EditorTagPanel from './EditorTagPanel.vue'
+import EditorAssetsPanel from './EditorAssetsPanel.vue'
+import { exportNoteAsMd, exportNoteAsHtml } from '../../services/api.js'
 
 const {
   activeFile, rootItems, fileCount,
   getChildren, setActiveFile, createFile, createFolder,
-  updateFileContent, renameItem, deleteItem, moveItem, searchItems,
+  updateFileContent, renameItem, deleteItem, moveItem, searchItems, searchByTag,
 } = useEditorStore()
 
 const contentStats = computed(() => {
@@ -151,6 +169,8 @@ const contentStats = computed(() => {
 
 const viewMode = ref('edit')
 const sidebarCollapsed = ref(false)
+const sidebarView = ref('files')
+const tagQuery = ref('')
 const toolbarVisible = ref(true)
 const menuOpen = ref(false)
 const menuRef = ref(null)
@@ -183,6 +203,18 @@ function toggleToolbar() {
   menuOpen.value = false
 }
 
+async function handleExportMd() {
+  menuOpen.value = false
+  if (!activeFile.value) return
+  await exportNoteAsMd(activeFile.value.id, activeFile.value.name)
+}
+
+async function handleExportHtml() {
+  menuOpen.value = false
+  if (!activeFile.value) return
+  await exportNoteAsHtml(activeFile.value.id, activeFile.value.name)
+}
+
 function handleClickOutside(e) {
   if (menuRef.value && !menuRef.value.contains(e.target)) {
     menuOpen.value = false
@@ -199,6 +231,16 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
   height: 100vh;
   background: var(--bg);
   overflow: hidden;
+}
+
+.left-panel {
+  display: flex;
+  overflow: hidden;
+  transition: width 0.2s, min-width 0.2s;
+}
+.left-panel.collapsed {
+  width: 0;
+  min-width: 0;
 }
 
 .editor-main {
@@ -246,6 +288,9 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 .topbar-btn:hover {
   background: var(--surface-hover);
   color: var(--text);
+}
+.topbar-btn.active {
+  color: var(--tag-color);
 }
 .breadcrumb {
   display: flex;
@@ -306,6 +351,11 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 .menu-item:hover {
   background: var(--surface-hover);
   color: var(--text);
+}
+.menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
 }
 
 /* Content area */
