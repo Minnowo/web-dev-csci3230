@@ -16,12 +16,13 @@
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, watch, createApp, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { CirclePlus, Network } from 'lucide-vue-next'
 import $ from 'jquery'
 import AppButton from './AppButton.vue'
 import { useEditorStore } from '../composables/useEditorStore'
+import { resolveIcon } from './editor/iconMap.js'
 
 const router = useRouter()
 const { createFile, setActiveFile, recentFiles, loading, init } = useEditorStore()
@@ -35,6 +36,19 @@ async function handleCreateNote() {
 function openNote(id) {
   setActiveFile(id)
   router.push('/editor')
+}
+
+// ── Icon renderer: converts any ICON_MAP key → SVG string (cached) ───────────
+const iconSvgCache = {}
+function getIconSvg(iconName) {
+  if (iconSvgCache[iconName]) return iconSvgCache[iconName]
+  const Icon = resolveIcon(iconName)
+  const div = document.createElement('div')
+  const app = createApp({ render: () => h(Icon, { width: 20, height: 20 }) })
+  app.mount(div)
+  iconSvgCache[iconName] = div.innerHTML
+  app.unmount()
+  return iconSvgCache[iconName]
 }
 
 // ── Inline SVG strings (Lucide-style, 24×24 viewBox) ──────────────────────────
@@ -118,7 +132,7 @@ function renderRecentlyVisited() {
         .data('note-id', file.id)
 
       // File icon
-      const $iconWrap = $('<div>').addClass('text-[var(--text-muted)]').html(SVG_FILE_TEXT)
+      const $iconWrap = $('<div>').addClass('text-[var(--text-muted)]').html(getIconSvg(file.icon || 'FileText'))
 
       // Bottom row: title + date on the left, chevron on the right
       const $bottom = $('<div>').addClass('flex items-end justify-between gap-1 mt-auto')
