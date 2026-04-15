@@ -234,6 +234,26 @@ export function useEditorStore() {
     return id
   }
 
+  async function importNote(title, content, parentId = null) {
+    const { id } = await createNote(title, content)
+    const item = {
+      id,
+      name:          title,
+      content:       content,
+      parentId:      parentId,
+      type:          'file',
+      icon:          'FileText',
+      updatedAt:     new Date().toISOString(),
+      lastVisitedAt: null,
+    }
+    state.items.push(item)
+    state.activeFileId = id
+    indexNote(id, { title, content }).catch(err => {
+      console.warn('Failed to index imported note:', err.message)
+    })
+    return id
+  }
+
   async function createFolder(parentId = null) {
 
     const res = await apiCreateFolder(parentId, "New Folder");
@@ -454,6 +474,7 @@ export function useEditorStore() {
     getChildren,
     setActiveFile,
     createFile,
+    importNote,
     createFolder,
     updateFileContent,
     renameItem,
