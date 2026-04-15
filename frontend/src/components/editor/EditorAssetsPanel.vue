@@ -14,7 +14,7 @@
       <input
         ref="fileInput"
         type="file"
-        accept=".md,.png,.jpg,.jpeg,.gif,.pdf"
+        accept=".md"
         style="display: none"
         @change="handleUpload"
       />
