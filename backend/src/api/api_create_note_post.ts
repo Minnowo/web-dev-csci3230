@@ -1,10 +1,12 @@
 import { type Response } from "express";
 import { DB } from "../db/db.js";
+import { parseIconForCreate } from "./note_icon.js";
 import type { AuthenticatedRequest } from "../types/user.js";
 
 interface CreateNoteRequestBody {
 	title: string;
 	content: string;
+	icon?: string | null;
 }
 
 export const ApiPostCreateNote = (
@@ -16,7 +18,7 @@ export const ApiPostCreateNote = (
 		return;
 	}
 
-	const { title, content } = req.body as CreateNoteRequestBody;
+	const { title, content, icon } = req.body as CreateNoteRequestBody;
 
 	if (typeof title !== "string" || typeof content !== "string") {
 		res.status(400).json({
@@ -32,8 +34,18 @@ export const ApiPostCreateNote = (
 		return;
 	}
 
+	const safeIcon = parseIconForCreate(icon);
+	if (
+		typeof safeIcon === "object" &&
+		safeIcon !== null &&
+		"error" in safeIcon
+	) {
+		res.status(400).json({ message: safeIcon.error });
+		return;
+	}	
+
 	const db = DB.Instance();
-	const result = db.CreateNote(req.user.ID, cleanTitle, content);
+	const result = db.CreateNote(req.user.ID, cleanTitle, content, safeIcon);
 
 	if (result.error !== null) {
 		console.error(`error creating note: ${result.error}`);

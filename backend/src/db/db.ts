@@ -3,6 +3,7 @@ import { DBError } from "./errors.js";
 import { Migrations } from "./migrations.js";
 import crypto from "crypto";
 import type { User } from "../types/user.js";
+import type { FileAsset } from "../types/file.js";
 import type { Note, NoteLink, NoteListItem } from "../types/note.js";
 import type { Folder, FolderChildren } from "../types/folder.js";
 
@@ -92,13 +93,14 @@ export class DB {
 		userId: number,
 		title: string,
 		content: string,
+		icon: string | null,
 	): Result<number> {
 		try {
 			const stmt = this.db.prepare(
-				"INSERT INTO DB_NOTES (USER_ID, TITLE, CONTENT) VALUES (?, ?, ?)",
+				"INSERT INTO DB_NOTES (USER_ID, TITLE, CONTENT, ICON) VALUES (?, ?, ?, ?)",
 			);
 
-			const info = stmt.run(userId, title, content);
+			const info = stmt.run(userId, title, content, icon);
 
 			return { data: Number(info.lastInsertRowid), error: null };
 		} catch (err) {
@@ -113,6 +115,7 @@ export class DB {
 					n.ID        AS id,
 					n.PARENT_ID AS folder_id,
 					n.TITLE     AS title,
+					n.ICON      AS icon,
 					n.UPDATED   AS updated_at,
 					GROUP_CONCAT(t.NAME) AS tags
 				FROM DB_NOTES n
@@ -124,12 +127,13 @@ export class DB {
 			);
 
 			const rows = stmt.all(userId) as Array<
-				Omit<NoteListItem, "tags"> & { tags: string | null }
+				Omit<NoteListItem, "tags"> & { tags: string | null; icon: string | null }
 			>;
 
 			return {
 				data: rows.map((r) => ({
 					...r,
+					icon: r.icon ?? null,
 					tags: r.tags ? r.tags.split(",") : [],
 				})),
 				error: null,
@@ -283,21 +287,26 @@ export class DB {
 		}
 	}
 
-	public GetSingleNote(noteId: number, userId: number): Result<Note> {
+	public GetSingleNote(noteId: number, userId: number): Result<Note | null> {
 		try {
 			const stmt = this.db.prepare(
 				`SELECT 
-					ID AS id, 
-					TITLE AS title, 
-					CONTENT AS content, 
-					CREATED AS created_at, 
-					UPDATED AS updated_at 
-				 FROM DB_NOTES 
+					ID AS id,
+					PARENT_ID AS folder_id,
+					TITLE AS title,
+					CONTENT AS content,
+					ICON AS icon,
+					CREATED AS created_at,
+					UPDATED AS updated_at
+				 FROM DB_NOTES
 				 WHERE ID = ? AND USER_ID = ?`,
 			);
 
-			const row = stmt.get(noteId, userId) as Note;
-
+			const row = stmt.get(noteId, userId) as Note | undefined;
+			if (!row) {
+				return { data: null, error: null };
+			}
+			
 			return { data: row, error: null };
 		} catch (err) {
 			return { data: null, error: DBError.from(err) };
@@ -309,17 +318,31 @@ export class DB {
 		userId: number,
 		title: string,
 		content: string,
+		icon?: string | null,
 	): Result<number> {
 		try {
+			if (icon === undefined) {
+				const stmt = this.db.prepare(
+					`UPDATE DB_NOTES
+					 SET TITLE = ?,
+					 	 CONTENT = ?,
+						 UPDATED = CURRENT_TIMESTAMP
+				 	 WHERE ID = ? AND USER_ID = ?`,
+				);
+				const row = stmt.run(title, content, noteId, userId);
+				return { data: row.changes, error: null };
+			}
+
 			const stmt = this.db.prepare(
 				`UPDATE DB_NOTES
 				 SET TITLE = ?,
 				 	 CONTENT = ?,
+					 ICON = ?,
 					 UPDATED = CURRENT_TIMESTAMP
 			 	 WHERE ID = ? AND USER_ID = ?`,
 			);
 
-			const row = stmt.run(title, content, noteId, userId);
+			const row = stmt.run(title, content, icon, noteId, userId);
 
 			return { data: row.changes, error: null };
 		} catch (err) {
@@ -439,6 +462,64 @@ export class DB {
 		}
 	}
 
+	private static fileRowToAsset(row: {
+		id: number;
+		user_id: number;
+		original_name: string;
+		stored_name: string;
+		mime_type: string;
+		extension: string | null;
+		size_bytes: number;
+		storage_path: string;
+		created_at: string;
+	}): FileAsset {
+		return {
+			id: row.id,
+			user_id: row.user_id,
+			original_name: row.original_name,
+			stored_name: row.stored_name,
+			mime_type: row.mime_type,
+			extension: row.extension,
+			size_bytes: row.size_bytes,
+			storage_path: row.storage_path,
+			created_at: row.created_at,
+		};
+	}
+
+	public CreateFileAsset(input: {
+		userId: number;
+		originalName: string;
+		storedName: string;
+		mimeType: string;
+		extension: string | null;
+		sizeBytes: number;
+		storagePath: string;
+	}): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				`INSERT INTO DB_FILES (
+					USER_ID,
+					ORIGINAL_NAME, STORED_NAME, MIME_TYPE, EXTENSION,
+					SIZE_BYTES, STORAGE_PATH
+				) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+			);
+
+			const info = stmt.run(
+				input.userId,
+				input.originalName,
+				input.storedName,
+				input.mimeType,
+				input.extension,
+				input.sizeBytes,
+				input.storagePath,
+			);
+
+			return { data: Number(info.lastInsertRowid), error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
 	public MoveNote(note_id: number, user_id: number, parent_folder_id: number | null): Result<number> {
 		try {
 			const stmt = this.db.prepare(
@@ -448,6 +529,83 @@ export class DB {
 			const info = stmt.run(parent_folder_id, note_id, user_id);
 
 			return { data: Number(info.changes), error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public GetFileAssetForUser(
+		fileId: number,
+		userId: number,
+	): Result<FileAsset | null> {
+		try {
+			const stmt = this.db.prepare(
+				`SELECT
+					ID AS id,
+					USER_ID AS user_id,
+					ORIGINAL_NAME AS original_name,
+					STORED_NAME AS stored_name,
+					MIME_TYPE AS mime_type,
+					EXTENSION AS extension,
+					SIZE_BYTES AS size_bytes,
+					STORAGE_PATH AS storage_path,
+					CREATED AS created_at
+				FROM DB_FILES
+				WHERE ID = ? AND USER_ID = ?`,
+			);
+
+			const row = stmt.get(fileId, userId) as
+				| Parameters<typeof DB.fileRowToAsset>[0]
+				| undefined;
+
+			if (!row) {
+				return { data: null, error: null };
+			}
+
+			return { data: DB.fileRowToAsset(row), error: null };
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public ListFileAssetsForUser(userId: number): Result<FileAsset[]> {
+		try {
+			const stmt = this.db.prepare(
+				`SELECT
+					ID AS id,
+					USER_ID AS user_id,
+					ORIGINAL_NAME AS original_name,
+					STORED_NAME AS stored_name,
+					MIME_TYPE AS mime_type,
+					EXTENSION AS extension,
+					SIZE_BYTES AS size_bytes,
+					STORAGE_PATH AS storage_path,
+					CREATED AS created_at
+				FROM DB_FILES
+				WHERE USER_ID = ?
+				ORDER BY CREATED DESC`,
+			);
+
+			const rows = stmt.all(userId) as Array<
+				Parameters<typeof DB.fileRowToAsset>[0]
+			>;
+
+			return {
+				data: rows.map((r) => DB.fileRowToAsset(r)),
+				error: null,
+			};
+		} catch (err) {
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
+	public DeleteFileAsset(fileId: number, userId: number): Result<number> {
+		try {
+			const stmt = this.db.prepare(
+				"DELETE FROM DB_FILES WHERE ID = ? AND USER_ID = ?",
+			);
+			const info = stmt.run(fileId, userId);
+			return { data: info.changes, error: null };
 		} catch (err) {
 			return { data: null, error: DBError.from(err) };
 		}
@@ -463,10 +621,10 @@ export class DB {
 
 			return { data: Number(info.changes), error: null };
 		} catch (err) {
-            return { data: null, error: DBError.from(err) };
-        }
-    }
-      
+			return { data: null, error: DBError.from(err) };
+		}
+	}
+
 	public GetFolders(user_id: number): Result<Folder[]> {
 		try {
 			const stmtFolders = this.db.prepare(
@@ -487,6 +645,7 @@ export class DB {
 			return { data: null, error: DBError.from(err) };
 		}
 	}
+
 	public GetFoldersChildren(
 		user_id: number,
 		folder_id: number | null,
