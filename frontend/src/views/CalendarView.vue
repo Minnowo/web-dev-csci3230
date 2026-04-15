@@ -3,5 +3,5 @@
 </template>
 
 <script setup>
-import ActivityCalendar from '../components/visualizations/ActivityCalendar.vue'
+import ActivityCalendar from "../components/visualizations/ActivityCalendar.vue";
 </script>

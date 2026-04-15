@@ -5,5 +5,5 @@
 </template>
 
 <script setup>
-import GraphVisualization from '../components/visualizations/GraphView.vue'
+import GraphVisualization from "../components/visualizations/GraphView.vue";
 </script>

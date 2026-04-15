@@ -14,20 +14,20 @@
         <div class="note-tags">
           <span v-for="tag in noteTags" :key="tag" class="tag-chip">
             #{{ tag }}
-            <button class="chip-remove" title="Remove tag" @click="removeTag(tag)">
+            <button
+              class="chip-remove"
+              title="Remove tag"
+              @click="removeTag(tag)"
+            >
               <X class="w-2.5 h-2.5" />
             </button>
           </span>
           <span v-if="!noteTags.length" class="empty-msg">No tags yet</span>
         </div>
-        <button
-          class="auto-tag-btn"
-          :disabled="autoTagging"
-          @click="autoTag"
-        >
+        <button class="auto-tag-btn" :disabled="autoTagging" @click="autoTag">
           <RefreshCw v-if="autoTagging" class="w-3.5 h-3.5 spinning" />
           <Sparkles v-else class="w-3.5 h-3.5" />
-          {{ autoTagging ? 'Analyzing...' : 'Auto-tag' }}
+          {{ autoTagging ? "Analyzing..." : "Auto-tag" }}
         </button>
       </template>
       <span v-else class="empty-msg">No note open</span>
@@ -50,11 +50,20 @@
           @keydown.enter="createNewTag"
           @keydown.escape="newTagName = ''"
         />
-        <button class="create-btn" :disabled="!newTagName.trim()" @click="createNewTag" title="Create tag">
+        <button
+          class="create-btn"
+          :disabled="!newTagName.trim()"
+          @click="createNewTag"
+          title="Create tag"
+        >
           <Plus class="w-3.5 h-3.5" />
         </button>
       </div>
-      <span v-if="newTagName.length > 20" class="char-count" :class="{ 'at-limit': newTagName.length === 30 }">
+      <span
+        v-if="newTagName.length > 20"
+        class="char-count"
+        :class="{ 'at-limit': newTagName.length === 30 }"
+      >
         {{ newTagName.length }}/30
       </span>
     </div>
@@ -64,7 +73,11 @@
       <div v-for="tag in globalTags" :key="tag.id" class="tag-row">
         <span class="tag-name">#{{ tag.name }}</span>
         <span class="tag-count">{{ tag.note_count }}</span>
-        <button class="delete-btn" title="Delete tag" @click="deleteGlobalTag(tag)">
+        <button
+          class="delete-btn"
+          title="Delete tag"
+          @click="deleteGlobalTag(tag)"
+        >
           <X class="w-3 h-3" />
         </button>
       </div>
@@ -73,10 +86,15 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { Plus, X, RefreshCw, Sparkles } from 'lucide-vue-next'
-import { useEditorStore } from '../../composables/useEditorStore.js'
-import { createTag, deleteTag, fetchTags, analyzeNote } from '../../services/api.js'
+import { ref, computed } from "vue";
+import { Plus, X, RefreshCw, Sparkles } from "lucide-vue-next";
+import { useEditorStore } from "../../composables/useEditorStore.js";
+import {
+  createTag,
+  deleteTag,
+  fetchTags,
+  analyzeNote,
+} from "../../services/api.js";
 
 const {
   globalTags,
@@ -85,84 +103,91 @@ const {
   removeTagFromContent,
   parseContentTags,
   reloadNoteTags,
-} = useEditorStore()
+} = useEditorStore();
 
 // All tags for the active note, read directly from file content
 const noteTags = computed(() =>
-  activeFile.value ? parseContentTags(activeFile.value.content ?? '') : []
-)
+  activeFile.value ? parseContentTags(activeFile.value.content ?? "") : [],
+);
 
-const newTagName = ref('')
-const error = ref('')
-const autoTagging = ref(false)
+const newTagName = ref("");
+const error = ref("");
+const autoTagging = ref(false);
 
 async function refreshTags() {
-  const fresh = await fetchTags()
-  globalTags.splice(0, globalTags.length, ...fresh)
-  if (activeFile.value) await reloadNoteTags(activeFile.value.id)
+  const fresh = await fetchTags();
+  globalTags.splice(0, globalTags.length, ...fresh);
+  if (activeFile.value) await reloadNoteTags(activeFile.value.id);
 }
 
 function sanitizeTagInput() {
-  newTagName.value = newTagName.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 30)
+  newTagName.value = newTagName.value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 30);
 }
 
 function handleTagPaste(e) {
-  const pasted = e.clipboardData.getData('text')
-  const sanitized = pasted.replace(/[^a-zA-Z0-9]/g, '')
-  newTagName.value = (newTagName.value + sanitized).slice(0, 30)
+  const pasted = e.clipboardData.getData("text");
+  const sanitized = pasted.replace(/[^a-zA-Z0-9]/g, "");
+  newTagName.value = (newTagName.value + sanitized).slice(0, 30);
 }
 
 async function createNewTag() {
-  const name = newTagName.value.trim()
-  if (!name) return
+  const name = newTagName.value.trim();
+  if (!name) return;
   if (!/^[a-zA-Z0-9]{1,30}$/.test(name)) {
-    error.value = 'Tag must be alphanumeric and at most 30 characters'
-    return
+    error.value = "Tag must be alphanumeric and at most 30 characters";
+    return;
   }
-  if (globalTags.some(t => t.name === name.toLowerCase())) {
-    error.value = 'Tag already exists'
-    return
+  if (globalTags.some((t) => t.name === name.toLowerCase())) {
+    error.value = "Tag already exists";
+    return;
   }
-  error.value = ''
+  error.value = "";
   try {
-    await createTag(name)
-    newTagName.value = ''
-    await refreshTags()
+    await createTag(name);
+    newTagName.value = "";
+    await refreshTags();
   } catch {
-    error.value = 'Failed to create tag'
+    error.value = "Failed to create tag";
   }
 }
 
 function removeTag(tagName) {
-  if (!activeFile.value) return
-  error.value = ''
-  removeTagFromContent(activeFile.value.id, tagName)
+  if (!activeFile.value) return;
+  error.value = "";
+  removeTagFromContent(activeFile.value.id, tagName);
 }
 
 async function autoTag() {
-  if (!activeFile.value || autoTagging.value) return
-  const { id, content } = activeFile.value
-  if (!content?.trim()) { error.value = 'Note is empty'; return }
-  error.value = ''
-  autoTagging.value = true
+  if (!activeFile.value || autoTagging.value) return;
+  const { id, content } = activeFile.value;
+  if (!content?.trim()) {
+    error.value = "Note is empty";
+    return;
+  }
+  error.value = "";
+  autoTagging.value = true;
   try {
-    const { tags } = await analyzeNote(id, content, globalTags.map(t => t.name))
-    const validTags = tags.filter(t => globalTags.some(g => g.name === t))
-    addTagsToContent(id, validTags)
+    const { tags } = await analyzeNote(
+      id,
+      content,
+      globalTags.map((t) => t.name),
+    );
+    const validTags = tags.filter((t) => globalTags.some((g) => g.name === t));
+    addTagsToContent(id, validTags);
   } catch {
-    error.value = 'Auto-tag failed'
+    error.value = "Auto-tag failed";
   } finally {
-    autoTagging.value = false
+    autoTagging.value = false;
   }
 }
 
 async function deleteGlobalTag(tag) {
-  error.value = ''
+  error.value = "";
   try {
-    await deleteTag(tag.id)
-    await refreshTags()
+    await deleteTag(tag.id);
+    await refreshTags();
   } catch {
-    error.value = 'Failed to delete tag'
+    error.value = "Failed to delete tag";
   }
 }
 </script>
@@ -209,7 +234,9 @@ async function deleteGlobalTag(tag) {
   cursor: pointer;
   border-radius: 4px;
   padding: 0;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 
 .refresh-btn:hover {
@@ -273,7 +300,9 @@ async function deleteGlobalTag(tag) {
   color: var(--text-muted);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 
 .create-btn:hover:not(:disabled) {
@@ -299,7 +328,10 @@ async function deleteGlobalTag(tag) {
   color: var(--text-dim);
   font-size: 12px;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s,
+    border-color 0.12s;
 }
 
 .auto-tag-btn:hover:not(:disabled) {
@@ -314,7 +346,9 @@ async function deleteGlobalTag(tag) {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spinning {
@@ -464,7 +498,10 @@ async function deleteGlobalTag(tag) {
   padding: 0;
   opacity: 0;
   flex-shrink: 0;
-  transition: opacity 0.1s, background 0.1s, color 0.1s;
+  transition:
+    opacity 0.1s,
+    background 0.1s,
+    color 0.1s;
 }
 
 .delete-btn:hover {

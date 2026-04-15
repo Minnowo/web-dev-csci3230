@@ -33,11 +33,7 @@
       >
         <component :is="fileIcon" class="w-4 h-4" />
       </button>
-      <component
-        v-else
-        :is="folderIcon"
-        class="w-4 h-4 item-icon shrink-0"
-      />
+      <component v-else :is="folderIcon" class="w-4 h-4 item-icon shrink-0" />
 
       <!-- Name / rename input -->
       <input
@@ -54,12 +50,18 @@
 
       <button
         class="dl-btn"
-        :title="item.type === 'folder' ? 'Export as ZIP' : 'Download as Markdown'"
+        :title="
+          item.type === 'folder' ? 'Export as ZIP' : 'Download as Markdown'
+        "
         @click.stop="handleDownload"
       >
         <Download class="w-3 h-3" />
       </button>
-      <button class="delete-btn" title="Delete" @click.stop="$emit('delete', item.id)">
+      <button
+        class="delete-btn"
+        title="Delete"
+        @click.stop="$emit('delete', item.id)"
+      >
         <Trash2 class="w-3 h-3" />
       </button>
     </div>
@@ -94,117 +96,123 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue'
-import { ChevronRight, Folder, FolderOpen, Trash2, Download } from 'lucide-vue-next'
-import { resolveIcon } from './iconMap.js'
-import { useEditorStore } from '../../composables/useEditorStore.js'
-import IconPicker from './IconPicker.vue'
-import { exportFolderAsZip, exportNoteAsMd } from '../../services/api.js'
+import { ref, computed, nextTick } from "vue";
+import {
+  ChevronRight,
+  Folder,
+  FolderOpen,
+  Trash2,
+  Download,
+} from "lucide-vue-next";
+import { resolveIcon } from "./iconMap.js";
+import { useEditorStore } from "../../composables/useEditorStore.js";
+import IconPicker from "./IconPicker.vue";
+import { exportFolderAsZip, exportNoteAsMd } from "../../services/api.js";
 
 const props = defineProps({
   item: { type: Object, required: true },
   activeId: { type: String, default: null },
   getChildren: { type: Function, required: true },
   depth: { type: Number, default: 0 },
-})
+});
 
-const emit = defineEmits(['select', 'delete', 'rename', 'move'])
+const emit = defineEmits(["select", "delete", "rename", "move"]);
 
-const { updateItemIcon } = useEditorStore()
+const { updateItemIcon } = useEditorStore();
 
-const expanded = ref(true)
-const isRenaming = ref(false)
-const renamingName = ref('')
-const renameInput = ref(null)
-const pickerOpen = ref(false)
-const pickerPos = ref({ top: 0, left: 0 })
-const isDragOver = ref(false)
+const expanded = ref(true);
+const isRenaming = ref(false);
+const renamingName = ref("");
+const renameInput = ref(null);
+const pickerOpen = ref(false);
+const pickerPos = ref({ top: 0, left: 0 });
+const isDragOver = ref(false);
 
-const children = computed(() => props.getChildren(props.item.id))
+const children = computed(() => props.getChildren(props.item.id));
 
-const fileIcon = computed(() => resolveIcon(props.item.icon || 'FileText'))
-const folderIcon = computed(() => expanded.value ? FolderOpen : Folder)
+const fileIcon = computed(() => resolveIcon(props.item.icon || "FileText"));
+const folderIcon = computed(() => (expanded.value ? FolderOpen : Folder));
 
 function handleClick() {
-  if (props.item.type === 'folder') {
-    expanded.value = !expanded.value
+  if (props.item.type === "folder") {
+    expanded.value = !expanded.value;
   } else {
-    emit('select', props.item.id)
+    emit("select", props.item.id);
   }
 }
 
 function openPicker(e) {
-  const rect = e.currentTarget.getBoundingClientRect()
+  const rect = e.currentTarget.getBoundingClientRect();
   pickerPos.value = {
     top: rect.bottom + 4,
     left: Math.min(rect.left, window.innerWidth - 270),
-  }
-  pickerOpen.value = true
+  };
+  pickerOpen.value = true;
 }
 
 function handleIconSelect(iconName) {
-  updateItemIcon(props.item.id, iconName)
+  updateItemIcon(props.item.id, iconName);
 }
 
 function startRename() {
-  isRenaming.value = true
-  renamingName.value = props.item.name
+  isRenaming.value = true;
+  renamingName.value = props.item.name;
   nextTick(() => {
-    renameInput.value?.focus()
-    renameInput.value?.select()
-  })
+    renameInput.value?.focus();
+    renameInput.value?.select();
+  });
 }
 
 function finishRename() {
   if (isRenaming.value && renamingName.value.trim()) {
-    emit('rename', props.item.id, renamingName.value.trim(), props.item.type)
+    emit("rename", props.item.id, renamingName.value.trim(), props.item.type);
   }
-  isRenaming.value = false
+  isRenaming.value = false;
 }
 
 function cancelRename() {
-  isRenaming.value = false
+  isRenaming.value = false;
 }
 
 async function handleDownload() {
-  if (props.item.type === 'folder') {
-    await exportFolderAsZip(props.item.id, props.item.name)
+  if (props.item.type === "folder") {
+    await exportFolderAsZip(props.item.id, props.item.name);
   } else {
-    await exportNoteAsMd(props.item.id, props.item.name)
+    await exportNoteAsMd(props.item.id, props.item.name);
   }
 }
 
 function onDragStart(e) {
-  e.dataTransfer.effectAllowed = 'move'
-  e.dataTransfer.setData('text/plain', String(props.item.id))
-  e.dataTransfer.setData('text/itemtype', props.item.type)
+  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.setData("text/plain", String(props.item.id));
+  e.dataTransfer.setData("text/itemtype", props.item.type);
 }
 
 function onDragEnd() {
-  isDragOver.value = false
+  isDragOver.value = false;
 }
 
 function onDragOver() {
   // Only folders are valid drop targets
-  if (props.item.type === 'folder') {
-    isDragOver.value = true
+  if (props.item.type === "folder") {
+    isDragOver.value = true;
     // Auto-expand folder on hover so user can drop into nested folders
-    expanded.value = true
+    expanded.value = true;
   }
 }
 
 function onDragLeave() {
-  isDragOver.value = false
+  isDragOver.value = false;
 }
 
 function onDrop(e) {
-  isDragOver.value = false
-  if (props.item.type !== 'folder') return
-  const draggedId = e.dataTransfer.getData('text/plain')
-  const draggedType = e.dataTransfer.getData('text/itemtype')
-  if (!draggedId || !draggedType) return
-  if (draggedType === 'folder' && draggedId === String(props.item.id)) return
-  emit('move', draggedId, draggedType, props.item.id)
+  isDragOver.value = false;
+  if (props.item.type !== "folder") return;
+  const draggedId = e.dataTransfer.getData("text/plain");
+  const draggedType = e.dataTransfer.getData("text/itemtype");
+  if (!draggedId || !draggedType) return;
+  if (draggedType === "folder" && draggedId === String(props.item.id)) return;
+  emit("move", draggedId, draggedType, props.item.id);
 }
 </script>
 
@@ -218,7 +226,9 @@ function onDrop(e) {
   cursor: pointer;
   font-size: 13px;
   color: var(--text-dim);
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
   position: relative;
 }
 .tree-item:hover {
@@ -255,7 +265,9 @@ function onDrop(e) {
   cursor: pointer;
   flex-shrink: 0;
   padding: 0;
-  transition: background 0.1s, color 0.1s;
+  transition:
+    background 0.1s,
+    color 0.1s;
 }
 .icon-btn:hover {
   background: var(--border);

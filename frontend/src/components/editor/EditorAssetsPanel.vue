@@ -21,39 +21,41 @@
     </div>
 
     <div v-if="error" class="panel-status error">{{ error }}</div>
-    <div v-else class="panel-status">Upload a .md file to import it as a note.</div>
+    <div v-else class="panel-status">
+      Upload a .md file to import it as a note.
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { Upload, Loader2 } from 'lucide-vue-next'
-import { useEditorStore } from '../../composables/useEditorStore.js'
+import { ref } from "vue";
+import { Upload, Loader2 } from "lucide-vue-next";
+import { useEditorStore } from "../../composables/useEditorStore.js";
 
-const { importNote } = useEditorStore()
+const { importNote } = useEditorStore();
 
-const uploading = ref(false)
-const error = ref('')
-const fileInput = ref(null)
+const uploading = ref(false);
+const error = ref("");
+const fileInput = ref(null);
 
 function triggerUpload() {
-  fileInput.value?.click()
+  fileInput.value?.click();
 }
 
 async function handleUpload(e) {
-  const file = e.target.files?.[0]
-  e.target.value = ''
-  if (!file) return
-  uploading.value = true
-  error.value = ''
+  const file = e.target.files?.[0];
+  e.target.value = "";
+  if (!file) return;
+  uploading.value = true;
+  error.value = "";
   try {
-    const content = await file.text()
-    const title = file.name.replace(/\.md$/i, '')
-    await importNote(title, content)
+    const content = await file.text();
+    const title = file.name.replace(/\.md$/i, "");
+    await importNote(title, content);
   } catch {
-    error.value = 'Import failed'
+    error.value = "Import failed";
   } finally {
-    uploading.value = false
+    uploading.value = false;
   }
 }
 </script>
@@ -92,7 +94,9 @@ async function handleUpload(e) {
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 .action-btn:hover:not(:disabled) {
   background: var(--surface-hover);
@@ -115,6 +119,8 @@ async function handleUpload(e) {
   animation: spin 1s linear infinite;
 }
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

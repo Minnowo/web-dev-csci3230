@@ -30,7 +30,7 @@
 
       <button type="submit" class="auth-btn" :disabled="loading">
         <span v-if="loading" class="btn-loading" />
-        {{ loading ? 'Signing in…' : 'Sign in' }}
+        {{ loading ? "Signing in…" : "Sign in" }}
       </button>
     </form>
 
@@ -42,47 +42,47 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { User, Lock, AlertCircle } from 'lucide-vue-next'
-import { useAuth } from '../composables/useAuth.js'
-import AuthCard from '../components/auth/AuthCard.vue'
-import AuthInput from '../components/auth/AuthInput.vue'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { User, Lock, AlertCircle } from "lucide-vue-next";
+import { useAuth } from "../composables/useAuth.js";
+import AuthCard from "../components/auth/AuthCard.vue";
+import AuthInput from "../components/auth/AuthInput.vue";
 
-const router = useRouter()
-const { login } = useAuth()
+const router = useRouter();
+const { login } = useAuth();
 
-const username = ref('')
-const password = ref('')
-const loading = ref(false)
-const errorMsg = ref('')
-const errors = ref({ username: '', password: '' })
+const username = ref("");
+const password = ref("");
+const loading = ref(false);
+const errorMsg = ref("");
+const errors = ref({ username: "", password: "" });
 
 function validate() {
-  errors.value = { username: '', password: '' }
-  let valid = true
+  errors.value = { username: "", password: "" };
+  let valid = true;
   if (!username.value.trim()) {
-    errors.value.username = 'Username is required'
-    valid = false
+    errors.value.username = "Username is required";
+    valid = false;
   }
   if (!password.value) {
-    errors.value.password = 'Password is required'
-    valid = false
+    errors.value.password = "Password is required";
+    valid = false;
   }
-  return valid
+  return valid;
 }
 
 async function handleSubmit() {
-  errorMsg.value = ''
-  if (!validate()) return
-  loading.value = true
+  errorMsg.value = "";
+  if (!validate()) return;
+  loading.value = true;
   try {
-    await login(username.value.trim(), password.value)
-    router.push('/')
+    await login(username.value.trim(), password.value);
+    router.push("/");
   } catch (err) {
-    errorMsg.value = err.message
+    errorMsg.value = err.message;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 </script>
@@ -131,13 +131,17 @@ async function handleSubmit() {
 .btn-loading {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(0,0,0,0.2);
+  border: 2px solid rgba(0, 0, 0, 0.2);
   border-top-color: var(--bg);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
   flex-shrink: 0;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .auth-link {
   color: var(--label-to);
   text-decoration: none;
