@@ -71,16 +71,6 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
       </div>
     </div>
 
-    <RouterLink to="/notes" custom v-slot="{ navigate, isActive }">
-      <button
-        @click="navigate"
-        class="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-c-border transition-colors cursor-pointer"
-        :class="isActive ? 'text-c-text' : 'hover:text-c-text'"
-      >
-        <FileText class="w-4 h-4" /> Notes
-      </button>
-    </RouterLink>
-
     <div class="flex-1" />
 
     <button class="flex items-center justify-center w-8 h-8 rounded-md hover:bg-c-border hover:text-c-text transition-colors cursor-pointer" title="Toggle theme" @click="toggle">
