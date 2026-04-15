@@ -150,13 +150,18 @@ export function useEditorStore() {
     state.items.find(i => i.id === state.activeFileId && i.type === 'file') || null
   )
 
+  function foldersFirst(a, b) {
+    if (a.type === b.type) return 0
+    return a.type === 'folder' ? -1 : 1
+  }
+
   /** All top-level items (files and folders with no parent). */
   const rootItems = computed(() =>
-    state.items.filter(i => i.parentId === null)
+    state.items.filter(i => i.parentId === null).sort(foldersFirst)
   )
 
   function getChildren(parentId) {
-    return state.items.filter(i => i.parentId === parentId)
+    return state.items.filter(i => i.parentId === parentId).sort(foldersFirst)
   }
 
   async function setActiveFile(id) {
