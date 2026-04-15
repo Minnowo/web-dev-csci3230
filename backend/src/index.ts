@@ -22,11 +22,20 @@ import { ApiGetNoteLinks } from "./api/api_note_links_get.js";
 import { ApiGetAllNoteLinks } from "./api/api_note_links_all_get.js";
 import { ApiPostCreateFolder } from "./api/api_create_folder_post.js";
 import { ApiPostDeleteFolder } from "./api/api_delete_folder_post.js";
+import { ApiPostMoveNote } from "./api/api_move_note_post.js";
+import { ApiPostMoveFolder } from "./api/api_move_folder_post.js";
 import { ApiGetTags } from "./api/api_tags_get.js";
 import { ApiPostTag } from "./api/api_tag_post.js";
 import { ApiPostDeleteTag } from "./api/api_tag_delete.js";
 import { ApiGetNoteTags } from "./api/api_note_tags_get.js";
 import { ApiPostNoteTags } from "./api/api_note_tags_post.js";
+import { ApiGetFilesList } from "./api/api_files_list_get.js";
+import { ApiPostFileUpload } from "./api/api_post_file_upload.js";
+import { runUploadThen } from "./middleware/multerUpload.js";
+import { ApiGetFolderChildren } from "./api/api_folder_children_get.js";
+import { ApiGetFolders } from "./api/api_folders_get.js";
+import { ApiGetFolderExport } from "./api/api_folder_export_get.js";
+import { ApiGetNoteExportMd } from "./api/api_note_export_md_get.js";
 
 export const ExpressApp = express();
 const PORT = 3000;
@@ -68,11 +77,17 @@ ExpressApp.post(
 	MiddleWareAuthenticateToken,
 	ApiPostDeleteNoteLinks,
 );
+
 ExpressApp.get("/api/notes/:id", MiddleWareAuthenticateToken, ApiGetNote);
 ExpressApp.get(
 	"/api/notes/:id/links",
 	MiddleWareAuthenticateToken,
 	ApiGetNoteLinks,
+);
+ExpressApp.get(
+	"/api/notes/:id/export",
+	MiddleWareAuthenticateToken,
+	ApiGetNoteExportMd,
 );
 ExpressApp.post(
 	"/api/notes/:id/update",
@@ -84,6 +99,29 @@ ExpressApp.post(
 	MiddleWareAuthenticateToken,
 	ApiPostDeleteNote,
 );
+ExpressApp.get(
+	"/api/files",
+	MiddleWareAuthenticateToken,
+	ApiGetFilesList,
+);
+ExpressApp.post(
+	"/api/files/upload",
+	MiddleWareAuthenticateToken,
+	runUploadThen(ApiPostFileUpload),
+);
+
+ExpressApp.get("/api/folders", MiddleWareAuthenticateToken, ApiGetFolders);
+ExpressApp.get("/api/folders/export", MiddleWareAuthenticateToken, ApiGetFolderExport);
+ExpressApp.get(
+	"/api/folder/:id",
+	MiddleWareAuthenticateToken,
+	ApiGetFolderChildren,
+);
+ExpressApp.get(
+	"/api/folder/:id/export",
+	MiddleWareAuthenticateToken,
+	ApiGetFolderExport,
+);
 ExpressApp.post(
 	"/api/folder",
 	MiddleWareAuthenticateToken,
@@ -93,6 +131,16 @@ ExpressApp.post(
 	"/api/folder/delete",
 	MiddleWareAuthenticateToken,
 	ApiPostDeleteFolder,
+);
+ExpressApp.post(
+	"/api/notes/:id/move",
+	MiddleWareAuthenticateToken,
+	ApiPostMoveNote,
+);
+ExpressApp.post(
+	"/api/folder/move",
+	MiddleWareAuthenticateToken,
+	ApiPostMoveFolder,
 );
 
 // ── Tag endpoints (David) ─────────────────────────────────────────────────────

@@ -3,6 +3,7 @@ export type Note = {
 	folder_id: number | null;
 	title: string;
 	content: string;
+	icon: string | null;
 	created_at: string;
 	updated_at: string;
 };
@@ -11,6 +12,7 @@ export type NoteListItem = {
 	id: number;
 	folder_id: number | null;
 	title: string;
+	icon: string | null;
 	created_at: string;
 	updated_at: string;
 	tags: string[];
