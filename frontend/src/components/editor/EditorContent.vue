@@ -253,6 +253,13 @@ function processLineContent(text) {
     return `<span class="wiki-link" contenteditable="false" data-name="${name}">${name}</span>`;
   });
 
+  // Ensures the browser can let you type after a closing *italic* element. 
+  // Without this, Enter/click after a preview mode does nothing.
+
+  if (/<\/(em|strong|s|code|span)>$/.test(text)) {
+    text += "\u200B";
+  }
+
   return text;
 }
 
@@ -452,7 +459,7 @@ function serializeInnerMarkdown(node) {
 
 function htmlToContent(html) {
   const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = html;
+  tempDiv.innerHTML = html.replace(/\u200B/g, "");
   const lines = [];
   for (const node of tempDiv.childNodes) {
     if (node.nodeType === Node.TEXT_NODE) {
