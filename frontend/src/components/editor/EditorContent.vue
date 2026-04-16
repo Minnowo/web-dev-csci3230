@@ -239,14 +239,23 @@ function processLineContent(text) {
       `<code><span class="md-syntax" contenteditable="false">\`</span>${c}<span class="md-syntax" contenteditable="false">\`</span></code>`,
   );
 
-  // 6. Tags (#tagname — not # alone or # followed by space)
+  // 6. Markdown links [text](url)
+  text = text.replace(
+    /\[([^\]]+?)\]\(([^)]+?)\)/g,
+    (_, label, raw) => {
+      const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+      return `<a href="${url}" class="md-link" target="_blank" rel="noopener noreferrer" title="${url}">${label}</a>`;
+    },
+  );
+
+  // 7. Tags (#tagname — not # alone or # followed by space)
   text = text.replace(
     /#([a-zA-Z0-9]{1,30})/g,
     (_, name) =>
       `<span class="tag-link" contenteditable="false" data-tag="${name}">#${name}</span>`,
   );
 
-  // 7. Wiki-links (skip self-references)
+  // 8. Wiki-links (skip self-references)
   text = text.replace(/\[\[([^\]]+)\]\]/g, (_, name) => {
     if (name.toLowerCase() === props.file?.name?.toLowerCase())
       return `[[${name}]]`;
@@ -447,6 +456,8 @@ function serializeInnerMarkdown(node) {
         result += `~~${serializeInnerMarkdown(child)}~~`;
       } else if (t === "code") {
         result += `\`${serializeInnerMarkdown(child)}\``;
+      } else if (t === "a" && child.href) {
+        result += `[${serializeInnerMarkdown(child)}](${child.getAttribute("href")})`;
       } else if (t === "br") {
         // ignore
       } else {
@@ -1399,6 +1410,12 @@ function selectWikiNote(note) {
 }
 
 async function handleWikiLinkClick(e) {
+  const link = e.target.closest("a.md-link");
+  if (link) {
+    e.preventDefault();
+    window.open(link.href, "_blank", "noopener,noreferrer");
+    return;
+  }
   if (e.target.classList.contains("wiki-link")) {
     const noteName = e.target.dataset.name;
     const item = state.items.find(
@@ -1461,8 +1478,14 @@ function applyFormat(command) {
     const tableHtml = `<table><tr><th>Header</th><th>Header</th></tr><tr><td>Cell</td><td>Cell</td></tr></table>`;
     document.execCommand("insertHTML", false, tableHtml);
   } else if (command === "createLink") {
-    const url = prompt("Enter URL:");
-    if (url) document.execCommand("createLink", false, url);
+    const raw = prompt("Enter URL:");
+    if (raw) {
+      const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+      const sel = window.getSelection();
+      const label = sel?.toString() || raw;
+      const linkHtml = `<a href="${url}" class="md-link" target="_blank" rel="noopener noreferrer" title="${url}">${label}</a>`;
+      document.execCommand("insertHTML", false, linkHtml);
+    }
   } else {
     document.execCommand(command, false, null);
   }
@@ -1777,6 +1800,16 @@ defineExpose({ applyFormat });
 .editor-area :deep(.wiki-link:hover) {
   background: color-mix(in srgb, var(--label-to) 22%, transparent);
   text-decoration: underline;
+}
+
+/* Hyperlinks in editor */
+.editor-area :deep(a.md-link) {
+  color: var(--label-to);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.editor-area :deep(a.md-link:hover) {
+  opacity: 0.8;
 }
 
 /* Wiki-link autocomplete dropdown */
