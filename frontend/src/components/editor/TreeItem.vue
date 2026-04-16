@@ -23,8 +23,7 @@
         :class="{ rotated: expanded }"
       />
       <span v-else class="w-3 h-3 inline-block shrink-0" />
-
-      <!-- Icon which clickable on files to open picker -->
+      <!-- Icon whic clickable on files to open picker -->
       <button
         v-if="item.type === 'file'"
         class="icon-btn"
