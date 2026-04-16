@@ -10,6 +10,7 @@
         <input
           class="note-title"
           :value="file.name"
+          :readonly="isReadOnly"
           @input="$emit('rename', file.id, $event.target.value, 'file')"
           @keydown.enter.prevent="focusEditor"
         />
@@ -77,12 +78,13 @@
     <div
       ref="editorRef"
       class="editor-area"
-      contenteditable="true"
+      :contenteditable="!isReadOnly"
       spellcheck="true"
       @input="handleInput"
       @keydown="handleKeydown"
       @click="handleWikiLinkClick"
       @blur="handleEditorBlur"
+      @scroll="handleScroll"
     />
   </div>
   <div v-else-if="!loading" class="empty-state">
@@ -109,9 +111,17 @@ import IconPicker from "./IconPicker.vue";
 const props = defineProps({
   file: { type: Object, default: null },
   livePreview: { type: Boolean, default: true },
+  isReadOnly: { type: Boolean, default: false },
+  readOnlyContent: { type: String, default: "" },
 });
 
-const emit = defineEmits(["update", "rename", "createFirst", "tag-click"]);
+const emit = defineEmits([
+  "update",
+  "scroll",
+  "rename",
+  "createFirst",
+  "tag-click",
+]);
 
 const {
   updateItemIcon,
@@ -128,6 +138,17 @@ const pickerOpen = ref(false);
 const pickerPos = ref({ top: 0, left: 0 });
 
 const noteIcon = computed(() => resolveIcon(props.file?.icon || "FileText"));
+
+function handleScroll() {
+  const el = editorRef.value;
+  if (!el) return;
+
+  emit("scroll", {
+    scrollTop: el.scrollTop,
+    scrollHeight: el.scrollHeight,
+    clientHeight: el.clientHeight,
+  });
+}
 
 function openPicker(e) {
   const rect = e.currentTarget.getBoundingClientRect();
@@ -164,6 +185,22 @@ function formatDate(dateStr) {
 }
 
 // When active file changes, load its content into the editor
+
+watch(
+  () => props.readOnlyContent,
+  (newVal) => {
+    if (!editorRef.value || !props.isReadOnly) return;
+
+    isUpdatingFromProp = true;
+    editorRef.value.innerHTML = contentToHtml(newVal);
+    renderWikiLinksInDOM();
+    nextTick(() => {
+      isUpdatingFromProp = false;
+    });
+  },
+  { immediate: true },
+);
+
 watch(
   [() => props.file?.id, () => props.livePreview],
   () => {
@@ -252,6 +289,23 @@ function processLineContent(text) {
       return `[[${name}]]`;
     return `<span class="wiki-link" contenteditable="false" data-name="${name}">${name}</span>`;
   });
+
+  // only for read only mode since live edit mode needs more complicated stuff to have this work
+  if (props.isReadOnly) {
+    // 1. Markdown links: [text](url)
+    text = text.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      `<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>`,
+    );
+
+    // 2. Raw URLs (avoid double-wrapping links already handled above)
+    text = text.replace(
+      /(^|[^">])(https?:\/\/[^\s<]+)/g,
+      (match, prefix, url) => {
+        return `${prefix}<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+      },
+    );
+  }
 
   return text;
 }
@@ -547,6 +601,7 @@ function renderWikiLinksInDOM() {
       nodes.push(n);
     }
   }
+
   if (!nodes.length) return;
 
   let restoreTo = null;
@@ -642,14 +697,19 @@ function handleInput() {
   const markdown = htmlToContent(html);
   lastEmittedContent = markdown;
   emit("update", markdown);
-  renderWikiLinksInDOM();
-  renderTagsInDOM();
+  if (props.livePreview) {
+    renderWikiLinksInDOM();
+    renderTagsInDOM();
+  }
   checkWikiAutocomplete();
   checkTagAutocomplete();
   updateCursorLine();
 }
 
 function handleKeydown(e) {
+  if (props.isReadOnly) {
+    return;
+  }
   // When user closes a #tag with space/enter/tab, immediately register it as a global tag.
   // Only fires when autocomplete is not open (otherwise we'd register the partial, not the selection).
   if (
@@ -1049,6 +1109,7 @@ function checkAndRenderInlinePattern() {
 // ─── Cursor-line tracking for Obsidian-style marker visibility ─────────────────
 
 function updateCursorLine() {
+  if (props.isReadOnly) return;
   if (!editorRef.value) return;
 
   // Remove cursor-line from all current blocks
@@ -1076,6 +1137,9 @@ function updateCursorLine() {
 }
 
 function handleSelectionChange() {
+  if (props.isReadOnly) {
+    return;
+  }
   if (!editorRef.value) return;
   const sel = window.getSelection();
   if (
@@ -1106,6 +1170,10 @@ const tagResults = ref([]);
 const tagSelectedIdx = ref(0);
 
 function checkTagAutocomplete() {
+  if (props.isReadOnly) {
+    closeTagAutocomplete();
+    return;
+  }
   const sel = window.getSelection();
   if (!sel?.rangeCount) {
     closeTagAutocomplete();
@@ -1300,6 +1368,10 @@ const wikiResults = ref([]);
 const wikiSelectedIdx = ref(0);
 
 function checkWikiAutocomplete() {
+  if (props.isReadOnly) {
+    closeWikiAutocomplete();
+    return;
+  }
   const sel = window.getSelection();
   if (!sel?.rangeCount) {
     closeWikiAutocomplete();
@@ -1425,6 +1497,9 @@ function handleEditorBlur() {
 }
 
 function applyFormat(command) {
+  if (props.isReadOnly) {
+    return;
+  }
   editorRef.value?.focus();
 
   if (command === "h1") {
@@ -1479,8 +1554,7 @@ function ensureMdSyntaxInHeadings() {
     }
   }
 }
-
-defineExpose({ applyFormat });
+defineExpose({ applyFormat, editorRef });
 </script>
 
 <style scoped>
