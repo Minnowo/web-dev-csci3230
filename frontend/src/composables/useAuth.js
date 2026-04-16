@@ -1,5 +1,6 @@
 import { ref, computed } from "vue";
 import * as authService from "../services/authService.js";
+import { useEditorStore } from "./useEditorStore.js";
 
 const USER_KEY = "auth_user";
 
@@ -66,6 +67,7 @@ export function useAuth() {
     user.value = null;
     deleteCookie("session");
     localStorage.removeItem(USER_KEY);
+    useEditorStore().reset();
   }
 
   /** Populate `user` from the /whoami endpoint. Safe to call on app boot. */
