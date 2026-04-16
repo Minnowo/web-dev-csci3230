@@ -240,6 +240,17 @@ watch(editorRef, (el) => {
 
 // Processes a plain-text line into HTML with inline markdown rendered and md-syntax marker spans preserved for non-destructive editing.
 function processLineContent(text) {
+
+  const codeBlocks = [];
+
+  // Step 1: extract inline code and replace with placeholders
+  text = text.replace(/`([^`]+?)`/g, (_, c) => {
+    const placeholder = `@@CODE${codeBlocks.length}@@`;
+    // Store literal content inside code
+    codeBlocks.push(c);
+    return placeholder;
+  });
+
   // Bold-italic 
   text = text.replace(
     /\*\*\*([^*<>]+?)\*\*\*/g,
@@ -266,13 +277,6 @@ function processLineContent(text) {
     /~~([^~<>]+?)~~/g,
     (_, c) =>
       `<s><span class="md-syntax" contenteditable="false">~~</span>${c}<span class="md-syntax" contenteditable="false">~~</span></s>`,
-  );
-
-  // Inline code
-  text = text.replace(
-    /`([^`<>]+?)`/g,
-    (_, c) =>
-      `<code><span class="md-syntax" contenteditable="false">\`</span>${c}<span class="md-syntax" contenteditable="false">\`</span></code>`,
   );
 
   // Markdown links [text](url)
@@ -319,6 +323,11 @@ function processLineContent(text) {
       },
     );
   }
+
+  text = text.replace(/@@CODE(\d+)@@/g, (_, index) => {
+    const c = codeBlocks[index];
+    return `<code><span class="md-syntax" contenteditable="false">\`</span>${c}<span class="md-syntax" contenteditable="false">\`</span></code>`;
+  });
 
   return text;
 }
