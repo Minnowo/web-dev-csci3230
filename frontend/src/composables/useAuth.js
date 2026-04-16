@@ -26,6 +26,12 @@ function deleteCookie(name) {
 const token = ref(getCookie("session") || null);
 const user = ref(JSON.parse(localStorage.getItem(USER_KEY) || "null"));
 
+// Resolved once the initial /whoami check finishes
+let _initialCheckDone = null;
+const initialAuthCheck = new Promise((resolve) => {
+  _initialCheckDone = resolve;
+});
+
 export function useAuth() {
   const isAuthenticated = computed(() => !!token.value);
 
@@ -72,7 +78,10 @@ export function useAuth() {
 
   /** Populate `user` from the /whoami endpoint. Safe to call on app boot. */
   async function fetchUser() {
-    if (!token.value) return;
+    if (!token.value) {
+      _initialCheckDone();
+      return;
+    }
     try {
       const data = await authService.whoami(token.value);
       user.value = data;
@@ -80,6 +89,8 @@ export function useAuth() {
     } catch {
       // Token is invalid or expired — clear session
       logout();
+    } finally {
+      _initialCheckDone();
     }
   }
 
@@ -87,6 +98,7 @@ export function useAuth() {
     token,
     user,
     isAuthenticated,
+    initialAuthCheck,
     authHeaders,
     register,
     login,
