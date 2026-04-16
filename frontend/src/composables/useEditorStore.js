@@ -540,6 +540,17 @@ export function useEditorStore() {
     return { outbound, inbound };
   }
 
+  function reset() {
+    state.items.splice(0, state.items.length);
+    state.activeFileId = null;
+    state.loading = true;
+    for (const key of Object.keys(noteLinkCache)) delete noteLinkCache[key];
+    for (const key of Object.keys(noteTagCache)) delete noteTagCache[key];
+    for (const key of Object.keys(contentTagCache)) delete contentTagCache[key];
+    for (const key of Object.keys(panelTagCache)) delete panelTagCache[key];
+    globalTags.splice(0, globalTags.length);
+  }
+
   async function init() {
     if (state.items.length > 0) return;
     state.loading = true;
@@ -612,5 +623,6 @@ export function useEditorStore() {
     removeTagFromContent,
     parseContentTags,
     init,
+    reset,
   };
 }
