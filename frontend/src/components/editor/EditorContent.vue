@@ -193,7 +193,7 @@ watch(
 
     isUpdatingFromProp = true;
     editorRef.value.innerHTML = contentToHtml(newVal);
-
+    renderWikiLinksInDOM();
     nextTick(() => {
       isUpdatingFromProp = false;
     });
@@ -289,6 +289,23 @@ function processLineContent(text) {
       return `[[${name}]]`;
     return `<span class="wiki-link" contenteditable="false" data-name="${name}">${name}</span>`;
   });
+
+  // only for read only mode since live edit mode needs more complicated stuff to have this work
+  if (props.isReadOnly) {
+    // 1. Markdown links: [text](url)
+    text = text.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      `<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>`,
+    );
+
+    // 2. Raw URLs (avoid double-wrapping links already handled above)
+    text = text.replace(
+      /(^|[^">])(https?:\/\/[^\s<]+)/g,
+      (match, prefix, url) => {
+        return `${prefix}<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+      },
+    );
+  }
 
   return text;
 }
@@ -584,6 +601,7 @@ function renderWikiLinksInDOM() {
       nodes.push(n);
     }
   }
+
   if (!nodes.length) return;
 
   let restoreTo = null;
