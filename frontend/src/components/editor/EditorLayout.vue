@@ -120,9 +120,12 @@
             ref="editorContentRef"
             :file="activeFile"
             :livePreview="viewMode !== 'split'"
+            :isReadOnly="false"
+            readOnlyContent=""
             @update="handleContentUpdate"
             @rename="renameItem"
             @create-first="handleCreateFile"
+            @scroll="onEditorScroll"
             @tag-click="
               (tag) => {
                 sidebarView = 'files';
@@ -131,10 +134,24 @@
             "
           />
 
-          <EditorPreview
-            v-if="viewMode !== 'edit'"
-            :content="activeFile?.content || ''"
+          <EditorContent
+            v-if="viewMode === 'split' || viewMode === 'preview'"
+            ref="editorPreviewContentRef"
+            :file="activeFile"
+            :livePreview="true"
+            :isReadOnly="true"
+            :readOnlyContent="editorPreviewContent"
+            @tag-click="
+              (tag) => {
+                sidebarView = 'files';
+                tagQuery = 'tag:' + tag;
+              }
+            "
           />
+          <!-- <EditorPreview -->
+          <!--   v-if="viewMode !== 'edit'" -->
+          <!--   :content="activeFile?.content || ''" -->
+          <!-- /> -->
 
           <!-- Empty state when no file and in preview mode -->
           <div v-if="viewMode === 'preview' && !activeFile" class="empty-state">
@@ -207,6 +224,7 @@ const contentStats = computed(() => {
 });
 
 const viewMode = ref("edit");
+const doUpdateView = ref(0);
 const sidebarCollapsed = ref(false);
 const sidebarView = ref("files");
 const tagQuery = ref("");
@@ -214,7 +232,17 @@ const toolbarVisible = ref(true);
 const menuOpen = ref(false);
 const menuRef = ref(null);
 const editorContentRef = ref(null);
+const editorPreviewContentRef = ref(null);
+const editorPreviewContent = ref("");
 
+function onEditorScroll(payload) {
+  const preview = editorPreviewContentRef.value;
+  if (!preview) return;
+
+  const { scrollTop, scrollHeight, clientHeight } = payload;
+
+  preview.editorRef.scrollTop = scrollTop;
+}
 async function handleCreateFile() {
   try {
     await createFile();
@@ -224,6 +252,7 @@ async function handleCreateFile() {
 }
 
 function handleContentUpdate(content) {
+  editorPreviewContent.value = content;
   if (activeFile.value) {
     updateFileContent(activeFile.value.id, content);
   }
